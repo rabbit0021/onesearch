@@ -1,0 +1,171 @@
+from flask import Flask, jsonify, request, send_from_directory, render_template
+import json
+import os
+from handlers import get_scrape_handler
+from datetime import datetime
+
+app = Flask(__name__, static_folder="static", template_folder="templates")
+DATA_FILE = "engineering_blogs.json"
+CATEGORIES_FILE = 'categories.json'
+SUBSCRIBERS_FILE = "subscribers.json"
+    
+def load_companies():
+    if not os.path.exists(DATA_FILE):
+        return []
+    with open(DATA_FILE, "r") as f:
+        return json.load(f)
+
+def save_companies(companies):
+    with open(DATA_FILE, "w") as f:
+        json.dump(companies, f, indent=2)
+
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+@app.route("/companies", methods=["GET"])
+def get_companies():
+    query = request.args.get("search", "").lower()
+    companies = load_companies()
+    if query:
+        companies = [c for c in companies if query in c["name"].lower()]
+    return jsonify(companies)
+
+@app.route("/companies", methods=["POST"])
+def add_company():
+    data = request.json
+    if not data or "name" not in data or "link" not in data:
+        return jsonify({"error": "Missing 'name' or 'link'"}), 400
+
+    companies = load_companies()
+    for company in companies:
+        if company["name"].lower() == data["name"].lower():
+            return jsonify({"error": "Company already exists"}), 409
+
+    companies.append({
+        "name": data["name"].strip(),
+        "link": data["link"].strip()
+    })
+
+    save_companies(companies)
+    return jsonify({"message": "Company added successfully"}), 201
+
+@app.route("/categories")
+def get_categories():
+    company = request.args.get("company")
+    if not company:
+        return jsonify({"error": "Company name is required"}), 400
+    
+    company = company.lower()
+    
+    # Load keywords
+    if not os.path.exists(CATEGORIES_FILE):
+        return jsonify([])
+
+    with open(CATEGORIES_FILE, "r") as f:
+        data = json.load(f)
+
+    categories = data.get(company, [])
+    return jsonify(categories)
+
+@app.route('/scrape_categories')
+def scrape_categories():
+    company = request.args.get('company')
+    if not company:
+        return jsonify({'error': 'company param required'}), 400
+
+    handler = get_scrape_handler(company.lower())
+    if not handler:
+        return jsonify({'error': f"No handler for {company}"}), 404
+
+    categories = handler()
+    
+    # Save to keywords.json
+    if os.path.exists(CATEGORIES_FILE):
+        with open(CATEGORIES_FILE) as f:
+            data = json.load(f)
+    else:
+        data = {}
+
+    data[company] = categories
+
+    with open(CATEGORIES_FILE, 'w') as f:
+        json.dump(data, f, indent=2)
+
+    return jsonify({'company': company, 'categories': categories})
+
+@app.route('/subscribe', methods=['POST'])
+def subscribe():
+    data = request.form
+    email = data.get('email')
+    company = data.get('company')
+    categories_raw = data.get('categories', '')
+    categories = [cat.strip() for cat in categories_raw.split(',') if cat.strip()]
+
+    if not email or not company or not categories:
+        return jsonify({"status": "error", "message": "Missing email, company or categories."}), 400
+
+    try:
+        with open(SUBSCRIBERS_FILE, "r") as f:
+            subscribers = json.load(f)
+    except (json.JSONDecodeError, FileNotFoundError):
+        subscribers = []
+
+    updated = False
+    time_now = datetime.utcnow().isoformat()
+
+    for cat in categories:
+        found = False
+        for sub in subscribers:
+            if sub["email"] == email and sub["company"] == company and sub["category"] == cat:
+                sub["time"] = time_now
+                updated = True
+                found = True
+                break
+        if not found:
+            subscribers.append({
+                "email": email,
+                "company": company,
+                "category": cat,
+                "time": time_now
+            })
+            updated = False
+
+    with open(SUBSCRIBERS_FILE, "w") as f:
+        json.dump(subscribers, f, indent=2)
+
+    return jsonify({
+        "status": "success",
+        "message": "Subscription updated." if updated else "Subscription added."
+    })
+
+@app.route("/subscriptions_for_email")
+def subscriptions_for_email():
+    email = request.args.get("email", "").strip().lower()
+    if not email:
+        return jsonify([])
+    
+    if not os.path.exists("subscribers.json"):
+        return jsonify([])
+
+    with open("subscribers.json", "r") as f:
+        try:
+            data = json.load(f)
+        except json.JSONDecodeError:
+            return jsonify([])
+    
+    grouped = {}
+    for entry in data:
+        if entry["email"] == email.lower():
+            company = entry["company"]
+            if company not in grouped:
+                grouped[company] = set()
+            grouped[company].add(entry["category"])
+            
+    print(grouped)
+    # Convert sets to lists for JSON serializability
+    result = {company: list(categories) for company, categories in grouped.items()}
+    return jsonify(result)
+
+if __name__ == "__main__":
+    app.run(debug=True)
