@@ -58,7 +58,6 @@ for sub in subscribers:
     time = sub['time']
     category = sub['category']
     sub_map.setdefault(email, {}).setdefault(company, set()).add((category, time))
-
 # Process notifications
 for email, companies in sub_map.items():
     
@@ -74,7 +73,6 @@ for email, companies in sub_map.items():
             print("working for ", email, company, category)
             # try:
             notification_state = get_notification_state(c, email, company, category)
-             
             if not notification_state:
                 time = parse_datetime(joined_time)
                 c.execute("""
@@ -87,6 +85,7 @@ for email, companies in sub_map.items():
             else:
                 last_notified_at = parse_datetime(notification_state[3])
                 blog_posts = handler(notification_state[1], notification_state[2], last_notified_at)
+
                 if not blog_posts:
                     continue
                 
