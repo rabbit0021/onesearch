@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request, send_from_directory, render_template
 import json
 import os
-from handlers import get_scrape_handler
+from handlers import ScraperFactory
 from datetime import datetime
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
@@ -74,11 +74,11 @@ def scrape_categories():
     if not company:
         return jsonify({'error': 'company param required'}), 400
 
-    handler = get_scrape_handler(company.lower())
-    if not handler:
+    scraper = ScraperFactory.get_scraper(company)
+    if not scraper:
         return jsonify({'error': f"No handler for {company}"}), 404
 
-    categories = handler()
+    categories = scraper.scrape()
     
     # Save to keywords.json
     if os.path.exists(CATEGORIES_FILE):

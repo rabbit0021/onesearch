@@ -1,7 +1,7 @@
 import json
 import sqlite3
 from datetime import datetime
-from handlers import get_blog_post_handler  # maps company -> handler class
+from handlers import ScraperFactory  # maps company -> handler class
 
 def parse_datetime(dt_str):
     if dt_str is None:
@@ -62,10 +62,13 @@ for sub in subscribers:
 for email, companies in sub_map.items():
     
     for company, categories in companies.items():
-        handler = get_blog_post_handler(company.lower())
-        if not handler:
-            print(f"⚠️ No handler found for company: {company}")
+        scraper = ScraperFactory.get_scraper(company)
+                
+        if not scraper:
+            print(f"⚠️ No handler found for company: {scraper}")
             continue
+        
+        categories = scraper.scrape()
 
         for categorytime in categories:
             category = categorytime[0]
@@ -84,7 +87,7 @@ for email, companies in sub_map.items():
                 """, (email, company, category, time))
             else:
                 last_notified_at = parse_datetime(notification_state[3])
-                blog_posts = handler(notification_state[2], last_notified_at)
+                blog_posts = scraper.search_blog_posts(notification_state[2], last_notified_at)
 
                 if not blog_posts:
                     continue

@@ -1,7 +1,8 @@
 from .base import BaseScraper
 
-BASE_URL = "https://aws.amazon.com/blogs/aws/feed/"
-class AwsScraper(BaseScraper):
+BASE_URL = "https://medium.com/feed/airbnb-engineering"
+
+class AirbnbScraper(BaseScraper):
 
     def scrape(self):
         return self.scrape_feed(BASE_URL)    
