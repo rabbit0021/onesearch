@@ -47,7 +47,7 @@ def scrape_facebook(max_pages=10):
 
     return sorted(categories)
 
-def search_facebook_blog_posts(company, category, last_scan_time):
+def search_facebook_blog_posts(category, last_scan_time):
     url = "https://engineering.fb.com/"
     res = requests.get(url)
     soup = BeautifulSoup(res.text, "html.parser")

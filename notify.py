@@ -84,7 +84,7 @@ for email, companies in sub_map.items():
                 """, (email, company, category, time))
             else:
                 last_notified_at = parse_datetime(notification_state[3])
-                blog_posts = handler(notification_state[1], notification_state[2], last_notified_at)
+                blog_posts = handler(notification_state[2], last_notified_at)
 
                 if not blog_posts:
                     continue
