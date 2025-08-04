@@ -162,7 +162,6 @@ def subscriptions_for_email():
                 grouped[company] = set()
             grouped[company].add(entry["category"])
             
-    print(grouped)
     # Convert sets to lists for JSON serializability
     result = {company: list(categories) for company, categories in grouped.items()}
     return jsonify(result)
