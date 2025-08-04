@@ -1,4 +1,3 @@
-import requests
 from datetime import datetime
 import feedparser
 from datetime import timezone
@@ -7,19 +6,24 @@ import urllib
 
 HEADERS = {'User-Agent': 'Mozilla/5.0'}
 class BaseScraper:
-    def scrape_feed(self, feed_url):
+    def get_feed_url(self):
+        return ""
+    
+    def scrape(self):
+        feed_url = self.get_feed_url()
         context = ssl._create_unverified_context()
         feed = feedparser.parse(feed_url, request_headers={}, handlers=[urllib.request.HTTPSHandler(context=context)])
         categories = set()
-        print(feed)
         for entry in feed.entries:
             for cat in entry.get('tags', []):
                 categories.add(cat.term.lower())    
 
         return sorted(categories)    
 
-    def search_feed_blog_posts(self, feed_url, category, last_scan_time):
+    def search_blog_posts(self, category, last_scan_time):
         """Search AWS blog posts matching a category and published after a specific datetime."""
+        feed_url = self.get_feed_url()
+
         feed = feedparser.parse(feed_url)
         matching_posts = []    
 

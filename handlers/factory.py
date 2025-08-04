@@ -1,4 +1,4 @@
-from handlers import aws, netflix, airbnb, dropbox
+from handlers import aws, netflix, airbnb, dropbox, facebook
 
 class ScraperFactory:
     def get_scraper(comapny):
@@ -10,6 +10,8 @@ class ScraperFactory:
             return airbnb.AirbnbScraper()
         elif comapny.lower() == "dropbox":
             return dropbox.DropboxScraper()
+        elif comapny.lower() == 'facebook':
+            return facebook.FacebookScraper()
         else:
             raise Exception("No handler found!")
         

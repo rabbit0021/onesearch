@@ -67,9 +67,7 @@ for email, companies in sub_map.items():
         if not scraper:
             print(f"⚠️ No handler found for company: {scraper}")
             continue
-        
-        categories = scraper.scrape()
-
+                
         for categorytime in categories:
             category = categorytime[0]
             joined_time = categorytime[1]
