@@ -3,11 +3,22 @@ import json
 import os
 from handlers import ScraperFactory
 from datetime import datetime
+import logging
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
-DATA_FILE = "engineering_blogs.json"
-CATEGORIES_FILE = 'categories.json'
-SUBSCRIBERS_FILE = "subscribers.json"
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'default-secret')
+
+# Logging
+if not os.path.exists('logs'):
+    os.makedirs('logs')
+    
+file_handler = logging.FileHandler('logs/server.log')
+file_handler.setLevel(logging.INFO)
+app.logger.addHandler(file_handler)
+
+DATA_FILE = "/data/engineering_blogs.json"
+CATEGORIES_FILE = '/data/categories.json'
+SUBSCRIBERS_FILE = "/data/subscribers.json"
     
 def load_companies():
     if not os.path.exists(DATA_FILE):
@@ -21,6 +32,7 @@ def save_companies(companies):
 
 @app.route("/")
 def index():
+    app.logger.info("Homepage accessed")
     return render_template("index.html")
 
 @app.route("/companies", methods=["GET"])

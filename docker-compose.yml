@@ -1,0 +1,42 @@
+version: "3.9"
+services:
+  app:
+    build: .
+    ports:
+      - "127.0.0.1:8000:8000"
+    env_file:
+      - .env
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    pids_limit: 100
+    mem_limit: 512m
+    cpus: "0.5"
+    volumes:
+      - ./logs:/app/logs
+      - tmpdata:/app/tmp
+      - ./db_data:/data
+    environment:
+    - TMPDIR=/app/tmp  
+    networks:
+      - appnet
+    container_name: onesearch_app
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared
+    restart: unless-stopped
+    command: tunnel --config /etc/cloudflared/config.yml run
+    volumes:
+      - ~/.cloudflared/config.yml:/etc/cloudflared/config.yml:ro
+      - ~/.cloudflared:/etc/cloudflared/:ro
+    networks:
+      - appnet
+
+volumes:
+  tmpdata: 
+
+networks:
+  appnet:

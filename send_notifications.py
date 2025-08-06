@@ -2,9 +2,9 @@ import sqlite3
 import smtplib
 from email.mime.text import MIMEText
 from datetime import datetime
+from db import get_database
 
 # === CONFIG ===
-DB_PATH = "notifications.db"
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
 SMTP_USERNAME = "xxxxx@gmail.com"
@@ -25,7 +25,7 @@ def send_email(to_email, subject, body):
 
 # === MAIN LOGIC ===
 def process_notifications():
-    conn = sqlite3.connect(DB_PATH)
+    conn =  get_database().get_connection()
     cursor = conn.cursor()
 
     cursor.execute("SELECT * FROM notifications")

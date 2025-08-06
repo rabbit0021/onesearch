@@ -2,6 +2,7 @@ import json
 import sqlite3
 from datetime import datetime
 from handlers import ScraperFactory  # maps company -> handler class
+from db import get_database
 
 def parse_datetime(dt_str):
     if dt_str is None:
@@ -21,10 +22,11 @@ def get_notification_state(c, email, company, category):
     return row
 
 # Load subscribers
-with open("subscribers.json") as f:
+with open("/data/subscribers.json") as f:
     subscribers = json.load(f)
 
-conn = sqlite3.connect("notifications.db")
+db = get_database()
+conn = db.get_connection()
 c = conn.cursor()
 
 # Ensure tables

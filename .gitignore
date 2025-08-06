@@ -13,3 +13,9 @@ venv/
 .DS_Store
 
 *.db
+
+*.env
+
+db_data/
+
+logs/

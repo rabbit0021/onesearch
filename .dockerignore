@@ -1,0 +1,14 @@
+.git
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+*.log
+*.env
+venv/
+.env/
+node_modules/
+*.tar.gz
+*.egg-info/
