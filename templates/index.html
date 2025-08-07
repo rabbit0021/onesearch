@@ -2,367 +2,43 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Engineering Blog Alerts</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body {
-      font-family: system-ui, sans-serif;
-      background-color: #f6f8fa;
-      padding: 2rem;
-      max-width: 640px;
-      margin: auto;
-      color: #333;
-    }
-
-    h1 {
-      text-align: center;
-      color: #222;
-    }
-
-    label {
-      font-weight: 600;
-      margin-top: 1rem;
-      display: block;
-    }
-
-    input[type="email"],
-    input[list],
-    input[type="text"],
-    button {
-      width: 100%;
-      padding: 0.75rem;
-      margin-top: 0.4rem;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 1rem;
-      box-sizing: border-box;
-    }
-
-    .tag-container {
-      display: flex;
-      flex-wrap: wrap;
-      margin-top: 0.4rem;
-      gap: 0.5rem;
-    }
-
-    .tag {
-      background-color: #007bff;
-      color: white;
-      padding: 0.4rem 0.6rem;
-      border-radius: 999px;
-      display: flex;
-      align-items: center;
-      font-size: 0.9rem;
-    }
-
-    .tag .remove-tag {
-      margin-left: 0.5rem;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    button {
-      background-color: #007bff;
-      color: white;
-      border: none;
-      margin-top: 1rem;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    button:hover {
-      background-color: #0056b3;
-    }
-
-    #preview-section {
-      margin-top: 1.5rem;
-      background-color: #eef3fc;
-      padding: 1rem;
-      border-radius: 10px;
-      border: 1px solid #cbdaf5;
-      display: none;
-    }
-
-    #preview-section a {
-      color: #007bff;
-      word-break: break-word;
-    }
-
-    @media (max-width: 600px) {
-      body {
-        padding: 1rem;
-      }
-    }
-
-    datalist option {
-      font-size: 1rem;
-    }
-
-    ul#category-suggestions {
-      margin-top: 0;
-      list-style: none;
-      padding: 0;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      background: white;
-      max-height: 150px;
-      overflow-y: auto;
-      position: absolute;
-      width: 100%;
-      z-index: 1;
-    }
-
-    ul#category-suggestions li {
-      padding: 8px;
-      cursor: pointer;
-    }
-
-    ul#category-suggestions li:hover {
-      background-color: #f0f0f0;
-    }
-
-    .category-wrapper {
-      position: relative;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
 <body>
+  <main class="container">
+    <h1 class="page-title">Subscribe to Engineering Blogs</h1>
 
-  <h1>Subscribe to Engineering Blogs</h1>
+    <form id="subscribe-form" class="subscription-form">
+      <div class="form-group">
+        <label for="email">Your Email</label>
+        <input id="email" type="input" name="email" placeholder="you@example.com" required />
+      </div>
 
-  <form id="subscribe-form">
-    <label for="email">Your Email</label>
-    <input id="email" type="email" name="email" required placeholder="you@example.com">
-    <label for="company">Select Company</label>
-    <input list="company-list" name="company" id="company" placeholder="e.g. Facebook" required>
-    <datalist id="company-list"></datalist>
+      <div class="form-group company-group">
+        <label for="company">Select Company</label>
+        <input type="input" id="companyInput" placeholder="Select company..." autocomplete="off" />
+        <div id="companyDropdown" class="dropdown"></div>
+      </div>
 
-    <label for="category-input">Select Categories</label>
-    <div class="category-wrapper">
-      <input type="text" id="category-input" placeholder="Start typing a category..." autocomplete="off">
-      <ul id="category-suggestions"></ul>
-    </div>
-    <div class="tag-container" id="selected-categories"></div>
+      <div class="form-group">
+        <label for="category-input">Select Categories</label>
+        <input type="input" id="categoryInput" placeholder="Select category..." autocomplete="off" />
+        <div id="categoryDropdown" class="dropdown"></div>
+        <div id="selected-categories" class="tag-container"></div>
+      </div>
 
-    <input type="hidden" name="categories" id="categories-hidden">
+      <button type="submit" class="submit-button">Subscribe</button>
 
-    <button type="submit">Subscribe</button>
-    <p id="subscribe-message" style="color: green; display: none; margin-top: 10px;">
-    </p>
-    <div id="already-subscribed" style="margin-top: 1em;"></div>
-  </form>
-  <script>
-    const emailInput = document.getElementById('email');
-    const companyInput = document.getElementById('company');
-    const categoryInput = document.getElementById('category-input');
-    const suggestionBox = document.getElementById('category-suggestions');
-    const tagContainer = document.getElementById('selected-categories');
-    const hiddenInput = document.getElementById('categories-hidden');
-    const form = document.getElementById("subscribe-form");
+      <p id="subscribe-message" class="subscribe-message"></p>
+      <div id="already-subscribed" class="subscription-info"></div>
+    </form>
+  </main>
 
-    let allCategories = [];
-    let selectedCategories = [];
-
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
-      const email = emailInput.value;
-      const company = companyInput.value;
-      const categories = selectedCategories;
-
-      if (!email || !company || categories.length === 0) {
-        alert("Please fill all fields and select at least one category.");
-        return;
-      }
-
-      const data = new URLSearchParams({
-        email: email,
-        company: company,
-        categories: categories.join(","),
-      });
-
-      fetch("/subscribe", {
-        method: "POST",
-        body: data,
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      })
-        .then((res) => res.json())
-        .then((result) => {
-          const msgEl = document.getElementById("subscribe-message");
-
-          if (result.status === "success") {
-            msgEl.textContent = result.message;
-            msgEl.style.display = "block";
-
-            // Hide after 5 seconds
-            setTimeout(() => {
-              msgEl.style.display = "none";
-            }, 5000);
-
-            form.reset();
-            selectedCategories = [];
-            renderTags();
-          } else {
-            alert("Subscription failed.");
-          }
-        });
-    });
-
-    emailInput.addEventListener("input", (e) => {
-      const email = e.target.value.trim();
-      if (!email) return;
-
-      fetch(`/subscriptions_for_email?email=${encodeURIComponent(email)}`)
-        .then(res => res.json())
-        .then(data => {
-          const section = document.getElementById("already-subscribed");
-          section.innerHTML = "";
-
-          if (Object.keys(data).length === 0) return;
-
-          const heading = document.createElement("div");
-          heading.textContent = "Already Subscribed To:";
-          heading.style.marginTop = "1.5em";
-          heading.style.fontWeight = "600";
-          heading.style.fontSize = "16px";
-          heading.style.color = "#444";
-          section.appendChild(heading);
-
-          const list = document.createElement("ul");
-          list.style.listStyle = "none";
-          list.style.padding = "0";
-          list.style.marginTop = "0.5em";
-
-          for (const [company, categories] of Object.entries(data)) {
-            const item = document.createElement("li");
-            item.style.marginBottom = "6px";
-            item.style.color = "#333";
-            item.style.fontSize = "14px";
-            item.style.lineHeight = "1.4";
-
-            item.innerHTML = `<strong style="color: #2a2a2a;">${company}</strong>: ${categories.join(", ")}`;
-            list.appendChild(item);
-          }
-
-          section.appendChild(list);
-        });
-    });
-
-    fetch('/companies')
-      .then(res => res.json())
-      .then(companies => {
-        const companyList = document.getElementById('company-list');
-        companies.forEach(c => {
-          const option = document.createElement('option');
-          option.value = c.company;
-          companyList.appendChild(option);
-        });
-      });
-
-    // Fetch categories when company is selected
-    companyInput.addEventListener('change', () => {
-      const company = companyInput.value;
-      fetch(`/categories?company=${encodeURIComponent(company)}`)
-        .then(res => res.json())
-        .then(categories => {
-          allCategories = categories;
-          updatePreviewLink();
-        });
-    });
-
-    // Show suggestions
-    categoryInput.addEventListener('input', () => {
-      const input = categoryInput.value.toLowerCase();
-      suggestionBox.innerHTML = '';
-      if (!input) return;
-
-      const filtered = allCategories.filter(c => c.toLowerCase().includes(input) && !selectedCategories.includes(c));
-      filtered.forEach(cat => {
-        const li = document.createElement('li');
-        li.textContent = cat;
-        li.addEventListener('click', () => {
-          addCategory(cat);
-          categoryInput.value = '';
-          suggestionBox.innerHTML = '';
-        });
-        suggestionBox.appendChild(li);
-      });
-    });
-
-    // Add tag on Enter
-    categoryInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        const value = categoryInput.value.trim();
-        if (value && !selectedCategories.includes(value)) {
-          addCategory(value);
-          categoryInput.value = '';
-          suggestionBox.innerHTML = '';
-        }
-      }
-    });
-
-    // Add tag
-    function addCategory(cat) {
-      selectedCategories.push(cat);
-      renderTags();
-    }
-
-    function removeCategory(cat) {
-      selectedCategories = selectedCategories.filter(c => c !== cat);
-      renderTags();
-    }
-
-    function renderTags() {
-      tagContainer.innerHTML = '';
-      selectedCategories.forEach(cat => {
-        const div = document.createElement('div');
-        div.className = 'tag';
-        div.textContent = cat;
-
-        const x = document.createElement('span');
-        x.className = 'remove-tag';
-        x.textContent = '❌';
-        x.onclick = () => removeCategory(cat);
-        div.appendChild(x);
-
-        tagContainer.appendChild(div);
-      });
-      hiddenInput.value = selectedCategories.join(',');
-    }
-
-    function updatePreviewLink() {
-      const company = companyInput.value;
-      if (!company) {
-        return;
-      }
-
-      fetch('/companies')
-        .then(res => res.json())
-        .then(companies => {
-          const match = companies.find(c => c.company === company);
-          if (match) {
-            previewLink.href = match.url;
-            previewLink.textContent = match.url;
-            previewSection.style.display = 'block';
-          } else {
-            previewSection.style.display = 'none';
-          }
-        });
-    }
-
-    function handleSubmit() {
-      if (selectedCategories.length === 0) {
-        alert("Please select at least one category.");
-        return false;
-      }
-      return true;
-    }
-  </script>
-
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 
 </html>

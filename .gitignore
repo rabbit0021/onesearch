@@ -16,6 +16,6 @@ venv/
 
 *.env
 
-db_data/
+data/
 
 logs/

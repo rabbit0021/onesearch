@@ -17,9 +17,10 @@ services:
     volumes:
       - ./logs:/app/logs
       - tmpdata:/app/tmp
-      - ./db_data:/data
+      - ./data:/app/data
     environment:
     - TMPDIR=/app/tmp  
+    - FLASK_ENV: production
     networks:
       - appnet
     container_name: onesearch_app

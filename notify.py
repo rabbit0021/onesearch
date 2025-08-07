@@ -3,6 +3,7 @@ import sqlite3
 from datetime import datetime
 from handlers import ScraperFactory  # maps company -> handler class
 from db import get_database
+import os
 
 def parse_datetime(dt_str):
     if dt_str is None:
@@ -22,7 +23,10 @@ def get_notification_state(c, email, company, category):
     return row
 
 # Load subscribers
-with open("/data/subscribers.json") as f:
+env = os.getenv('FLASK_ENV', 'development')
+subscribers_file = "/data/subscribers.json" if env == 'production' else 'data/subscribers_dev.json'
+
+with open(subscribers_file) as f:
     subscribers = json.load(f)
 
 db = get_database()

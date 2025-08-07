@@ -4,21 +4,42 @@ import os
 from handlers import ScraperFactory
 from datetime import datetime
 import logging
+from middleware import register_middlewares
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'default-secret')
 
-# Logging
-if not os.path.exists('logs'):
-    os.makedirs('logs')
-    
-file_handler = logging.FileHandler('logs/server.log')
+# Logging    
+log_dir = os.path.join(os.path.dirname(__file__), 'logs')
+os.makedirs(log_dir, exist_ok=True)
+
+env = os.getenv('FLASK_ENV', 'development')
+log_file_name = 'server_prod.log' if env == 'production' else 'server_dev.log'
+
+file_handler = logging.FileHandler(os.path.join(log_dir, log_file_name))
 file_handler.setLevel(logging.INFO)
+
+formatter = logging.Formatter(
+    '[%(asctime)s] %(levelname)s in %(module)s: %(message)s'
+)
+file_handler.setFormatter(formatter)
+
+app.logger.setLevel(logging.INFO)
 app.logger.addHandler(file_handler)
 
-DATA_FILE = "/data/engineering_blogs.json"
-CATEGORIES_FILE = '/data/categories.json'
-SUBSCRIBERS_FILE = "/data/subscribers.json"
+# optional: log to stdout too
+stream_handler = logging.StreamHandler()
+stream_handler.setFormatter(formatter)
+app.logger.addHandler(stream_handler)
+
+# test log
+app.logger.info("Logger initialized.")
+register_middlewares(app)
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_FILE = os.path.join(BASE_DIR, "data", "companies.json")
+SUBSCRIBERS_FILE = os.path.join(BASE_DIR, "data", "subscribers.json")
+CATEGORIES_FILE =  os.path.join(BASE_DIR, "data", "categories.json")
     
 def load_companies():
     if not os.path.exists(DATA_FILE):
@@ -32,7 +53,6 @@ def save_companies(companies):
 
 @app.route("/")
 def index():
-    app.logger.info("Homepage accessed")
     return render_template("index.html")
 
 @app.route("/companies", methods=["GET"])
@@ -130,7 +150,6 @@ def subscribe():
         found = False
         for sub in subscribers:
             if sub["email"] == email and sub["company"] == company and sub["category"] == cat:
-                sub["time"] = time_now
                 updated = True
                 found = True
                 break
@@ -157,10 +176,10 @@ def subscriptions_for_email():
     if not email:
         return jsonify([])
     
-    if not os.path.exists("subscribers.json"):
+    if not os.path.exists(SUBSCRIBERS_FILE):
         return jsonify([])
 
-    with open("subscribers.json", "r") as f:
+    with open(SUBSCRIBERS_FILE, "r") as f:
         try:
             data = json.load(f)
         except json.JSONDecodeError:

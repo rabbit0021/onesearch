@@ -1,0 +1,178 @@
+/* Reset & Layout */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+  background-color: #f4f6f9;
+  color: #222;
+}
+
+.container {
+  max-width: 600px;
+  margin: auto;
+  padding: 2rem 1rem;
+}
+
+/* Typography */
+.page-title {
+  text-align: center;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+}
+
+/* Form */
+.subscription-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  background: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+  font-size: 0.95rem;
+}
+
+/* Input fields */
+input[type="input"],
+input[list],
+input[type="text"] {
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  transition: border-color 0.2s;
+}
+
+input:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+/* Submit button */
+.submit-button {
+  background-color: #007bff;
+  color: white;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.submit-button:hover {
+  background-color: #0056b3;
+}
+
+/* Category Tags */
+.tag-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.tag {
+  background-color: #007bff;
+  color: white;
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.remove-tag {
+  margin-left: 0.5rem;
+  cursor: pointer;
+}
+
+/* Suggestions Dropdown */
+.category-wrapper {
+  position: relative;
+}
+
+/* Success Message */
+.subscribe-message {
+  color: #2e7d32;
+  background-color: #e6f4ea;
+  padding: 0.75rem;
+  border-radius: 8px;
+  display: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+/* Subscribed Info */
+.subscription-info {
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.dropdown {
+  border: 1px solid #ccc;
+  max-height: 150px;
+  overflow-y: auto;
+  display: none;
+  background: white;
+  position: absolute;
+  z-index: 10;
+  width: 200px;
+}
+
+.dropdown div {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.dropdown li:hover,
+.dropdown li.active {
+  background-color: #eee;
+}
+
+.tag-container {
+  margin-top: 10px;
+}
+
+.tag {
+  display: inline-block;
+  background: #79e7a1;
+  padding: 5px 10px;
+  margin: 4px;
+  border-radius: 4px;
+  color: #2e7d32;
+}
+
+.tag button {
+  margin-left: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .subscription-form {
+    padding: 1.5rem;
+  }
+
+  .page-title {
+    font-size: 1.5rem;
+  }
+
+  input,
+  .submit-button {
+    font-size: 1rem;
+  }
+}
