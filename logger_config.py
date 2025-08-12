@@ -4,7 +4,6 @@ import os
 
 # Detect environment
 env = os.getenv('FLASK_ENV', 'development')
-
 # Log directory based on environment
 if env == "production":
     log_dir = os.path.join(os.path.dirname(__file__), 'logs', 'prod')
