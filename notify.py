@@ -4,6 +4,7 @@ from datetime import datetime
 from handlers import ScraperFactory  # maps company -> handler class
 from db import get_database
 import os
+from logger_config import get_logger
 
 def parse_datetime(dt_str):
     if dt_str is None:
@@ -24,7 +25,14 @@ def get_notification_state(c, email, company, category):
 
 # Load subscribers
 env = os.getenv('FLASK_ENV', 'development')
-subscribers_file = "/data/subscribers.json" if env == 'production' else 'data/subscribers_dev.json'
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+if True:
+    subscribers_file = os.path.join(BASE_DIR, "data", "subscribers.json")
+else:
+    subscribers_file = os.path.join(BASE_DIR, "data", "subscribers_dev.json")
+
+logger = get_logger("notify_worker")
 
 with open(subscribers_file) as f:
     subscribers = json.load(f)
@@ -71,13 +79,13 @@ for email, companies in sub_map.items():
         scraper = ScraperFactory.get_scraper(company)
                 
         if not scraper:
-            print(f"⚠️ No handler found for company: {scraper}")
+            logger.error(f"⚠️ No handler found for company: {scraper}")
             continue
                 
         for categorytime in categories:
             category = categorytime[0]
             joined_time = categorytime[1]
-            print("working for ", email, company, category)
+            logger.info(f"working for {email}, {company}, {category}")
             # try:
             notification_state = get_notification_state(c, email, company, category)
             if not notification_state:
@@ -97,7 +105,7 @@ for email, companies in sub_map.items():
                     continue
                 
                 for blog in blog_posts:
-                    print(f"🔔 Notifying {email} about new post: {blog['title']}")
+                    logger.info(f"🔔 Notifying {email} about new post: {blog['title']}")
         
                     # Insert notification
                     c.execute("""
@@ -113,4 +121,4 @@ for email, companies in sub_map.items():
 # Final commit and cleanup
 conn.commit()
 conn.close()
-print("Notification run ended.")
+logger.info("Notification run ended.")

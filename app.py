@@ -5,35 +5,16 @@ from handlers import ScraperFactory
 from datetime import datetime
 import logging
 from middleware import register_middlewares
+from logger_config import get_logger
+from datetime import timezone
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'default-secret')
 
 # Logging    
-log_dir = os.path.join(os.path.dirname(__file__), 'logs')
-os.makedirs(log_dir, exist_ok=True)
-
-env = os.getenv('FLASK_ENV', 'development')
-log_file_name = 'server_prod.log' if env == 'production' else 'server_dev.log'
-
-file_handler = logging.FileHandler(os.path.join(log_dir, log_file_name))
-file_handler.setLevel(logging.INFO)
-
-formatter = logging.Formatter(
-    '[%(asctime)s] %(levelname)s in %(module)s: %(message)s'
-)
-file_handler.setFormatter(formatter)
-
-app.logger.setLevel(logging.INFO)
-app.logger.addHandler(file_handler)
-
-# optional: log to stdout too
-stream_handler = logging.StreamHandler()
-stream_handler.setFormatter(formatter)
-app.logger.addHandler(stream_handler)
+app.logger = get_logger("app")
 
 # test log
-app.logger.info("Logger initialized.")
 register_middlewares(app)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -144,8 +125,8 @@ def subscribe():
         subscribers = []
 
     updated = False
-    time_now = datetime.utcnow().isoformat()
-
+    time_now = datetime.now(timezone.utc).isoformat()
+    
     for cat in categories:
         found = False
         for sub in subscribers:

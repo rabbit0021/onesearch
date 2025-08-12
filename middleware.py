@@ -31,6 +31,13 @@ def summarize_response(response):
         "length": len(response.get_data()),
         "preview": preview
     }
+
+def get_real_ip():
+    return (
+        request.headers.get('CF-Connecting-IP')  # Cloudflare specific
+        or request.headers.get('X-Forwarded-For', '').split(',')[0].strip()
+        or request.remote_addr
+    )
     
 def register_middlewares(app):
     if getattr(app, "_middlewares_registered", False):
@@ -43,8 +50,8 @@ def register_middlewares(app):
             return
         g.start_time = time.time()
         log_params = {
-            'remote_addr': request.remote_addr,
             'method': request.method,
+            'remote_addr': get_real_ip(),
             'path': request.path,
         }
         app.logger.info(f"{log_params}")
@@ -59,8 +66,8 @@ def register_middlewares(app):
         
         duration = round((time.time() - g.start_time) * 1000)
         log_params = {
-            'remote_addr': request.remote_addr,
             'method': request.method,
+            'remote_addr': get_real_ip(),
             'path': request.path,
             'status': response.status_code,
             'duration_ms': duration,

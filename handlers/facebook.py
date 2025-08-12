@@ -1,12 +1,16 @@
 import requests
 from bs4 import BeautifulSoup
 import re
-from datetime import datetime
 from .base import BaseScraper
+from logger_config import get_logger
+from email.utils import parsedate_to_datetime
+from dateutil import parser
+from datetime import timezone
 
 BASE_URL = 'https://engineering.fb.com'
 HEADERS = {'User-Agent': 'Mozilla/5.0'}
 
+logger = get_logger("handlers")
 class FacebookScraper(BaseScraper):
     def scrape(self):
         categories = set()
@@ -77,15 +81,18 @@ class FacebookScraper(BaseScraper):
                     continue
                 date_str = date_tag.get_text(strip=True)
     
-                for fmt in ("%B %d, %Y", "%b %d, %Y", "%b %d, %Y".upper()):
-                    try:
-                        published = datetime.strptime(date_str, fmt)
-                        break
-                    except ValueError:
-                        continue
-                else:
+                try:
+                    # Parse published date using the correct format
+                    published = parser.parse(date_str)
+                    if published.tzinfo is None:
+                        published = published.replace(tzinfo=timezone.utc)
+                except ValueError as e:
+                    logger.error(f"Date parse error: {date_str} -> {e}")
                     continue
-    
+                
+                if last_scan_time.tzinfo is None:
+                    last_scan_time = last_scan_time.replace(tzinfo=timezone.utc)
+                
                 if published <= last_scan_time:
                     continue
     
@@ -97,7 +104,7 @@ class FacebookScraper(BaseScraper):
                 })
     
             except Exception as e:
-                logging.warning(f"Error parsing article: {e}")
+                logger.warning(f"Error parsing article: {e}")
                 continue
         
         return posts

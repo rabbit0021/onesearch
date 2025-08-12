@@ -1,6 +1,6 @@
 import smtplib
 from email.mime.text import MIMEText
-from datetime import datetime
+from datetime import datetime, timezone
 from db import get_database
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -8,12 +8,15 @@ from email.mime.image import MIMEImage
 import smtplib
 import os
 from email.utils import formataddr
+from logger_config import get_logger
 
 # === CONFIG ===
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
-SMTP_USERNAME = "xxxx@gmail.com"
-SMTP_PASSWORD = "xxxx xxxx"
+SMTP_USERNAME = "manavoriginal@gmail.com"
+SMTP_PASSWORD = "ajde noro qgty ldxt"
+
+logger = get_logger("notify_worker")
 
 # === EMAIL TEMPLATE ===
 
@@ -61,6 +64,8 @@ def process_notifications():
 
     cursor.execute("SELECT * FROM notifications")
     notifications = cursor.fetchall()
+    
+    logger.info(f"found {len(notifications)} notifications to be processed")
 
     for row in notifications:
         email = row[0]
@@ -127,22 +132,29 @@ def process_notifications():
         try:
             send_email(email, subject, html_body, logo_path=logo_file, header_path=header_file)
         except Exception as e:
-            print(f"❌ Failed to send to {email}: {e}")
+            logger.error(f"❌ Failed to send to {email}: {e}")
             continue
-
-        # Delete after sending
-        cursor.execute("""
-            DELETE FROM notifications
-            WHERE email = ? AND company = ? AND category = ? AND post_title = ?
-        """, (email, company, category, post_title))
-        conn.commit()
         
-        cursor.execute("""
-            UPDATE notification_state
-            SET last_notified_at = ?
-            WHERE email = ? AND company = ? AND category = ?
-        """, (datetime.utcnow().isoformat(), email, company, category))
+        try:
+            time_now = datetime.now(timezone.utc).isoformat()
+    
+            cursor.execute("""
+                UPDATE notification_state
+                SET last_notified_at = ?
+                WHERE email = ? AND company = ? AND category = ?
+            """, (time_now, email, company, category))
+            
+            # Delete notifications
+            cursor.execute("""
+                DELETE FROM notifications
+                WHERE email = ? AND company = ? AND category = ? AND post_title = ?
+            """, (email, company, category, post_title))
+            
+            conn.commit()
 
+        except Exception as e:
+            logger.error(f"❌ Failed to update notificaation {email}: {e}")
+        
     conn.close()
 
 if __name__ == "__main__":

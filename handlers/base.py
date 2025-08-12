@@ -3,9 +3,14 @@ import feedparser
 from datetime import timezone
 import ssl
 import urllib
+from logger_config import get_logger
+from email.utils import parsedate_to_datetime
 
 HEADERS = {'User-Agent': 'Mozilla/5.0'}
-class BaseScraper:
+
+logger = get_logger("handlers")
+
+class BaseScraper:        
     def get_feed_url(self):
         return ""
     
@@ -36,14 +41,15 @@ class BaseScraper:
 
             try:
                 # Parse published date using the correct format
-                published = datetime.strptime(entry.published, "%a, %d %b %Y %H:%M:%S %z")
+                published = parsedate_to_datetime(entry.published)
             except ValueError as e:
-                print(f"Date parse error: {entry.published} -> {e}")
+                logger.error(f"Date parse error: {entry.published} -> {e}")
                 continue
             
             if last_scan_time.tzinfo is None:
                 last_scan_time = last_scan_time.replace(tzinfo=timezone.utc)
             if published <= last_scan_time:
+                logger.debug(f"Skipping {entry.title}: article published on {published} before last scan time: {last_scan_time}")
                 continue    
 
             matching_posts.append({
