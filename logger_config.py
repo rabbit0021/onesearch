@@ -1,7 +1,6 @@
 # logger_config.py
 import logging
 import os
-
 # Detect environment
 env = os.getenv('FLASK_ENV', 'development')
 
