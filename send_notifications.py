@@ -13,8 +13,8 @@ from logger_config import get_logger
 # === CONFIG ===
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
-SMTP_USERNAME = "xxxx@gmail.com"
-SMTP_PASSWORD = "xxxxx xxxxx"
+SMTP_USERNAME = os.getenv('SMTP_USERNAME', 'xxxx@gmail.com')
+SMTP_PASSWORD = os.getenv('SMTP_PASSWORD', 'xxxx')
 
 logger = get_logger("notify_worker")
 
@@ -126,8 +126,8 @@ def process_notifications():
            </html>
         """    
         env = os.getenv('FLASK_ENV', 'development')
-        logo_file = "/data/logo.png" if env == 'production' else 'data/logo.png'
-        header_file = "/data/header.jpg" if env == 'production' else 'data/header.jpg'
+        logo_file = "/app/data/logo.png" if env == 'production' else 'data/logo.png'
+        header_file = "/app/data/header.jpg" if env == 'production' else 'data/header.jpg'
         
         try:
             send_email(email, subject, html_body, logo_path=logo_file, header_path=header_file)
