@@ -13,8 +13,8 @@ from logger_config import get_logger
 # === CONFIG ===
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
-SMTP_USERNAME = "manavoriginal@gmail.com"
-SMTP_PASSWORD = "ajde noro qgty ldxt"
+SMTP_USERNAME = "xxxx@gmail.com"
+SMTP_PASSWORD = "xxxxx xxxxx"
 
 logger = get_logger("notify_worker")
 
