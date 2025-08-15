@@ -284,3 +284,23 @@ function showToast(message, duration = 3000) {
   }, duration);
 }
 // #endregion
+function showRightPanel(duration = 5000) {
+  const panel = document.getElementById('right-panel');
+  panel.classList.add('active');
+
+  // Hide after duration
+  setTimeout(() => {
+    panel.classList.remove('active');
+  }, duration);
+}
+
+// Example: show panel 2 seconds after page load
+function initPanel() {
+  setTimeout(() => showRightPanel(7000), 2000);
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initPanel);
+} else {
+  initPanel(); // already loaded
+}

@@ -267,6 +267,45 @@ input:focus {
   visibility: visible;
 }
 
+/* Right panel hidden by default */
+.right-panel {
+  position: fixed;
+  top: 20%;
+  right: -140px; /* hidden off screen */
+  width: 120px;
+  background-color: #fff;
+  border: 2px solid #007bff;
+  border-radius: 12px 0 0 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transition: right 0.8s ease;
+  z-index: 1000;
+  text-align: center;
+  padding: 10px 5px;
+  cursor: pointer;
+}
+
+/* When panel is active */
+.right-panel.active {
+  right: 0;
+}
+
+/* Panel content */
+.panel-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cat-img {
+  width: 80px;
+  margin-bottom: 5px;
+}
+
+.panel-text {
+  font-size: 1rem;
+  color: #333;
+}
+
 /* Responsive Design */
 @media (max-width: 600px) {
   .subscription-form {

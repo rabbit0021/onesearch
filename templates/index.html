@@ -27,7 +27,7 @@
   <!-- ✅ Favicon -->
   <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 
-  <link rel="stylesheet" href="{{ url_for('static', filename='style2.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style3.css') }}">
 </head>
 
 <body>
@@ -93,7 +93,17 @@
 
   <div id="subscribe-message" class="subscription-toast"></div>
 
-  <script src="{{ url_for('static', filename='script.js') }}"></script>
+  <div id="right-panel" class="right-panel">
+    <div class="panel-content">
+      <img src="{{ url_for('static', filename='cat.gif') }}" alt="Cool Cat" class="cat-img" />
+      <p class="panel-text">
+          Did you know? OneSearch uses AI to help you discover quality engineering blogs and sends curated alerts so you never feel overwhelmed.
+      </p>
+    </div>
+  </div>
+
+
+  <script src="{{ url_for('static', filename='script2.js') }}"></script>
 </body>
 
 </html>
