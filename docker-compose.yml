@@ -18,6 +18,7 @@ services:
       - ./logs:/app/logs
       - tmpdata:/app/tmp
       - ./data:/app/data
+      - ./static:/static
     environment:
     - TMPDIR=/app/tmp  
     networks:

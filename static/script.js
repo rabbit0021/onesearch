@@ -1,16 +1,20 @@
 // #region Element References
 const emailInput = document.getElementById('email');
 const companyInput = document.getElementById('companyInput');
-const categoryInput = document.getElementById('categoryInput');
-const tagContainer = document.getElementById('selected-categories');
+const techTeamGroup = document.querySelector('.form-group.tech-team-group');
+const tagContainer = document.getElementById('selected-techteams');
 const hiddenInput = document.getElementById('categories-hidden');
 const form = document.getElementById("subscribe-form");
 const companyDropdown = document.getElementById('companyDropdown');
-const categoryDropdown = document.getElementById('categoryDropdown');
+const topicInput = document.getElementById('topicInput');
+const topicDropdown = document.getElementById('topicDropdown');
+const notifyCheckboxes = document.querySelectorAll('input[name="notify_from"]');
+const subscription_status = document.getElementById("already-subscribed");
+
 // #endregion
 
 // #region State
-let selectedCategories = [];
+let selectedTechTeams = [];
 let allCompanies = [];
 let allCategories = [];
 // #endregion
@@ -19,18 +23,20 @@ let allCategories = [];
 form.addEventListener("submit", function (e) {
     e.preventDefault();
     const email = emailInput.value;
-    const company = companyInput.value;
-    const categories = selectedCategories;
+    const techteams = selectedTechTeams;
+    const individuals = [];
+    const communities = [];
+    const topic = topicInput.value.trim();
 
-    if (!email || !company || categories.length === 0) {
-        alert("Please fill all fields and select at least one category.");
+    if (!email || !topic || (techteams.length === 0 && individuals.length === 0 && communities.length === 0)) {
+        alert("Please enter your email, topic, and select at least one publisher.");
         return;
     }
 
     const data = new URLSearchParams({
         email: email,
-        company: company,
-        categories: categories.join(","),
+        techteams: techteams.join(","),
+        topic: topicInput.value,
     });
 
     fetch("/subscribe", {
@@ -42,19 +48,14 @@ form.addEventListener("submit", function (e) {
     })
     .then((res) => res.json())
     .then((result) => {
-        const msgEl = document.getElementById("subscribe-message");
-
         if (result.status === "success") {
-            msgEl.textContent = result.message;
-            msgEl.style.display = "block";
-
-            setTimeout(() => {
-                msgEl.style.display = "none";
-            }, 5000);
-
+            showToast("Subscription Updated!", 3000);
             form.reset();
-            selectedCategories = [];
+            selectedTechTeams = [];
             renderTags();
+            displaySubscriptionStatus("");
+            companyInput.disabled = true; // show
+
         } else {
             alert("Subscription failed.");
         }
@@ -63,105 +64,143 @@ form.addEventListener("submit", function (e) {
 // #endregion
 
 // #region Prefill Subscription Info
-emailInput.addEventListener("input", (e) => {
-    const email = e.target.value.trim();
-    if (!email) return;
+emailInput.addEventListener("blur", () => {
+    const email = emailInput.value.trim();
+    if (!email){
+        return
+    }
 
     fetch(`/subscriptions_for_email?email=${encodeURIComponent(email)}`)
         .then(res => res.json())
         .then(data => {
-            const section = document.getElementById("already-subscribed");
-            section.innerHTML = "";
-
-            if (Object.keys(data).length === 0) return;
-
-            const heading = document.createElement("div");
-            heading.textContent = "Already Subscribed To:";
-            heading.style.marginTop = "1.5em";
-            heading.style.fontWeight = "600";
-            heading.style.fontSize = "16px";
-            heading.style.color = "#444";
-            section.appendChild(heading);
-
-            const list = document.createElement("ul");
-            list.style.listStyle = "none";
-            list.style.padding = "0";
-            list.style.marginTop = "0.5em";
-
-            for (const [company, categories] of Object.entries(data)) {
-                const item = document.createElement("li");
-                item.style.marginBottom = "6px";
-                item.style.color = "#333";
-                item.style.fontSize = "14px";
-                item.style.lineHeight = "1.4";
-                item.innerHTML = `<strong style="color: #2a2a2a;">${company}</strong>: ${categories.join(", ")}`;
-                list.appendChild(item);
-            }
-
-            section.appendChild(list);
+            displaySubscriptionStatus(data);
         });
 });
-// #endregion
 
-// #region Fetch Companies and Categories
-fetch('/companies')
-  .then(res => res.json())
-  .then(companies => {
-    allCompanies = companies.map(c => c.company);
-  });
+function displaySubscriptionStatus(data) {
+    subscription_status.innerHTML = "";
 
-companyInput.addEventListener('input', handleCompanySelect);
-companyInput.addEventListener('focus', handleCompanySelect);
+    if (!Object.keys(data).length) return;
 
-function handleCompanySelect() {
-  showDropdown(companyInput, companyDropdown, allCompanies, selected => {
-    companyInput.value = selected;
-    companyDropdown.style.display = 'none';
+    const heading = document.createElement("div");
+    heading.textContent = "Already Subscribed To:";
+    heading.style.marginTop = "1.5em";
+    heading.style.fontWeight = "600";
+    heading.style.fontSize = "16px";
+    heading.style.color = "#444";
+    subscription_status.appendChild(heading);
 
-    fetch(`/categories?company=${encodeURIComponent(selected)}`)
-      .then(res => res.json())
-      .then(categories => {
-        allCategories = categories;
-        categoryInput.value = '';
-        categoryDropdown.innerHTML = '';
-      });
-  });
+    const list = document.createElement("ul");
+    list.style.listStyle = "none";
+    list.style.padding = "0";
+    list.style.marginTop = "0.5em";
+
+    for (const [topic, publishers] of Object.entries(data)) {
+        const item = document.createElement("li");
+        item.style.marginBottom = "6px";
+        item.style.color = "#333";
+        item.style.fontSize = "14px";
+        item.style.lineHeight = "1.4";
+        item.innerHTML = `<strong style="color: #2a2a2a;">${topic}</strong>: ${
+            publishers.map(pub => pub.charAt(0).toUpperCase() + pub.slice(1)).join(", ")
+        }`;
+        list.appendChild(item);
+    }
+
+    subscription_status.appendChild(list);
 }
 // #endregion
 
-// #region Category Dropdown
-categoryInput.addEventListener('focus', () => {
-  showDropdown(categoryInput, categoryDropdown, allCategories, selected => {
-    categoryInput.value = '';
-    categoryDropdown.style.display = 'none';
-    if (!selectedCategories.includes(selected)) {
-      selectedCategories.push(selected);
-      addCategoryTag(selected);
-      categoryInput.value = '';
+// #region Fetch Companies and Categories
+fetch('/techteams')
+  .then(res => res.json())
+  .then(companies => {
+    allCompanies = companies.map(c => 
+      c.charAt(0).toUpperCase() + c.slice(1)
+    );
+  });
+
+allTopics = [
+  "Software Engineering",
+  "Data Science",
+  "Data Analytics",
+  "Software Testing",
+  "Product Management"
+];
+
+topicInput.addEventListener('input', handleTopicSelect);
+topicInput.addEventListener('focus', handleTopicSelect);
+
+notifyCheckboxes.forEach((checkbox) => {
+  checkbox.addEventListener('change', (event) => {
+    const value = event.target.value;   // "tech_teams", "individuals", etc.
+    const checked = event.target.checked;
+
+    if (checked) {
+      // Perform your action for selected checkbox
+      handleCheckboxSelect(value);
+    } else {
+      // Perform your action for deselected checkbox
+      handleCheckboxDeselect(value);
     }
   });
 });
 
-categoryInput.addEventListener('input', () => {
-  showDropdown(categoryInput, categoryDropdown, allCategories, selected => {
-    categoryInput.value = '';
-    categoryDropdown.style.display = 'none';
-    if (!selectedCategories.includes(selected)) {
-      selectedCategories.push(selected);
-      addCategoryTag(selected);
-      categoryInput.value = '';
+// Example action functions
+function handleCheckboxSelect(value) {
+  if (value === 'tech_teams') {
+    companyInput.disabled = false; // show
+  }
+}
+
+function handleCheckboxDeselect(value) {
+  if (value === 'tech_teams') {
+    companyInput.disabled = true; // show
+  }
+}
+
+function handleTopicSelect() {
+  showDropdown(topicInput, topicDropdown, allTopics, selected => {
+    topicInput.value = selected;
+    topicDropdown.style.display = 'none';
+  });
+}
+
+// #endregion
+
+//#region Category Dropdown
+companyInput.addEventListener('focus', () => {
+  showDropdown(companyInput, companyDropdown, allCompanies, selected => {
+    companyInput.value = '';
+    companyDropdown.style.display = 'none';
+    if (!selectedTechTeams.includes(selected)) {
+      selectedTechTeams.push(selected);
+      addTechTeamTag(selected);
+      companyInput.value = '';
     }
   });
 });
 
-categoryInput.addEventListener('keydown', (e) => {
+companyInput.addEventListener('input', () => {
+  showDropdown(companyInput, companyDropdown, allCompanies, selected => {
+    companyInput.value = '';
+    companyDropdown.style.display = 'none';
+    if (!selectedTechTeams.includes(selected)) {
+      selectedTechTeams.push(selected);
+      addTechTeamTag(selected);
+      companyInput.value = '';
+    }
+  });
+});
+
+companyInput.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') {
     e.preventDefault();
-    const value = categoryInput.value.trim();
-    if (value && !selectedCategories.includes(value)) {
-      selectedCategories.push(value);
-      addCategoryTag(value);
-      categoryInput.value = '';
+    const value = companyInput.value.trim();
+    if (value && !selectedTechTeams.includes(value)) {
+      selectedTechTeams.push(value);
+      addTechTeamTag(value);
+      companyInput.value = '';
     }
   }
 });
@@ -187,28 +226,19 @@ function showDropdown(inputEl, dropdownEl, items, onSelect) {
     dropdownEl.style.display = 'none';
   }
 }
-
-document.addEventListener('click', e => {
-  if (!companyDropdown.contains(e.target) && e.target !== companyInput) {
-    companyDropdown.style.display = 'none';
-  }
-  if (!categoryDropdown.contains(e.target) && e.target !== categoryInput) {
-    categoryDropdown.style.display = 'none';
-  }
-});
 // #endregion
 
 // #region Tag Handling
-function addCategoryTag(category) {
+function addTechTeamTag(techteam) {
   const tag = document.createElement('span');
   tag.className = 'tag';
-  tag.textContent = category;
+  tag.textContent = techteam;
 
   const removeBtn = document.createElement('button');
   removeBtn.textContent = 'x';
   removeBtn.onclick = () => {
     tag.remove();
-    selectedCategories = selectedCategories.filter(c => c !== category);
+    selectedTechTeams = selectedTechTeams.filter(c => c !== techteam);
   };
 
   tag.appendChild(removeBtn);
@@ -217,7 +247,6 @@ function addCategoryTag(category) {
 
 function renderTags() {
   tagContainer.innerHTML = '';
-  selectedCategories.forEach(tag => addCategoryTag(tag));
 }
 // #endregion
 
@@ -228,5 +257,30 @@ function handleSubmit() {
         return false;
     }
     return true;
+}
+
+document.addEventListener('click', (e) => {
+  if (!companyDropdown.contains(e.target) && e.target !== companyInput) {
+    companyDropdown.style.display = 'none';
+  }
+
+  if (!topicDropdown.contains(e.target) && e.target !== topicInput) {
+    topicDropdown.style.display = 'none';
+  }
+});
+
+function showToast(message, duration = 3000) {
+  let toast = document.querySelector('.subscription-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.className = 'subscription-toast';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = message;
+  toast.classList.add('show');
+
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, duration);
 }
 // #endregion

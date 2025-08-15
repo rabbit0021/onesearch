@@ -46,24 +46,43 @@
         <!-- ✅ type="email" for better validation -->
         <input id="email" type="input" name="email" placeholder="you@example.com" required />
       </div>
-
-      <div class="form-group company-group">
-        <label for="companyInput">Select Tech Team</label>
-        <input type="text" id="companyInput" name="company" placeholder="Start typing a company name..." autocomplete="off" />
-        <div id="companyDropdown" class="dropdown"></div>
+      
+      <div class="form-group">
+        <label for="topicInput">Select Your Field</label>
+        <input type="text" id="topicInput" name="topic" placeholder="Start typing your profession..." autocomplete="off" required />
+        <div id="topicDropdown" class="dropdown"></div>
+      </div>
+      
+      <div class="form-group notify-from-group">
+        <label for="notify-from">Notification from</label>
+        <div id="notify-from" class="tag-checkbox-group">
+          <label class="tag-checkbox">
+            <input type="checkbox" name="notify_from" value="tech_teams">
+            <span>Tech Teams</span>
+          </label>
+          <label class="tag-checkbox disabled">
+            <input disabled type="checkbox" name="notify_from" value="individuals">
+            <span>Individuals</span>
+            <span class="tooltip">Coming Soon...</span>
+          </label>
+          <label class="tag-checkbox disabled">
+            <input disabled type="checkbox" name="notify_from" value="communities">
+            <span>Communities</span>
+            <span class="tooltip">Coming Soon...</span>
+          </label>
+        </div>
       </div>
 
       <div class="form-group">
-        <label for="categoryInput">Select Categories</label>
-        <input type="text" id="categoryInput" name="categories" placeholder="Start typing a category..." autocomplete="off" />
-        <div id="categoryDropdown" class="dropdown"></div>
-        <div id="selected-categories" class="tag-container"></div>
+        <label for="companyInput">Select Tech Team</label>
+        <span class="tooltip">Enable</span>
+        <input type="text" disabled id="companyInput" name="company" placeholder="Start typing a company name..." autocomplete="off" />
+        <div id="companyDropdown" class="dropdown"></div>
+        <div id="selected-techteams" class="tag-container"></div>
       </div>
 
       <button type="submit" class="submit-button">Subscribe</button>
-
-      <p id="subscribe-message" class="subscribe-message"></p>
-      <div id="already-subscribed" class="subscription-info"></div>
+      <div id="already-subscribed" class="subscription-status"></div>
     </form>
   </main>
 
@@ -71,6 +90,8 @@
   <footer class="footer">
     <p>© {{ current_year }} OneSearch Blog Alerts. Stay connected with engineering blogs worldwide.</p>
   </footer>
+
+  <div id="subscribe-message" class="subscription-toast"></div>
 
   <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>

@@ -27,7 +27,7 @@ def get_notification_state(c, email, company, category):
 env = os.getenv('FLASK_ENV', 'development')
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-if True:
+if env == 'production':
     subscribers_file = os.path.join(BASE_DIR, "data", "subscribers.json")
 else:
     subscribers_file = os.path.join(BASE_DIR, "data", "subscribers_dev.json")
@@ -110,9 +110,8 @@ for email, companies in sub_map.items():
                     # Insert notification
                     c.execute("""
                         INSERT INTO notifications
-                        (email, company, category, post_url, post_title)
+                        (email, heading, post_url, post_title)
                         VALUES (?, ?, ?, ?, ?)
-                        ON CONFLICT(email, company, category, post_title) DO UPDATE SET post_url=excluded.post_url
                     """, (email, company, category, blog['url'], blog['title']))
             # except Exception as e:
             #     print(f"⚠️ Error in notify for {company}/{category}: {e}")

@@ -134,10 +134,11 @@ input:focus {
 .dropdown div {
   padding: 8px;
   cursor: pointer;
+  overflow: hidden;
 }
 
-.dropdown li:hover,
-.dropdown li.active {
+.dropdown div:hover,
+.dropdown div.active {
   background-color: #eee;
 }
 
@@ -161,13 +162,109 @@ input:focus {
   cursor: pointer;
 }
 
-.intro-text, footer {
+.intro-text {
   text-align: center; 
   max-width: 600px;        
   margin: 0 auto 20px auto; 
   font-size: 1.1rem;        
-  line-height: 1.6;         
-  color: #333;            
+  color: #333;       
+  line-height: 1.6rem;     
+}
+
+.footer {
+  text-align: center; 
+  max-width: 600px;        
+  margin: 0 auto 20px auto; 
+  font-size: 0.8rem;        
+  color: #bbb;    
+  line-height: 1.6rem;        
+}
+
+.tag-checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.tag-checkbox {
+  display: inline-flex;
+  align-items: center;
+  background-color: #f3f4f6;
+  padding: 5px 10px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  position: relative; /* <-- needed for tooltip */
+}
+
+.tag-checkbox input[disabled] {
+  pointer-events: none; /* disabled input won’t capture hover */
+}
+
+.subscription-toast {
+  position: fixed;         /* out of document flow */
+  bottom: 20px;            /* bottom-right corner */
+  right: 20px;
+  background-color: #e6f4ea;
+  color: #2e7d32;
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  opacity: 0;
+  pointer-events: none;    /* clicks go through when hidden */
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  transform: translateY(20px); /* start slightly lower */
+  z-index: 9999;
+}
+
+.subscription-toast.show {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0); /* move to visible position */
+}
+
+/* Tooltip styling */
+.tooltip {
+  visibility: hidden;
+  position: absolute;
+  bottom: 125%; /* above the tag */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: #575757;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  transition: opacity 0.2s ease;
+  z-index: 10;
+  background-color: #dadada;
+}
+
+/* Show tooltip on hover */
+.tag-checkbox.disabled:hover .tooltip {
+  visibility: visible;
+}
+
+.notify-from-group label {
+  display: block;        /* ensures the label is on its own line */
+  margin-bottom: 0.5rem; /* adjust the gap as needed */
+  font-weight: 600;      /* optional: make label slightly bolder */
+}
+
+#companyInput:disabled {
+  background-color: #f0f0f0;  /* lighter gray */
+  color: #999;                 /* gray text */
+  cursor: not-allowed;         /* show “disabled” cursor */
+  border: 1px solid #ccc;      /* optional border styling */
+  opacity: 0.8;                /* slightly faded */
+}
+
+/* Show tooltip on hover */
+#companyInput:disabled:hover .tooltip {
+  visibility: visible;
 }
 
 /* Responsive Design */
@@ -183,5 +280,15 @@ input:focus {
   input,
   .submit-button {
     font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .tag-checkbox-group {
+    gap: 0.5rem;
+  }
+  .tag-checkbox {
+    padding: 5px 12px;
+    font-size: 0.85rem;
   }
 }
