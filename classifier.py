@@ -1,33 +1,92 @@
-# Install
-# pip install sentence-transformers
-
 from sentence_transformers import SentenceTransformer, util
 from db import enums
+import torch
 
-# 1. Load model
-model = SentenceTransformer('all-MiniLM-L6-v2')
+# 1. Load a stronger model
+model = SentenceTransformer('all-mpnet-base-v2')
 
-# 2. Define categories
+# 2. Concise category descriptions
 categories = {
-    enums.PublisherCategory.SOFTWARE_ENGINEERING.value: "includes frontend, backend, system design, devops, storage",
-    enums.PublisherCategory.SOFTWARE_TESTING.value: "manual, automation, performance, load testing",
-    enums.PublisherCategory.DATA_ANALYTICS.value: "analytics, business intelligence, data visualization",
-    enums.PublisherCategory.DATA_SCIENCE.value: "machine learning, ai, predictive modeling, deep learning",
-    enums.PublisherCategory.PRODUCT_MANAGEMENT.value: "product design, user experience, product strategy"
+    enums.PublisherCategory.SOFTWARE_ENGINEERING.value: (
+        "frontend, backend, APIs, microservices, databases, system design, DevOps, cloud, CI/CD, containers, scalability, performance, distributed systems, mobile, UI/UX"
+    ),
+    enums.PublisherCategory.SOFTWARE_TESTING.value: (
+        "manual testing, automated testing, Selenium, Cypress, Playwright, unit tests, integration tests, end-to-end tests, performance, load, stress, TDD, BDD, defect tracking, CI/CD testing"
+    ),
+    enums.PublisherCategory.DATA_ANALYTICS.value: (
+        "data analysis, business intelligence, dashboards, reporting, KPI, SQL, NoSQL, ETL pipelines, data visualization, Tableau, Power BI, Looker, anomaly detection, A/B testing, insights"
+    ),
+    enums.PublisherCategory.DATA_SCIENCE.value: (
+        "machine learning, deep learning, AI, predictive modeling, NLP, computer vision, recommender systems, feature engineering, model training, Python, R, TensorFlow, PyTorch, scikit-learn, ML deployment, recommendation systems"
+    ),
+    enums.PublisherCategory.PRODUCT_MANAGEMENT.value: (
+        "product strategy, design, UX/UI, customer research, roadmap planning, prioritization, market analysis, cross-functional collaboration, agile, lean, product launch, product lifecycle management, product metrics, stakeholder communication"
+    ),
+    "GENERAL": (
+        "general technology, business, professional development, industry news, opinions, AI and tech trends, interdisciplinary topics, updates not fitting other categories"
+    )
 }
 
 # 3. Encode category descriptions
-category_embeddings = {cat: model.encode(desc, convert_to_tensor=True) 
-                       for cat, desc in categories.items()}
+category_embeddings = {
+    cat: model.encode(desc, convert_to_tensor=True)
+    for cat, desc in categories.items()
+}
 
-def classify_post(post_title, post_content=""):
-    # 4. Encode input text
-    title_embedding = model.encode(post_title, convert_to_tensor=True)
-    content_embedding = model.encode(post_content, convert_to_tensor=True)
-    text_embedding = (0.7 * title_embedding + 0.3 * content_embedding)
-    # 5. Compute cosine similarity
-    scores = {cat: util.cos_sim(text_embedding, emb).item() 
-              for cat, emb in category_embeddings.items()}
-    
-    # 6. Return the category with the highest score
-    return max(scores, key=scores.get)
+# Optional: simple keyword mapping to override embeddings
+keywords_map = {
+    enums.PublisherCategory.SOFTWARE_ENGINEERING.value: [
+        "react", "angular", "vue", "node.js", "django", "java", "go", "microservices", "api", "devops", "kubernetes"
+    ],
+    enums.PublisherCategory.SOFTWARE_TESTING.value: [
+        "selenium", "cypress", "playwright", "testing", "qa", "unit test", "integration test", "e2e test"
+    ],
+    enums.PublisherCategory.DATA_ANALYTICS.value: [
+        "sql", "nosql", "tableau", "power bi", "looker", "etl", "dashboard", "kpi", "analysis"
+    ],
+    enums.PublisherCategory.DATA_SCIENCE.value: [
+        "machine learning", "deep learning", "ai", "nlp", "computer vision", "tensorflow", "pytorch", "scikit-learn"
+    ],
+    enums.PublisherCategory.PRODUCT_MANAGEMENT.value: [
+        "product strategy", "roadmap", "ux", "ui", "customer research", "agile", "lean", "launch", "metrics"
+    ]
+}
+
+def classify_post(post_title, tags="", content=""):
+    """
+    Classify a post into a category using title + tags + first 100 chars of content.
+    Uses embeddings similarity with optional keyword boost.
+    """
+
+    # 1. Prepare text
+    content_snippet = content[:100] if content else ""
+    combined_text = f"Title: {post_title}. Tags: {tags}. Content: {content_snippet}".lower()
+
+    # 2. Encode input
+    text_embedding = model.encode(combined_text, convert_to_tensor=True)
+
+    # 3. Compute similarity
+    scores = {
+        cat: util.cos_sim(text_embedding, emb).item()
+        for cat, emb in category_embeddings.items()
+    }
+
+    # 4. Keyword boost: add 0.1 if a keyword exists in title/tags/content
+    combined_lower = combined_text.lower()
+    for cat, kw_list in keywords_map.items():
+        for kw in kw_list:
+            if kw in combined_lower:
+                scores[cat] += 0.1
+                break
+
+    # 5. Assign category with highest similarity
+    best_cat = max(scores, key=scores.get)
+
+    # 6. Adaptive fallback: check relative score
+    sorted_scores = sorted(scores.values(), reverse=True)
+    top_score = sorted_scores[0]
+    second_score = sorted_scores[1] if len(sorted_scores) > 1 else 0.0
+    if top_score < 0.25 or (top_score - second_score) < 0.05:
+        return "GENERAL"
+
+    return best_cat

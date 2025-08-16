@@ -30,14 +30,12 @@ class BaseScraper:
         feed_url = self.get_feed_url()
 
         feed = feedparser.parse(feed_url)
+        
         matching_posts = []    
 
         for entry in feed.entries:
             # Normalize tags
-            categories = [tag.term.lower() for tag in entry.get("tags", [])]    
-
-            if category.lower() not in categories:
-                continue    
+            categories = [tag.term.lower() for tag in entry.get("tags", [])]     
 
             try:
                 # Parse published date using the correct format
@@ -51,12 +49,16 @@ class BaseScraper:
             if published <= last_scan_time:
                 logger.debug(f"Skipping {entry.title}: article published on {published} before last scan time: {last_scan_time}")
                 continue    
+            
+            full_content = entry.content[0].value if entry.content else ""
+            content = full_content[:100]  # truncate to first 100 chars
 
             matching_posts.append({
                 "title": entry.title,
                 "url": entry.link,
                 "published": published.isoformat(),
-                "categories": categories
+                "categories": categories,
+                "content": content
             })    
 
         return matching_posts

@@ -127,7 +127,26 @@ class SQLiteDatabase:
                 },
             }
             for row in cursor.fetchall()
-        ]      
+        ]  
+    
+    def get_subscriptions_by_publisher(self, conn, publisher_id):
+        c = conn.cursor()
+        c.execute("""
+            SELECT s.email, s.topic, s.joined_time, s.last_notified_at
+            FROM subscriptions s
+            JOIN publishers p ON s.publisher_id = p.id
+            WHERE p.id = ?
+        """, (publisher_id,))
+        rows = c.fetchall()
+        return [
+            {
+                "email": row["email"],
+                "topic": row["topic"],
+                "joined_time": row["joined_time"],
+                "last_notified_at": row["last_notified_at"]
+            }
+            for row in rows
+        ]  
 
 
     def add_subscription(self, conn, email, topic, publisher_id, joined_time=None):
@@ -182,7 +201,7 @@ class SQLiteDatabase:
     def get_publishers(self, conn):
         c = conn.cursor()
         c.execute("""
-            SELECT id, publisher_name, publisher_type
+            SELECT *
             FROM publishers
         """)
         rows = c.fetchall()
@@ -216,6 +235,15 @@ class SQLiteDatabase:
             VALUES (?, ?)
         """, (publisher_name, publisher_type))
         logger.info(f"Publisher {publisher_name} added successfully")
+    
+    def update_publisher(self, conn, publisher_id, last_scraped_at):
+        c = conn.cursor()
+        c.execute("""
+            UPDATE publishers
+            SET last_scraped_at = ?
+            WHERE id = ?
+        """, (last_scraped_at, publisher_id))
+        logger.info(f"Publisher {publisher_id} updated successfully")
 
     @classmethod
     def get_instance(cls, db_path):

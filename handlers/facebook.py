@@ -72,8 +72,6 @@ class FacebookScraper(BaseScraper):
     
                 # Categories
                 cats = [c.get_text(strip=True).lower() for c in article.select(".cat-links a")]
-                if category.lower() not in cats:
-                    continue
     
                 # Date
                 date_tag = article.select_one("time.entry-date")
@@ -95,12 +93,21 @@ class FacebookScraper(BaseScraper):
                 
                 if published <= last_scan_time:
                     continue
+                
+                content_block = article.select_one(".entry-content")
+                if content_block:
+                    paragraphs = content_block.find_all("p")
+                    full_content = " ".join(p.get_text(strip=True) for p in paragraphs)
+                    content = full_content[:100]  # first 100 characters
+                else:
+                    content = ""
     
                 posts.append({
                     "title": title,
                     "url": post_url,
                     "categories": cats,
-                    "published": published.isoformat()
+                    "published": published.isoformat(),
+                    "content": content
                 })
     
             except Exception as e:

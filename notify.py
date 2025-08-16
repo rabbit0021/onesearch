@@ -1,10 +1,13 @@
 import json
 import sqlite3
 from datetime import datetime
+
 from handlers import ScraperFactory  # maps company -> handler class
 from db import get_database
 import os
 from logger_config import get_logger
+from classifier import classify_post
+import time
 
 def parse_datetime(dt_str):
     if dt_str is None:
@@ -14,110 +17,82 @@ def parse_datetime(dt_str):
     except ValueError:
         print(f"Warning: invalid datetime string: {dt_str}")
         return None
-
-def get_notification_state(c, email, company, category):
-    c.execute("""
-        SELECT * from notification_state
-        WHERE email = ? AND company = ? AND category = ?
-    """, (email, company, category))
-    row = c.fetchone()
-    return row
-
+    
 # Load subscribers
 env = os.getenv('FLASK_ENV', 'development')
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-if env == 'production':
-    subscribers_file = os.path.join(BASE_DIR, "data", "subscribers.json")
-else:
-    subscribers_file = os.path.join(BASE_DIR, "data", "subscribers_dev.json")
-
 logger = get_logger("notify_worker")
-
-with open(subscribers_file) as f:
-    subscribers = json.load(f)
 
 db = get_database()
 conn = db.get_connection()
-c = conn.cursor()
 
-# Ensure tables
-c.execute("""
-CREATE TABLE IF NOT EXISTS notifications (
-    email TEXT,
-    company TEXT,
-    category TEXT,
-    post_url TEXT,
-    post_title TEXT,
-    notified_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (email, company, category, post_title)
-)
-""")
-c.execute("""
-CREATE TABLE IF NOT EXISTS notification_state (
-    email TEXT,
-    company TEXT,
-    category TEXT,
-    last_notified_at DATETIME,
-    PRIMARY KEY (email, company, category)
-)
-""")
-conn.commit()
+publishers = db.get_publishers(conn)
 
-# Organize subscriptions: email -> company -> set(categories)
-sub_map = {}
-for sub in subscribers:
-    email = sub['email']
-    company = sub['company']
-    time = sub['time']
-    category = sub['category']
-    sub_map.setdefault(email, {}).setdefault(company, set()).add((category, time))
-# Process notifications
-for email, companies in sub_map.items():
+for publisher in publishers:
     
-    for company, categories in companies.items():
-        scraper = ScraperFactory.get_scraper(company)
-                
-        if not scraper:
-            logger.error(f"⚠️ No handler found for company: {scraper}")
-            continue
-                
-        for categorytime in categories:
-            category = categorytime[0]
-            joined_time = categorytime[1]
-            logger.info(f"working for {email}, {company}, {category}")
-            # try:
-            notification_state = get_notification_state(c, email, company, category)
-            if not notification_state:
-                time = parse_datetime(joined_time)
-                c.execute("""
-                    INSERT INTO notification_state
-                    (email, company, category, last_notified_at)
-                    VALUES (?, ?, ?, ?)
-                    ON CONFLICT(email, company, category)
-                    DO UPDATE SET last_notified_at = excluded.last_notified_at
-                """, (email, company, category, time))
-            else:
-                last_notified_at = parse_datetime(notification_state[3])
-                blog_posts = scraper.search_blog_posts(notification_state[2], last_notified_at)
+    last_scraped_at =  parse_datetime(publisher.get("last_scraped_at"))
+    
+    if last_scraped_at is None:
+        last_scraped_at = datetime.fromisoformat("2023-01-01T00:00:00+00:00")
 
-                if not blog_posts:
+    if publisher.get("publisher_type") == "techteam":
+
+        subscribers = db.get_subscriptions_by_publisher(conn, publisher["id"])
+        if not subscribers:
+            logger.info(f"No subscribers found for {publisher['publisher_name']}")
+            continue
+        
+        scraper = ScraperFactory.get_scraper(publisher["publisher_name"])
+        if not scraper:
+            logger.error(f"⚠️ No handler found for publisher: {publisher['publisher_name']}")
+            continue
+
+        logger.info(f"🔍 Scraping {publisher['publisher_name']} for new blog posts after {last_scraped_at}...")
+
+        blog_posts = scraper.search_blog_posts("", last_scraped_at)
+        
+        if not blog_posts:
+            logger.info(f"No new blog posts found for {publisher['publisher_name']}")
+            continue
+        
+        for post in blog_posts:
+            tags = ', '.join(post["categories"])
+            logger.info(f"Found new post: {post['title']} published by {post['published']} with tags: {tags}")
+            category = classify_post(post["title"], tags)
+            if not category:
+                logger.warning(f"⚠️ Could not classify post: {post['title']}")
+                continue
+            
+            logger.info(f" {category} - Classified post '{post['title']}'")
+
+            topic_subscribers = [sub for sub in subscribers if sub["topic"] == category]
+            
+            if not topic_subscribers:
+                logger.info(f"No subscribers found for category '{category}' in {publisher['publisher_name']}")
+                continue
+            
+            for subscriber in topic_subscribers:
+                if category != subscriber["topic"]:
+                    logger.debug(f"Skipping {subscriber['email']} for {post['title']} - category mismatch: {category} != {subscriber['topic']}")
                     continue
                 
-                for blog in blog_posts:
-                    logger.info(f"🔔 Notifying {email} about new post: {blog['title']}")
+                # Add notification
+                logger.info(f"Adding notification for {subscriber['email']} about {post['title']}")
+                notification = {
+                    "email": subscriber["email"].lower(),
+                    "heading": publisher["publisher_name"] + " - " + category,
+                    "style_version": "v1",
+                    "post_url": post["url"],
+                    "post_title": post["title"]
+                }
+                db.add_notification(conn, **notification)
+                conn.commit()
         
-                    # Insert notification
-                    c.execute("""
-                        INSERT INTO notifications
-                        (email, heading, post_url, post_title)
-                        VALUES (?, ?, ?, ?, ?)
-                    """, (email, company, category, blog['url'], blog['title']))
-            # except Exception as e:
-            #     print(f"⚠️ Error in notify for {company}/{category}: {e}")
-            #     continue
+        publisher["last_scraped_at"] = datetime.now().isoformat()
+        db.update_publisher(conn, publisher["id"], publisher["last_scraped_at"])
+        conn.commit()
 
-# Final commit and cleanup
-conn.commit()
+
 conn.close()
 logger.info("Notification run ended.")
