@@ -267,21 +267,23 @@ input:focus {
   visibility: visible;
 }
 
-/* Right panel hidden by default */
 .right-panel {
+  display: flex;
   position: fixed;
-  top: 20%;
-  right: -140px; /* hidden off screen */
-  width: 120px;
-  background-color: #fff;
-  border: 2px solid #007bff;
-  border-radius: 12px 0 0 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  transition: right 0.8s ease;
+  top: 0;
+  right: -280px;
+  width: 240px;
+  height: 100vh;
+  background-color: rgba(234, 236, 240, 0.5); /* same color with transparency */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-left: 2px solid rgba(200, 200, 200, 0.5);
+  transition: right 0.5s ease;
   z-index: 1000;
-  text-align: center;
-  padding: 10px 5px;
-  cursor: pointer;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 15px;
+  overflow-y: auto;
 }
 
 /* When panel is active */
@@ -289,21 +291,88 @@ input:focus {
   right: 0;
 }
 
-/* Panel content */
-.panel-content {
+/* Chat message layout */
+.chat-message {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
+  margin-top: 50px;
+  margin-bottom: 15px;
 }
 
-.cat-img {
-  width: 80px;
-  margin-bottom: 5px;
+/* Cat avatar */
+.cat-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  margin-right: 10px;
+  flex-shrink: 0;
+  animation: float 1.5s infinite alternate;
 }
 
-.panel-text {
-  font-size: 1rem;
-  color: #333;
+/* Floating animation for cat */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  100% { transform: translateY(-5px); }
+}
+
+/* Message bubble */
+.message-bubble {
+  background: #f1f1f1;
+  color: #000;
+  padding: 10px 15px;
+  border-radius: 15px;
+  font-size: 16px;
+  line-height: 1.4;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+#notification-wrapper {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  cursor: pointer;
+}
+
+#notification-icon {
+  font-size: 24px;
+  position: relative;
+}
+
+/* Red dot */
+#notification-dot {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 10px;
+  height: 10px;
+  background-color: red;
+  border-radius: 50%;
+  display: block; /* initially visible */
+}
+
+.feedback-form-card {
+  background-color: #f0f4f8;
+  padding: 10px;
+  margin-top: 10px;
+  display: none; /* hidden by default */
+}
+
+/* Textarea and button styling */
+.feedback-form-card textarea {
+  width: 100%;
+  height: 60px;
+  padding: 5px;
+  border: 1px solid #ccc;
+  margin: -10px;
+  margin-bottom: 6px;
+}
+
+.feedback-form-card textarea:focus {
+  border-color: #007bff;
+}
+
+.feedback-form-card button {
+  margin-left: -9px;
 }
 
 /* Responsive Design */

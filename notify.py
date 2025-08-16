@@ -43,9 +43,13 @@ for publisher in publishers:
             logger.info(f"No subscribers found for {publisher['publisher_name']}")
             continue
         
-        scraper = ScraperFactory.get_scraper(publisher["publisher_name"])
+        try:
+            scraper = ScraperFactory.get_scraper(publisher["publisher_name"])
+        except Exception as e:
+            logger.error(f"{e}")
+            pass
+        
         if not scraper:
-            logger.error(f"⚠️ No handler found for publisher: {publisher['publisher_name']}")
             continue
 
         logger.info(f"🔍 Scraping {publisher['publisher_name']} for new blog posts after {last_scraped_at}...")
@@ -81,13 +85,15 @@ for publisher in publishers:
                 logger.info(f"Adding notification for {subscriber['email']} about {post['title']}")
                 notification = {
                     "email": subscriber["email"].lower(),
-                    "heading": publisher["publisher_name"] + " - " + category,
+                    "heading": publisher["publisher_name"] + " ," + category,
                     "style_version": "v1",
                     "post_url": post["url"],
                     "post_title": post["title"]
                 }
+                
                 db.add_notification(conn, **notification)
                 conn.commit()
+                    
         
         publisher["last_scraped_at"] = datetime.now().isoformat()
         db.update_publisher(conn, publisher["id"], publisher["last_scraped_at"])

@@ -7,6 +7,7 @@ from middleware import register_middlewares
 from logger_config import get_logger
 from datetime import timezone
 from db import get_database
+import time
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'default-secret')
@@ -15,12 +16,17 @@ app.db = get_database()
 # Logging    
 app.logger = get_logger("app")
 
+if os.getenv("FLASK_ENV") == "production":
+    tempdata_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "tempData.json")
+else:
+    tempdata_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "tempData_dev.json")
+
 # test log
 register_middlewares(app)
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("index.html", time=time.time)
 
 @app.route("/techteams", methods=["GET"])
 def get_companies():
@@ -87,6 +93,54 @@ def subscriptions_for_email():
     # Convert sets to lists for JSON serializability
     result = {topic: list(publishers) for topic, publishers in grouped.items()}
     return jsonify(result)
+
+@app.route("/interested", methods=["POST"])
+def interested():
+    # Ensure the tempdata file exists
+    if not os.path.exists(tempdata_path):
+        with open(tempdata_path, 'w') as f:
+            json.dump({"interested-count": 0, "feedbacks": []}, f)
+
+    # Read, increment, and save the interested count
+    with open(tempdata_path, 'r+') as f:
+        data = json.load(f)
+        data["interested-count"] = data.get("interested-count", 0) + 1
+        f.seek(0)
+        json.dump(data, f, indent=2)
+        f.truncate()
+
+    return jsonify({"interested-count": data["interested-count"]})
+
+@app.route("/feedback", methods=["POST"])
+def feedback():
+    data = request.get_json()  # <-- read JSON instead of request.form
+    if not data:
+        return jsonify({"status": "error", "message": "No data sent"}), 400
+
+    feedback_text = data.get("feedback", "").strip()
+    
+    feedback_text = feedback_text[:200]  # Limit feedback to 1000 characters
+    
+    if not feedback_text:
+        return jsonify({"status": "error", "message": "Feedback cannot be empty."}), 400
+
+    # Ensure tempdata file exists
+    if not os.path.exists(tempdata_path):
+        with open(tempdata_path, 'w') as f:
+            json.dump({"interested-count": 0, "feedbacks": []}, f)
+
+    # Append and save feedback
+    with open(tempdata_path, 'r+') as f:
+        existing = json.load(f)
+        existing["feedbacks"].append({
+            "text": feedback_text,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        })
+        f.seek(0)
+        json.dump(existing, f, indent=2)
+        f.truncate()
+
+    return jsonify({"status": "success", "message": "Feedback submitted successfully."})
 
 if __name__ == "__main__":
     if os.getenv("FLASK_ENV") == "Production":

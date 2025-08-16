@@ -25,7 +25,7 @@ class SQLiteDatabase:
             style_version INTEGER,
             post_url TEXT,
             post_title TEXT,
-            UNIQUE (email, heading, post_title)
+            deleted BOOL DEFAULT 0
         )
         """)
         c.execute("""
@@ -36,7 +36,7 @@ class SQLiteDatabase:
             joined_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             topic TEXT NOT NULL CHECK (topic IN ('Software Engineering', 'Data Analytics', 'Data Science', 'Software Testing', 'Product Management')),
             last_notified_at DATETIME DEFAULT NULL,
-            FOREIGN KEY (publisher_id) REFERENCES publishers(id)
+            FOREIGN KEY (publisher_id) REFERENCES publishers(id),
             UNIQUE (email, publisher_id, topic)
         )
         """)
@@ -165,7 +165,6 @@ class SQLiteDatabase:
                 VALUES (?, ?, ?, ?)
             """, (email, topic, publisher_id, joined_time))    
 
-        conn.commit()
         logger.info(f"Subscription for {email} added successfully")
         
     def remove_subscription(self, conn, email, topic, publisher_id):
@@ -185,19 +184,34 @@ class SQLiteDatabase:
         return [dict(row) for row in rows]
 
     def add_notification(self, conn, email, heading, style_version, post_url, post_title):
+        logger.info(f"Adding notification: {email}, type: {post_title}")
         c = conn.cursor()
         c.execute("""
             INSERT INTO notifications (email, heading, style_version, post_url, post_title)
             VALUES (?, ?, ?, ?, ?)
         """, (email, heading, style_version, post_url, post_title))
+        logger.info("notification added successfully!")
     
     def delete_notification(self, conn, email, heading, post_title):
+        logger.info(f"Deleting notification: {email}, type: {post_title}")
         c = conn.cursor()
         c.execute("""
-            DELETE FROM notifications
+            UPDATE notifications
+            SET deleted = 1
             WHERE email = ? AND heading = ? AND post_title = ?
         """, (email, heading, post_title))
+        logger.info("notification deleted successfully!")
     
+    def delete_notifications_by_email(self, conn, email):
+        logger.info(f"Deleting all notifications for {email}")
+        c = conn.cursor()
+        c.execute("""
+            UPDATE notifications
+            SET deleted = 1
+            WHERE email = ?
+        """, (email,))
+        logger.info("notifications deleted successfully!")
+        
     def get_publishers(self, conn):
         c = conn.cursor()
         c.execute("""
@@ -237,6 +251,7 @@ class SQLiteDatabase:
         logger.info(f"Publisher {publisher_name} added successfully")
     
     def update_publisher(self, conn, publisher_id, last_scraped_at):
+        logger.info(f"Updating publisher: {publisher_id}, last_scraped_at: {last_scraped_at}")
         c = conn.cursor()
         c.execute("""
             UPDATE publishers

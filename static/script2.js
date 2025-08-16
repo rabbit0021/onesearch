@@ -10,6 +10,14 @@ const topicInput = document.getElementById('topicInput');
 const topicDropdown = document.getElementById('topicDropdown');
 const notifyCheckboxes = document.querySelectorAll('input[name="notify_from"]');
 const subscription_status = document.getElementById("already-subscribed");
+const icon = document.getElementById('notification-icon');
+const panel = document.getElementById('right-panel');
+const dot = document.getElementById("notification-dot");
+const chatMessage = document.getElementById("chat-message");
+const chatContainer = document.getElementById("chat-message");
+const interestedButton = document.getElementById("interested-button");
+const feedbackButton = document.getElementById("feedback-button");
+const feedbackContainer = document.getElementById("feedback-form-container");
 
 // #endregion
 
@@ -260,6 +268,11 @@ function handleSubmit() {
 }
 
 document.addEventListener('click', (e) => {
+
+  if (!panel.contains(e.target) && e.target !== icon) {
+    panel.classList.remove("active");
+  }
+
   if (!companyDropdown.contains(e.target) && e.target !== companyInput) {
     companyDropdown.style.display = 'none';
   }
@@ -283,24 +296,85 @@ function showToast(message, duration = 3000) {
     toast.classList.remove('show');
   }, duration);
 }
-// #endregion
-function showRightPanel(duration = 5000) {
-  const panel = document.getElementById('right-panel');
-  panel.classList.add('active');
 
-  // Hide after duration
-  setTimeout(() => {
-    panel.classList.remove('active');
-  }, duration);
-}
+icon.addEventListener("click", () => {
+  // Toggle panel visibility
+  panel.classList.toggle("active");
 
-// Example: show panel 2 seconds after page load
-function initPanel() {
-  setTimeout(() => showRightPanel(7000), 2000);
-}
+  // Hide the red dot when clicked
+  if (dot.style.display !== "none") {
+    dot.style.display = "none";
+  }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initPanel);
-} else {
-  initPanel(); // already loaded
-}
+ const clearContent = (e) => {
+      if (e.propertyName === "right" && !panel.classList.contains("active")) {
+        chatContainer.innerHTML = ""; 
+        panel.removeEventListener("transitionend", clearContent);
+      }
+    };
+    panel.addEventListener("transitionend", clearContent);
+});
+
+interestedButton.addEventListener("click", () => {
+  // call backend server to log interest
+  fetch("/interested", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email: emailInput.value.trim() }),
+  })
+  .then(response => {
+    if (response.ok) {
+       showToast("Thank you for your interest! We'll keep you updated.");
+    }
+    else {
+      alert("Something went wrong. Please try again later.");
+    }
+  })
+});
+
+feedbackButton.addEventListener("click", () => {
+  // Only create one form
+  if (feedbackContainer.children.length > 0) return;
+
+  // Create simple feedback card
+  const card = document.createElement("div");
+  card.className = "feedback-form-card";
+  card.innerHTML = `
+    <textarea placeholder="Type your feedback here..."></textarea>
+    <button>Send</button>
+  `;
+  feedbackContainer.appendChild(card);
+
+  // Show the card
+  card.style.display = "block";
+
+  // Handle Send button
+  card.querySelector("button").addEventListener("click", () => {
+    const message = card.querySelector("textarea").value.trim();
+    if (!message) return alert("Please enter feedback");
+
+    const data = new URLSearchParams({
+        feedback: message,
+    });
+    // Here you would typically send the feedback to your server
+    // Send JSON to Flask
+    fetch("/feedback", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ feedback: message })  // <-- JSON.stringify needed
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.status === "success") {
+        showToast("Feedback sent successfully");
+      } else {
+        alert(data.message || "Error sending feedback");
+      }
+    })
+
+    // Remove the card after sending
+    feedbackContainer.removeChild(card);
+  });
+});

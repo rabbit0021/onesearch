@@ -50,15 +50,14 @@ class BaseScraper:
                 logger.debug(f"Skipping {entry.title}: article published on {published} before last scan time: {last_scan_time}")
                 continue    
             
-            full_content = entry.content[0].value if entry.content else ""
-            content = full_content[:100]  # truncate to first 100 chars
+            # full_content = entry.content[0].value if entry.content else ""
+            # content = full_content[:100]  # truncate to first 100 chars
 
             matching_posts.append({
                 "title": entry.title,
                 "url": entry.link,
                 "published": published.isoformat(),
-                "categories": categories,
-                "content": content
+                "categories": categories
             })    
 
         return matching_posts

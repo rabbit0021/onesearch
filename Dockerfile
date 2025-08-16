@@ -10,7 +10,7 @@ COPY . .
 RUN chown -R appuser /app
 # Create logs dir with right permission
 RUN mkdir -p /app/logs && chown -R appuser /app/logs
-RUN mkdir -p /app/tmp && chmod 777 /app/tmp
+RUN mkdir -p /app/tmp && chmod 777 /app/tmp/
 
 USER appuser
 

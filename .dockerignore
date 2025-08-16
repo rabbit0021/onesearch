@@ -1,14 +1,30 @@
-.git
+# Python
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-*.db
-*.sqlite3
-*.log
-*.env
+env/
 venv/
-.env/
+*.sqlite3
+
+# Node
 node_modules/
-*.tar.gz
-*.egg-info/
+npm-debug.log
+yarn-error.log
+
+# Git
+.git/
+
+# Logs
+*.log
+
+# IDEs
+.vscode/
+.idea/
+.DS_Store
+
+# Others
+*.csv
+*.mp4
+*.zip
+tmp/

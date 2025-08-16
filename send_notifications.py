@@ -9,18 +9,37 @@ import smtplib
 import os
 from email.utils import formataddr
 from logger_config import get_logger
+from collections import defaultdict
+import random
+from jinja2 import Template
 
 # === CONFIG ===
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
 SMTP_USERNAME = os.getenv('SMTP_USERNAME', 'xxxx@gmail.com')
-SMTP_PASSWORD = os.getenv('SMTP_PASSWORD', 'xxxx')
+SMTP_PASSWORD = os.getenv('SMTP_PASSWORD', 'xxxxx')
 
 logger = get_logger("notify_worker")
 
 # === EMAIL TEMPLATE ===
 
 # === MAIN LOGIC ===
+
+SUBJECT_TAGLINES = [
+    "Stay Hungry, Stay Foolish",
+    "Stay Curious, Stay Bold",
+    "Learn Fast, Ship Faster",
+    "Build More, Noise Less",
+    "Read Less, Learn More",
+    "Think Different, Ship Different",
+    "Fresh Reads, Zero Clutter",
+    "Ideas Today, Impact Tomorrow"
+]
+
+def get_random_subject():
+    tagline = random.choice(SUBJECT_TAGLINES)
+    return f"OneSearch Digest: {tagline}"
+
 
 def send_email(to_email, subject, html_body, logo_path=None, header_path=None):
     msg = MIMEMultipart("related")
@@ -57,105 +76,101 @@ def send_email(to_email, subject, html_body, logo_path=None, header_path=None):
         server.starttls()
         server.login(SMTP_USERNAME, SMTP_PASSWORD)
         server.sendmail(msg["From"], to_email, msg.as_string())
-        
-def process_notifications():
-    conn =  get_database().get_connection()
-    cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM notifications")
-    notifications = cursor.fetchall()
-    
+def deduplicate_notifications(notifications):
+    """Remove duplicates based on (email, heading, post_url)."""
+    seen = set()
+    deduped = []
+    for row in notifications:
+        key = (row["email"], row["heading"], row["post_url"])
+        if key not in seen:
+            seen.add(key)
+            deduped.append(row)
+    return deduped
+
+def process_notifications(db, conn):
+    notifications = db.get_notifications(conn)
     logger.info(f"found {len(notifications)} notifications to be processed")
 
+    notifications = deduplicate_notifications(notifications)
+    logger.info(f"After dedup, found {len(notifications)} notifications to be processed")
+
+    notifications_by_email = defaultdict(list)
     for row in notifications:
-        email = row[0]
-        company = row[1]
-        category = row[2]
-        post_url = row[3]
-        post_title = row[4]    
+        notifications_by_email[row["email"]].append(row)
 
-        subject = f"[{company}] New blog post in {category}"    
+    organised_by_heading = {}
+    for email, rows in notifications_by_email.items():
+        heading_map = defaultdict(list)
+        for row in rows:
+            heading = row["heading"]
+            publisher, category = heading.split(",", 1)
+            row["publisher"] = publisher.strip()
+            heading_map[category.strip()].append(row)
+        organised_by_heading[email] = heading_map
+    
+    # Load static template once
+    with open("static/email_template.html", "r") as f:
+        html_template = Template(f.read())
 
-        html_body = f"""
-           <html>
-           <body style="font-family: Arial, sans-serif; color: #333; margin:0; padding:0;">
-           
-               <!-- Header image -->
-               <div style="width:100%; height:150px; overflow:hidden;">
-                   <img src="cid:header" alt="Header Image" 
-                        style="width:100%; height:150px; object-fit:cover; display:block;">
-               </div>
-           
-               <!-- Main content -->
-               <div style="padding:32px; font-family:'Segoe UI', Arial, sans-serif; color:#222; background-color:#f9fbfd; border-radius:10px; border:1px solid #e6ecf2;">
-                   
-                   <!-- Emoji + Category -->
-                   <div style="font-size:14px; letter-spacing:1px; text-transform:uppercase; color:#555; margin-bottom:8px;">
-                       📂 {category}
-                   </div>
-               
-                   <!-- Big Headline -->
-                   <h2 style="font-size:30px; color:#0073e6; margin:0 0 18px 0; font-weight:700; line-height:1.3;">
-                       ✨ A Fresh Read Awaits
-                   </h2>
-               
-                   <!-- Blog Title -->
-                   <p style="font-size:20px; margin:0 0 24px 0; font-weight:500; color:#333;">
-                       {post_title}
-                   </p>
-               
-                   <!-- CTA Button -->
-                   <a href="{post_url}" style="display:inline-block; padding:14px 28px; background-color:#0073e6; 
-                       color:#fff; text-decoration:none; border-radius:6px; font-size:16px; font-weight:600; 
-                       box-shadow:0 3px 6px rgba(0,0,0,0.08); transition:background-color 0.2s;">
-                       Read Full Article →
-                   </a>
-               
-               </div>
-
-           
-               <!-- Footer -->
-               <div style="padding:16px; border-top:1px solid #e0e0e0; display:flex; align-items:center; background-color:#fafafa; font-family:Arial, sans-serif; font-size:12px; color:#555;">
-                   <img src="cid:logo" alt="OneSearch logo" style="width:60px; height:auto; margin-right:10px;">
-                   <div>
-                       <div style="font-weight:bold; color:#222; font-size:13px;">OneSearch</div>
-                       <div style="color:#777;">One place for all engineering blogs</div>
-                   </div>
-               </div>
-           </body>
-           </html>
-        """    
-        env = os.getenv('FLASK_ENV', 'development')
-        logo_file = "/app/data/logo.png" if env == 'production' else 'data/logo.png'
-        header_file = "/app/data/header.jpg" if env == 'production' else 'data/header.jpg'
+    for email, heading_map in organised_by_heading.items():
+        subject = get_random_subject()
         
+        category_sections = ""
+        for heading, posts in heading_map.items():
+            category = heading
+
+            blog_items = "".join([
+                f"""
+                <div style="padding:14px; margin-bottom:12px; border-radius:10px;
+                            background:#f9fafb; border:1px solid #e5e7eb;">
+                    <div style="font-size:15px; color:#374151; margin-bottom:6px;">
+                        <strong style="color:#111827;">{p['publisher']}</strong>
+                    </div>
+                    <a href="{p['post_url']}" style="font-size:16px; font-weight:500;
+                            color:#2563eb; text-decoration:none;">
+                        {p['post_title']}
+                    </a>
+                </div>
+                """
+                for p in posts
+            ])
+
+            category_sections += f"""
+                <div style="margin-bottom:32px;">
+                    <h2 style="font-size:20px; color:#111827; margin:0 0 16px 0;
+                               border-left:4px solid #2563eb; padding-left:8px;">
+                        📂 {category}
+                    </h2>
+                    {blog_items}
+                </div>
+            """
+
+        # Render template with dynamic sections
+        html_body = html_template.render(category_sections=category_sections)
+        
+        # print(html_body)
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+        logo_file = os.path.join(BASE_DIR, "static", "logo.png")
+        header_file = os.path.join(BASE_DIR, "static", "header.png")
+
         try:
             send_email(email, subject, html_body, logo_path=logo_file, header_path=header_file)
         except Exception as e:
             logger.error(f"❌ Failed to send to {email}: {e}")
             continue
-        
-        try:
-            time_now = datetime.now(timezone.utc).isoformat()
-    
-            cursor.execute("""
-                UPDATE notification_state
-                SET last_notified_at = ?
-                WHERE email = ? AND company = ? AND category = ?
-            """, (time_now, email, company, category))
-            
-            # Delete notifications
-            cursor.execute("""
-                DELETE FROM notifications
-                WHERE email = ? AND company = ? AND category = ? AND post_title = ?
-            """, (email, company, category, post_title))
-            
-            conn.commit()
 
+        try:
+            db.delete_notifications_by_email(conn, email)
+            conn.commit()
         except Exception as e:
-            logger.error(f"❌ Failed to update notificaation {email}: {e}")
-        
+            logger.error(f"❌ Failed to cleanup for {email}: {e}")
+            
+            
+if __name__ == "__main__":
+    db = get_database()
+    conn = db.get_connection()
+    process_notifications(db, conn)
     conn.close()
 
-if __name__ == "__main__":
-    process_notifications()

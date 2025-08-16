@@ -39,7 +39,7 @@ keywords_map = {
         "react", "angular", "vue", "node.js", "django", "java", "go", "microservices", "api", "devops", "kubernetes"
     ],
     enums.PublisherCategory.SOFTWARE_TESTING.value: [
-        "selenium", "cypress", "playwright", "testing", "qa", "unit test", "integration test", "e2e test"
+        "selenium", "cypress", "playwright", "testing", "qa", "unit test", "integration test", "e2e test", "load testing", "performance testing", "performance engineering"
     ],
     enums.PublisherCategory.DATA_ANALYTICS.value: [
         "sql", "nosql", "tableau", "power bi", "looker", "etl", "dashboard", "kpi", "analysis"

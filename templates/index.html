@@ -6,14 +6,16 @@
   <title>Engineering Blog Alerts – Subscribe to Top Tech Company Blogs</title>
 
   <!-- ✅ SEO meta description -->
-  <meta name="description" content="Get alerts for new articles from your favorite engineering blogs. Choose companies and categories, and stay updated instantly.">
+  <meta name="description"
+    content="Get alerts for new articles from your favorite engineering blogs. Choose companies and categories, and stay updated instantly.">
 
   <!-- ✅ Mobile responsive -->
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <!-- ✅ Open Graph for social sharing -->
   <meta property="og:title" content="Engineering Blog Alerts" />
-  <meta property="og:description" content="Subscribe and get alerts for your favorite tech company blog posts. A platfrom that aggegates blogs and notifies you when any new blog appears" />
+  <meta property="og:description"
+    content="Subscribe and get alerts for your favorite tech company blog posts. A platfrom that aggegates blogs and notifies you when any new blog appears" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://onesearch.blog" />
   <meta property="og:image" content="https://onesearch.blog/static/preview.jpg" />
@@ -27,7 +29,9 @@
   <!-- ✅ Favicon -->
   <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 
-  <link rel="stylesheet" href="{{ url_for('static', filename='style3.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='style3.css') }}?v={{ time() }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    crossorigin="anonymous" />
 </head>
 
 <body>
@@ -36,7 +40,7 @@
 
     <!-- ✅ Add intro text for SEO -->
     <p class="intro-text">
-      Stay up to date with the latest posts from top engineering blogs. Select your favorite tech teams and categories, 
+      Stay up to date with the latest posts from top engineering blogs. Select your favorite tech teams and categories,
       and we’ll send you alerts when new content is published.
     </p>
 
@@ -46,13 +50,14 @@
         <!-- ✅ type="email" for better validation -->
         <input id="email" type="input" name="email" placeholder="you@example.com" required />
       </div>
-      
+
       <div class="form-group">
         <label for="topicInput">Select Your Field</label>
-        <input type="text" id="topicInput" name="topic" placeholder="Start typing your profession..." autocomplete="off" required />
+        <input type="text" id="topicInput" name="topic" placeholder="Start typing your profession..." autocomplete="off"
+          required />
         <div id="topicDropdown" class="dropdown"></div>
       </div>
-      
+
       <div class="form-group notify-from-group">
         <label for="notify-from">Notification from</label>
         <div id="notify-from" class="tag-checkbox-group">
@@ -76,7 +81,8 @@
       <div class="form-group">
         <label for="companyInput">Select Tech Team</label>
         <span class="tooltip">Enable</span>
-        <input type="text" disabled id="companyInput" name="company" placeholder="Start typing a company name..." autocomplete="off" />
+        <input type="text" disabled id="companyInput" name="company" placeholder="Start typing a company name..."
+          autocomplete="off" />
         <div id="companyDropdown" class="dropdown"></div>
         <div id="selected-techteams" class="tag-container"></div>
       </div>
@@ -92,18 +98,47 @@
   </footer>
 
   <div id="subscribe-message" class="subscription-toast"></div>
-
+  <div id="notification-wrapper">
+    <i id="notification-icon" class="fas fa-bars"></i>
+    <span id="notification-dot"></span>
+  </div>
   <div id="right-panel" class="right-panel">
-    <div class="panel-content">
-      <img src="{{ url_for('static', filename='cat.gif') }}" alt="Cool Cat" class="cat-img" />
-      <p class="panel-text">
-          Did you know? OneSearch uses AI to help you discover quality engineering blogs and sends curated alerts so you never feel overwhelmed.
-      </p>
+
+    <!-- Feature Cards -->
+    <div class="feature-cards">
+
+      <div class="feature-card">
+        <h4>New Feature in Beta 🚀</h4>
+        <p>Smart blog rankings coming soon! Stay tuned for more updates.</p>
+        <button id="interested-button" class="interested-button">Interested</button>
+      </div>
+
+      <div class="feature-card">
+        <h4>Send Feedback ✉️</h4>
+        <p>Let us know what you think or request a feature.</p>
+        <button id="feedback-button" class="feedback-button">Send Feedback</button>
+      </div>
+
+      <div id="feedback-form-container"></div>
+
+
+      <div class="feature-card">
+        <h4>Upcoming Improvements 🔧</h4>
+        <p>AI-enhanced features are on the way!</p>
+      </div>
+
+      <!-- Animated Cat Intro -->
+      <div id="chat-message" class="chat-message">
+        <img src="{{ url_for('static', filename='cat.gif') }}" alt="Cool Cat" class="cat-avatar" />
+        <div class="message-bubble">
+          Did you know? OneSearch uses AI to help you discover quality engineering blogs and sends curated alerts so you
+          never feel overwhelmed.
+        </div>
+      </div>
     </div>
   </div>
 
-
-  <script src="{{ url_for('static', filename='script2.js') }}"></script>
+<script src="{{ url_for('static', filename='script2.js') }}?v={{ time() }}"></script>
 </body>
 
 </html>

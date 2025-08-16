@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <body style="font-family:'Segoe UI', Arial, sans-serif; color:#333; margin:0; padding:0; background-color:#f3f4f6;">
+
+    <!-- Header image -->
+    <div style="width:100%; height:180px; overflow:hidden; border-bottom:4px solid #2563eb;">
+      <img src="cid:header" alt="Header Image"
+           style="width:100%; height:180px; object-fit:cover; display:block;">
+    </div>
+
+    <!-- Main content -->
+    <div style="padding:32px; background-color:#fff; border-radius:12px;
+                border:1px solid #e5e7eb; margin:32px auto; max-width:640px;
+                box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+
+      <h1 style="font-size:26px; margin:0 0 24px 0; color:#2563eb; text-align:center;">
+        ✨ Your OneSearch Blog Digest
+      </h1>
+
+      {{ category_sections | safe }}
+    </div>
+
+    <div style="padding:20px; border-top:1px solid #e5e7eb; display:flex; align-items:center;
+                background-color:#f9fafb; font-size:12px; color:#6b7280; justify-content:center;">
+      <div>
+        <img src="cid:logo" alt="OneSearch logo" style="width:50px; height:auto; margin-right:10px;">
+        <div style="color:#6b7280;">One place for all engineering blogs</div>
+      </div>
+    </div>
+  </body>
+</html>

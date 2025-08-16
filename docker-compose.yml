@@ -16,11 +16,9 @@ services:
     cpus: "0.5"
     volumes:
       - ./logs:/app/logs
-      - tmpdata:/app/tmp
+      - ./tmp:/app/tmp
       - ./data:/app/data
       - ./static:/app/static
-    environment:
-    - TMPDIR=/app/tmp  
     networks:
       - appnet
     container_name: onesearch_app
@@ -35,9 +33,6 @@ services:
       - ~/.cloudflared:/etc/cloudflared/:ro
     networks:
       - appnet
-
-volumes:
-  tmpdata: 
 
 networks:
   appnet:

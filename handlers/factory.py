@@ -25,6 +25,6 @@ class ScraperFactory:
         elif comapny.lower() == 'salesforce':
             return salesforce.SalesforceScraper()
         else:
-            raise Exception("No handler found!")
+            raise Exception(f"No handler found for {comapny}!")
         
         
