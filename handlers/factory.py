@@ -1,6 +1,9 @@
 from handlers import aws, github, netflix, airbnb, dropbox, facebook, slack, spotify, cloudfare, nvidea, salesforce
+from logger_config import get_logger;
 
+logger = get_logger("HANDLERS")
 class ScraperFactory:
+    
     def get_scraper(comapny):
         if comapny.lower() == "aws":
             return aws.AwsScraper()
@@ -25,6 +28,7 @@ class ScraperFactory:
         elif comapny.lower() == 'salesforce':
             return salesforce.SalesforceScraper()
         else:
-            raise Exception(f"No handler found for {comapny}!")
+            logger.error(f"No handler found for {comapny}")
+            return None
         
         

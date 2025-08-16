@@ -1,6 +1,6 @@
 from .base import BaseScraper
 
-BASE_URL = "https://engineering.atspotify.com/feed/"
+BASE_URL = "https://blogs.nvidia.com/feed/"
 
 class NvideaScraper(BaseScraper):
         

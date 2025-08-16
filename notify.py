@@ -27,14 +27,22 @@ logger = get_logger("notify_worker")
 db = get_database()
 conn = db.get_connection()
 
-publishers = db.get_publishers(conn)
+subscriptions = db.get_subscriptions(conn)
 
-for publisher in publishers:
+publishers = {}
+
+for sub in subscriptions:
+    pub = sub['publisher']
+    publishers[pub['id']] = pub
+    
+for publisher_id in publishers:
+    publisher = publishers[publisher_id]
     
     last_scraped_at =  parse_datetime(publisher.get("last_scraped_at"))
     
-    if last_scraped_at is None:
-        last_scraped_at = datetime.fromisoformat("2023-01-01T00:00:00+00:00")
+    # if last_scraped_at is None:
+    if not last_scraped_at:
+        last_scraped_at = datetime.fromisoformat("2025-01-01T00:00:00+00:00")
 
     if publisher.get("publisher_type") == "techteam":
 
@@ -43,11 +51,7 @@ for publisher in publishers:
             logger.info(f"No subscribers found for {publisher['publisher_name']}")
             continue
         
-        try:
-            scraper = ScraperFactory.get_scraper(publisher["publisher_name"])
-        except Exception as e:
-            logger.error(f"{e}")
-            pass
+        scraper = ScraperFactory.get_scraper(publisher["publisher_name"])
         
         if not scraper:
             continue

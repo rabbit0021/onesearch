@@ -16,8 +16,8 @@ from jinja2 import Template
 # === CONFIG ===
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
-SMTP_USERNAME = os.getenv('SMTP_USERNAME', 'xxxx@gmail.com')
-SMTP_PASSWORD = os.getenv('SMTP_PASSWORD', 'xxxxx')
+SMTP_USERNAME = os.getenv('SMTP_USERNAME', 'manavoriginal@gmail.com')
+SMTP_PASSWORD = os.getenv('SMTP_PASSWORD', 'cges anhu gfoc ggxu')
 
 logger = get_logger("notify_worker")
 
@@ -82,13 +82,14 @@ def deduplicate_notifications(notifications):
     seen = set()
     deduped = []
     for row in notifications:
-        key = (row["email"], row["heading"], row["post_url"])
+        key = (row["email"], row["post_url"])
         if key not in seen:
             seen.add(key)
             deduped.append(row)
     return deduped
 
 def process_notifications(db, conn):
+    # notifications = db.get_notifications_by_email(conn, "manav0611@gmail.com")
     notifications = db.get_notifications(conn)
     logger.info(f"found {len(notifications)} notifications to be processed")
 

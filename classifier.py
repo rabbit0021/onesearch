@@ -8,7 +8,7 @@ model = SentenceTransformer('all-mpnet-base-v2')
 # 2. Concise category descriptions
 categories = {
     enums.PublisherCategory.SOFTWARE_ENGINEERING.value: (
-        "frontend, backend, APIs, microservices, databases, system design, DevOps, cloud, CI/CD, containers, scalability, performance, distributed systems, mobile, UI/UX"
+        "frontend, backend, APIs, microservices, databases, relational databases, cloud databases, DevOps, system design, CI/CD, containers, scalability, performance, distributed systems, mobile, UI/UX"
     ),
     enums.PublisherCategory.SOFTWARE_TESTING.value: (
         "manual testing, automated testing, Selenium, Cypress, Playwright, unit tests, integration tests, end-to-end tests, performance, load, stress, TDD, BDD, defect tracking, CI/CD testing"
@@ -36,7 +36,9 @@ category_embeddings = {
 # Optional: simple keyword mapping to override embeddings
 keywords_map = {
     enums.PublisherCategory.SOFTWARE_ENGINEERING.value: [
-        "react", "angular", "vue", "node.js", "django", "java", "go", "microservices", "api", "devops", "kubernetes"
+        "react", "angular", "vue", "node.js", "django", "java", "go", 
+        "microservices", "api", "devops", "kubernetes", 
+        "aurora", "rds", "cloud database", "postgresql", "mysql", "mongodb", "redis", "database"
     ],
     enums.PublisherCategory.SOFTWARE_TESTING.value: [
         "selenium", "cypress", "playwright", "testing", "qa", "unit test", "integration test", "e2e test", "load testing", "performance testing", "performance engineering"

@@ -80,7 +80,7 @@ class SQLiteDatabase:
         c = conn.cursor()
         c.execute("""
             SELECT s.email, s.publisher_id, s.joined_time, s.last_notified_at,
-               p.id as publisher_id, p.publisher_name, p.category, p.sub_category
+               p.id as publisher_id, p.publisher_name, p.last_scraped_at, p.publisher_type
             FROM subscriptions s
             JOIN publishers p ON s.publisher_id = p.id
         """)
@@ -94,9 +94,9 @@ class SQLiteDatabase:
             "last_notified_at": row["last_notified_at"],
             "publisher": {
                 "id": row["publisher_id"],
-                "name": row["publisher_name"],
-                "category": row["category"],
-                "sub_category": row["sub_category"]
+                "publisher_name": row["publisher_name"],
+                "last_scraped_at": row['last_scraped_at'],
+                "publisher_type": row['publisher_type']
                 }
             }
             result.append(subscription)
@@ -105,7 +105,7 @@ class SQLiteDatabase:
     def get_subscriptions_by_email(self, conn, email):
         query = """
             SELECT s.email, s.topic, s.publisher_id, s.joined_time, s.last_notified_at,
-                   p.id AS publisher_id, p.publisher_name
+                   p.id AS publisher_id, p.publisher_name, p.last_scraped_at, p.publisher_type
             FROM (
                 SELECT *
                 FROM subscriptions
@@ -123,7 +123,10 @@ class SQLiteDatabase:
                 "last_notified_at": row["last_notified_at"],
                 "publisher": {
                     "id": row["publisher_id"],
-                    "name": row["publisher_name"]
+                    "publisher_name": row["publisher_name"],
+                    "last_scraped_at": row['last_scraped_at'],
+                    "publisher_type": row['publisher_type']
+
                 },
             }
             for row in cursor.fetchall()
@@ -147,7 +150,6 @@ class SQLiteDatabase:
             }
             for row in rows
         ]  
-
 
     def add_subscription(self, conn, email, topic, publisher_id, joined_time=None):
         c = conn.cursor()
@@ -177,9 +179,19 @@ class SQLiteDatabase:
     def get_notifications(self, conn):
         c = conn.cursor()
         c.execute("""
-            SELECT email, heading, style_version, post_url, post_title
+            SELECT *
             FROM notifications
         """)
+        rows = c.fetchall()
+        return [dict(row) for row in rows]
+    
+    def get_notifications_by_email(self, conn, email):
+        c = conn.cursor()
+        c.execute("""
+            SELECT *
+            FROM notifications
+            WHERE email = ?
+        """, (email,))
         rows = c.fetchall()
         return [dict(row) for row in rows]
 
