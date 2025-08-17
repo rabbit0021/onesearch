@@ -44,7 +44,7 @@ keywords_map = {
         "selenium", "cypress", "playwright", "testing", "qa", "unit test", "integration test", "e2e test", "load testing", "performance testing", "performance engineering"
     ],
     enums.PublisherCategory.DATA_ANALYTICS.value: [
-        "sql", "nosql", "tableau", "power bi", "looker", "etl", "dashboard", "kpi", "analysis"
+        "sql", "nosql", "tableau", "power bi", "looker", "etl", "dashboard", "kpi", "analysis", "data pipelines"
     ],
     enums.PublisherCategory.DATA_SCIENCE.value: [
         "machine learning", "deep learning", "ai", "nlp", "computer vision", "tensorflow", "pytorch", "scikit-learn"

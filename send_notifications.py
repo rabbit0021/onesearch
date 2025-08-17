@@ -14,10 +14,10 @@ import random
 from jinja2 import Template
 
 # === CONFIG ===
-SMTP_SERVER = "smtp.gmail.com"
+SMTP_SERVER = "smtp.zoho.in"
 SMTP_PORT = 587
-SMTP_USERNAME = os.getenv('SMTP_USERNAME', 'manavoriginal@gmail.com')
-SMTP_PASSWORD = os.getenv('SMTP_PASSWORD', 'cges anhu gfoc ggxu')
+SMTP_USERNAME = os.getenv('SMTP_USERNAME', 'xxxx@domain.com')
+SMTP_PASSWORD = os.getenv('SMTP_PASSWORD', 'xxxxx')
 
 logger = get_logger("notify_worker")
 
@@ -43,9 +43,9 @@ def get_random_subject():
 
 def send_email(to_email, subject, html_body, logo_path=None, header_path=None):
     msg = MIMEMultipart("related")
-    msg["From"] = formataddr(("no-reply@onesearch.blog","Engineering Blog Alerts"))
     msg["To"] = to_email
     msg["Subject"] = subject
+    msg['From'] = SMTP_USERNAME
 
     # Alternative plain text for clients that can't render HTML
     plain_text = "This email contains HTML content. Please view it in an email client that supports HTML."
