@@ -181,6 +181,7 @@ class SQLiteDatabase:
         c.execute("""
             SELECT *
             FROM notifications
+            WHERE deleted = 0
         """)
         rows = c.fetchall()
         return [dict(row) for row in rows]
