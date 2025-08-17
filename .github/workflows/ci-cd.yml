@@ -1,0 +1,64 @@
+name: CI/CD to AKS
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Log in to ACR
+      run: |
+        az acr login --name ${{ secrets.ACR_NAME }}
+
+    - name: Build and Push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        tags: ${{ secrets.ACR_NAME }}.azurecr.io/${{ vars.DOCKER_IMAGE_NAME }}:${{ github.sha }}
+
+    - name: Run tests in container
+      run: |
+        docker run --rm ${{ secrets.ACR_NAME }}.azurecr.io/${{ vars.DOCKER_IMAGE_NAME }}:${{ github.sha }} pytest
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Get AKS credentials
+      run: |
+        az aks get-credentials \
+          --resource-group ${{ secrets.AKS_RESOURCE_GROUP }} \
+          --name ${{ secrets.AKS_CLUSTER_NAME }} \
+          --overwrite-existing
+
+    - name: Deploy to AKS
+      run: |
+        kubectl set image deployment/my-app-deployment \
+          my-app=${{ secrets.ACR_NAME }}.azurecr.io/${{ vars.DOCKER_IMAGE_NAME }}:${{ github.sha }}
+        kubectl rollout status deployment/my-app-deployment
