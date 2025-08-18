@@ -65,7 +65,7 @@ form.addEventListener("submit", function (e) {
             companyInput.disabled = true; // show
 
         } else {
-            alert("Subscription failed.");
+            alert(result.message);
         }
     });
 });

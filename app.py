@@ -50,27 +50,37 @@ def subscribe():
     if not email or not topic or (not techteams and not individuals and not communities):
         return jsonify({"status": "error", "message": "Missing email or topic or publisher"
                         }), 400
-    conn = app.db.get_connection()
-    
-    if techteams:
-        techteams = [team.lower().strip() for team in techteams.split(',')]
+    try:
+        conn = app.db.get_connection()
         
-        for team in techteams:
-            publishers = app.db.get_publisher_by_name(conn, team)
-            if not publishers:
-                return jsonify({"status": "error", "message": f"Publisher '{team}' not found."
-                                }), 404
+        if techteams:
+            techteams = [team.lower().strip() for team in techteams.split(',')]
             
-            publisher = publishers[0]
-            
-            existing_subscriptions = app.db.get_subscriptions_by_email(conn, email)
-            if not any(sub["publisher"]["id"] == publisher["id"] and sub["topic"] == topic for sub in existing_subscriptions):
-                app.db.add_subscription(conn, email, topic, publisher['id'])
-
-    return jsonify({
-        "status": "success",
-        "message": "Subscription updated."
-    })
+            for team in techteams:
+                publishers = app.db.get_publisher_by_name(conn, team)
+                if not publishers:
+                    return jsonify({"status": "error", "message": f"Publisher '{team}' not found."
+                                    }), 404
+                
+                publisher = publishers[0]
+                
+                existing_subscriptions = app.db.get_subscriptions_by_email(conn, email)
+                if not any(sub["publisher"]["id"] == publisher["id"] and sub["topic"] == topic for sub in existing_subscriptions):
+                    app.db.add_subscription(conn, email, topic, publisher['id'])
+        
+        conn.commit()
+        return jsonify({
+            "status": "success",
+            "message": "Subscription updated."
+        })
+    except:
+        conn.rollback()
+        return jsonify({
+            "status": "failed",
+            "message": "Unable to add Subscription at this time, Could you please try again."
+         }, 500)
+    finally:
+        conn.close()
 
 @app.route("/subscriptions_for_email")
 def subscriptions_for_email():
@@ -85,7 +95,7 @@ def subscriptions_for_email():
     grouped = {}
     for entry in subscriptions:
         topic = entry["topic"]
-        publisher = entry["publisher"]["name"]
+        publisher = entry["publisher"]["publisher_name"]
         if topic not in grouped:
             grouped[topic] = set()
         grouped[topic].add(publisher)

@@ -59,6 +59,15 @@ jobs:
 
     - name: Deploy to AKS
       run: |
-        kubectl set image deployment/my-app-deployment \
+        kubectl set env deployment/my-app-deployment \
+          FLASK_ENV=${{ vars.FLASK_ENV }} \
+          TMPDIR=${{ vars.TMPDIR }} \
+          DB_TYPE=${{ vars.DB_TYPE }} \
+          DB_PATH=${{ vars.DB_PATH }} \
+          SECRET_KEY=${{ secrets.SECRET_KEY }}
+          HF_HOME=${{ vars.HF_HOME }}
+          SMTP_USERNAME=${{ secrets.SMTP_USERNAME }}
+          SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}
+        kubectl set image deployment/onesearchserver \
           my-app=${{ secrets.ACR_NAME }}.azurecr.io/${{ vars.DOCKER_IMAGE_NAME }}:${{ github.sha }}
-        kubectl rollout status deployment/my-app-deployment
+        kubectl rollout status deployment/onesearchserver
