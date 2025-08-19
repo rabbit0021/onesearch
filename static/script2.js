@@ -10,7 +10,7 @@ const topicInput = document.getElementById('topicInput');
 const topicDropdown = document.getElementById('topicDropdown');
 const notifyCheckboxes = document.querySelectorAll('input[name="notify_from"]');
 const subscription_status = document.getElementById("already-subscribed");
-const icon = document.getElementById('logo');
+const icon = document.getElementById('notification-icon');
 const panel = document.getElementById('right-panel');
 const dot = document.getElementById("notification-dot");
 const chatMessage = document.getElementById("chat-message");

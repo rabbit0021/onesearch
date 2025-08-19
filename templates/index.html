@@ -3,11 +3,11 @@
 
 <head>
   <meta charset="UTF-8" />
-  <title>Engineering Blog Alerts | Subscribe to Tech Company Blogs – OneSearch.blog</title>
+  <title>OneSearch - Engineering Blog Alerts | Subscribe to Tech Company Blogs – OneSearch.blog</title>
 
   <!-- ✅ SEO meta description -->
   <meta name="description"
-    content="Subscribe to engineering blogs and get instant alerts. OneSearch.blog helps software engineers, data scientists, analysts, and testers stay updated with new posts from top tech company blogs.">
+    content="OneSearch - Subscribe to engineering blogs and get instant alerts. OneSearch.blog helps software engineers, data scientists, analysts, and testers stay updated with new posts from top tech company blogs.">
   <!-- ✅ Mobile responsive -->
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
@@ -50,12 +50,18 @@
 
 <body>
   <main class="container">
-    <h1 class="page-title">Subscribe to Engineering Blogs</h1>
-
-    <p class="intro-text">
-      Stay up to date with the latest posts from top engineering blogs.
-      Select your favorite tech teams and categories, and we’ll send you alerts when new content is published.
-    </p>
+    <div class="page-title-cont">
+      <img id="logo" src="{{ url_for('static', filename='logo.png') }}" alt="OneSearch" class="logo" />
+      <div style="margin-left: 0.5rem;">
+        <h1 class="page-title">
+          OneSearch: Subscribe to Engineering Blogs
+        </h1>
+        <p class="intro-text">
+          Stay up to date with the latest posts from top engineering blogs.
+          Select your topic and favorite publisher, and we’ll send you curated alerts.
+        </p>
+      </div>
+    </div>
 
     <form id="subscribe-form" class="subscription-form">
       <div class="form-group">
@@ -105,24 +111,24 @@
     </form>
   </main>
 
-  <section class="seo-text">
-    <h3>Why Subscribe with OneSearch.blog?</h3>
-    <p>
-      Software engineers, data analysts, data scientists, and testers use OneSearch.blog
-      to follow technical blogs without the hassle of RSS feeds or manual checking.
-      Get curated, top-ranked alerts from leading tech teams like Facebook, Netflix, AWS, Slack, and Kubernetes,
-      as well as from individuals and communities — so you never miss important engineering insights.
-    </p>
-  </section>
-
   <!-- ✅ Small footer for credibility -->
   <footer class="footer">
-    <p>© {{ current_year }} OneSearch Blog Alerts. Stay connected with engineering blogs worldwide.</p>
+    <section class="seo-text">
+      <h3>Why Subscribe with OneSearch.blog?</h3>
+      <p style="margin: -0.5rem;">
+        OneSearch not only aggregates engineering blogs but also uses AI to intelligently categorize and rank them,
+        ensuring you see only the most relevant and high-quality content. We make a special effort to keep subscribers
+        informed
+        without ever feeling overwhelmed.
+      </p>
+    </section>
+    <p style="  margin-top: 2rem;
+">© {{ current_year }} OneSearch Blog Alerts. Stay connected with engineering blogs worldwide.</p>
   </footer>
 
   <div id="subscribe-message" class="subscription-toast"></div>
   <div id="notification-wrapper">
-    <img id="logo" src="{{ url_for('static', filename='logo.png') }}" alt="OneSearch" class="logo" />
+    <i id="notification-icon" class="fas fa-bars"></i>
     <span id="notification-dot"></span>
   </div>
   <div id="right-panel" class="right-panel">

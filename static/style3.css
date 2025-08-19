@@ -4,20 +4,13 @@ body {
   font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
   background-color: #f4f6f9;
   color: #222;
+  padding-bottom: 200px;
 }
 
 .container {
   max-width: 600px;
   margin: auto;
   padding: 2rem 1rem;
-}
-
-/* Typography */
-.page-title {
-  text-align: center;
-  font-size: 1.8rem;
-  font-weight: 700;
-  margin-bottom: 2rem;
 }
 
 /* Form */
@@ -162,35 +155,6 @@ input:focus {
   cursor: pointer;
 }
 
-.intro-text {
-  text-align: center; 
-  max-width: 600px;        
-  margin: 0 auto 20px auto; 
-  font-size: 1.1rem;        
-  color: #333;       
-  line-height: 1.6rem;     
-}
-
-.footer {
-  text-align: center; 
-  max-width: 600px;        
-  margin: 0 auto 20px auto; 
-  font-size: 0.8rem;        
-  color: #646464;    
-  line-height: 1.6rem;        
-}
-.seo-text
-{
-  line-height: 1.6rem;        
-  text-align: center; 
-  max-width: 600px;        
-  margin: auto; 
-  font-size: 0.8rem;        
-  color: #5c5b5b;    
-  line-height: 1.6rem;   
-  width: 35%;  
-}
-
 .tag-checkbox-group {
   display: flex;
   flex-wrap: wrap;
@@ -207,40 +171,48 @@ input:focus {
   font-weight: 500;
   cursor: pointer;
   user-select: none;
-  position: relative; /* <-- needed for tooltip */
+  position: relative;
+  /* <-- needed for tooltip */
 }
 
 .tag-checkbox input[disabled] {
-  pointer-events: none; /* disabled input won’t capture hover */
+  pointer-events: none;
+  /* disabled input won’t capture hover */
 }
 
 .subscription-toast {
-  position: fixed;         /* out of document flow */
-  bottom: 20px;            /* bottom-right corner */
+  position: fixed;
+  /* out of document flow */
+  bottom: 20px;
+  /* bottom-right corner */
   right: 20px;
   background-color: #e6f4ea;
   color: #2e7d32;
   padding: 12px 20px;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
   opacity: 0;
-  pointer-events: none;    /* clicks go through when hidden */
+  pointer-events: none;
+  /* clicks go through when hidden */
   transition: opacity 0.5s ease, transform 0.5s ease;
-  transform: translateY(20px); /* start slightly lower */
+  transform: translateY(20px);
+  /* start slightly lower */
   z-index: 9999;
 }
 
 .subscription-toast.show {
   opacity: 1;
   pointer-events: auto;
-  transform: translateY(0); /* move to visible position */
+  transform: translateY(0);
+  /* move to visible position */
 }
 
 /* Tooltip styling */
 .tooltip {
   visibility: hidden;
   position: absolute;
-  bottom: 125%; /* above the tag */
+  bottom: 125%;
+  /* above the tag */
   left: 50%;
   transform: translateX(-50%);
   background-color: #333;
@@ -260,17 +232,25 @@ input:focus {
 }
 
 .notify-from-group label {
-  display: block;        /* ensures the label is on its own line */
-  margin-bottom: 0.5rem; /* adjust the gap as needed */
-  font-weight: 600;      /* optional: make label slightly bolder */
+  display: block;
+  /* ensures the label is on its own line */
+  margin-bottom: 0.5rem;
+  /* adjust the gap as needed */
+  font-weight: 600;
+  /* optional: make label slightly bolder */
 }
 
 #companyInput:disabled {
-  background-color: #f0f0f0;  /* lighter gray */
-  color: #999;                 /* gray text */
-  cursor: not-allowed;         /* show “disabled” cursor */
-  border: 1px solid #ccc;      /* optional border styling */
-  opacity: 0.8;                /* slightly faded */
+  background-color: #f0f0f0;
+  /* lighter gray */
+  color: #999;
+  /* gray text */
+  cursor: not-allowed;
+  /* show “disabled” cursor */
+  border: 1px solid #ccc;
+  /* optional border styling */
+  opacity: 0.8;
+  /* slightly faded */
 }
 
 /* Show tooltip on hover */
@@ -285,7 +265,8 @@ input:focus {
   right: -280px;
   width: 240px;
   height: 100vh;
-  background-color: rgba(234, 236, 240, 0.5); /* same color with transparency */
+  background-color: rgba(234, 236, 240, 0.5);
+  /* same color with transparency */
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-left: 2px solid rgba(200, 200, 200, 0.5);
@@ -320,34 +301,15 @@ input:focus {
   animation: float 1.5s infinite alternate;
 }
 
-.logo {
-  display: block;
-  width: 50px;
-  height: 50px;
-  object-fit: cover;
-  top: -10px;
-  right: -10px;
-  position: absolute;
-  /* soften corners */
-  border-radius: 10px;   /* try 8px, 12px, or even 16px for more rounded */
-
-  /* keep the nice look */
-  background: white;
-  border: 2px solid #fff;
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
-
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.logo:hover {
-  transform: scale(1.08);
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.35);
-}
-
 /* Floating animation for cat */
 @keyframes float {
-  0% { transform: translateY(0px); }
-  100% { transform: translateY(-5px); }
+  0% {
+    transform: translateY(0px);
+  }
+
+  100% {
+    transform: translateY(-5px);
+  }
 }
 
 /* Message bubble */
@@ -358,7 +320,7 @@ input:focus {
   border-radius: 15px;
   font-size: 16px;
   line-height: 1.4;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 #notification-wrapper {
@@ -382,14 +344,16 @@ input:focus {
   height: 10px;
   background-color: red;
   border-radius: 50%;
-  display: block; /* initially visible */
+  display: block;
+  /* initially visible */
 }
 
 .feedback-form-card {
   background-color: #f0f4f8;
   padding: 10px;
   margin-top: 10px;
-  display: none; /* hidden by default */
+  display: none;
+  /* hidden by default */
 }
 
 /* Textarea and button styling */
@@ -416,10 +380,6 @@ input:focus {
     padding: 1.5rem;
   }
 
-  .page-title {
-    font-size: 1.5rem;
-  }
-
   input,
   .submit-button {
     font-size: 1rem;
@@ -430,8 +390,71 @@ input:focus {
   .tag-checkbox-group {
     gap: 0.5rem;
   }
+
   .tag-checkbox {
     padding: 5px 12px;
     font-size: 0.85rem;
   }
+}
+
+.page-title-cont {
+  display: flex;
+  margin-bottom: 1rem;
+}
+
+.page-title {
+  display: inline-block;
+  line-height: 1.6rem;
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: #585858;
+}
+
+.intro-text {
+  margin: 0 auto 20px auto;
+  font-size: 1rem;
+  color: #828282;
+  line-height: 1.2rem;
+}
+
+.logo {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-top: 0.9rem;
+
+  background: white;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
+
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: inline-block;
+}
+
+/* .logo:hover {
+  transform: scale(1.08);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.35);
+} */
+
+.seo-text {
+  text-align: center;
+  margin: auto;
+  font-size: 0.7rem;
+  color: #585858;
+  padding: 1rem;
+  max-width: 500px;
+}
+  
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 0.8rem;
+  color: #828282;
+  padding: auto;
+  border-top: 1px solid #ddd;
+  background-color: #f4f6f9;
 }

@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, send_from_directory, render_template
+from flask import Flask, send_from_directory, jsonify, request, send_from_directory, render_template
 import json
 import os
 from handlers import ScraperFactory
@@ -151,6 +151,14 @@ def feedback():
         f.truncate()
 
     return jsonify({"status": "success", "message": "Feedback submitted successfully."})
+
+@app.route("/robots.txt")
+def robots_txt():
+    return send_from_directory(app.static_folder, "robots.txt")
+
+@app.route("/sitemap.xml")
+def sitemap_xml():
+    return send_from_directory(app.static_folder, "sitemap.xml")
 
 if __name__ == "__main__":
     if os.getenv("FLASK_ENV") == "Production":

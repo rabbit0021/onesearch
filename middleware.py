@@ -5,30 +5,40 @@ import json
 
 def summarize_response(response):
     content_type = response.content_type
-    data = response.get_data(as_text=True)
     preview = None
-    item_count = None
+    length = None
 
+    # Skip streaming/passthrough responses (like send_file)
+    if getattr(response, "direct_passthrough", False):
+        return {
+            "content_type": content_type,
+            "length": 0,
+            "preview": "<streaming response>"
+        }
+
+    data = response.get_data(as_text=True)
     try:
         if "application/json" in content_type:
             parsed = json.loads(data)
             if isinstance(parsed, list):
-                item_count = len(parsed)
-                preview = f"[List with {item_count} items]"
+                preview = f"[List with {len(parsed)} items]"
             elif isinstance(parsed, dict):
-                preview = json.dumps(parsed)[:150] + "..." if len(json.dumps(parsed)) > 150 else json.dumps(parsed)
+                j = json.dumps(parsed)
+                preview = j[:150] + "..." if len(j) > 150 else j
             else:
                 preview = str(parsed)[:150]
         elif "text" in content_type:
             preview = data[:150] + "..." if len(data) > 150 else data
         else:
             preview = "[Binary or non-text response]"
-    except Exception as e:
+        length = len(response.get_data())
+    except Exception:
         preview = "[Failed to parse response]"
+        length = len(response.get_data())
 
     return {
         "content_type": content_type,
-        "length": len(response.get_data()),
+        "length": length,
         "preview": preview
     }
 
