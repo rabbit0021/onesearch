@@ -176,8 +176,19 @@ input:focus {
   max-width: 600px;        
   margin: 0 auto 20px auto; 
   font-size: 0.8rem;        
-  color: #bbb;    
+  color: #646464;    
   line-height: 1.6rem;        
+}
+.seo-text
+{
+  line-height: 1.6rem;        
+  text-align: center; 
+  max-width: 600px;        
+  margin: auto; 
+  font-size: 0.8rem;        
+  color: #5c5b5b;    
+  line-height: 1.6rem;   
+  width: 35%;  
 }
 
 .tag-checkbox-group {
@@ -307,6 +318,30 @@ input:focus {
   margin-right: 10px;
   flex-shrink: 0;
   animation: float 1.5s infinite alternate;
+}
+
+.logo {
+  display: block;
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  top: -10px;
+  right: -10px;
+  position: absolute;
+  /* soften corners */
+  border-radius: 10px;   /* try 8px, 12px, or even 16px for more rounded */
+
+  /* keep the nice look */
+  background: white;
+  border: 2px solid #fff;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.logo:hover {
+  transform: scale(1.08);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.35);
 }
 
 /* Floating animation for cat */

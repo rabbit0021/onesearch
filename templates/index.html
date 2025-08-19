@@ -3,16 +3,16 @@
 
 <head>
   <meta charset="UTF-8" />
-  <title>Engineering Blog Alerts – Subscribe to Top Tech Company Blogs</title>
+  <title>Engineering Blog Alerts | Subscribe to Tech Company Blogs – OneSearch.blog</title>
 
   <!-- ✅ SEO meta description -->
   <meta name="description"
-    content="Get alerts for new articles from your favorite engineering blogs. Choose companies and categories, and stay updated instantly.">
-
+    content="Subscribe to engineering blogs and get instant alerts. OneSearch.blog helps software engineers, data scientists, analysts, and testers stay updated with new posts from top tech company blogs.">
   <!-- ✅ Mobile responsive -->
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <!-- ✅ Open Graph for social sharing -->
+  <meta property="og:site_name" content="OneSearch.blog" />
   <meta property="og:title" content="Engineering Blog Alerts" />
   <meta property="og:description"
     content="Subscribe and get alerts for your favorite tech company blog posts. A platfrom that aggegates blogs and notifies you when any new blog appears" />
@@ -29,19 +29,32 @@
   <!-- ✅ Favicon -->
   <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 
-<link rel="stylesheet" href="{{ url_for('static', filename='style3.css') }}?v={{ time() }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style3.css') }}?v={{ time() }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     crossorigin="anonymous" />
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "OneSearch.blog",
+  "url": "https://onesearch.blog",
+  "description": "Subscribe to engineering blogs and get alerts when new articles are published. Curated by OneSearch.blog.",
+  "potentialAction": {
+    "@type": "SubscribeAction",
+    "target": "https://onesearch.blog/#subscribe-form",
+    "description": "Subscribe to alerts from top engineering blogs"
+  }
+}
+</script>
 </head>
 
 <body>
   <main class="container">
     <h1 class="page-title">Subscribe to Engineering Blogs</h1>
 
-    <!-- ✅ Add intro text for SEO -->
     <p class="intro-text">
-      Stay up to date with the latest posts from top engineering blogs. Select your favorite tech teams and categories,
-      and we’ll send you alerts when new content is published.
+      Stay up to date with the latest posts from top engineering blogs.
+      Select your favorite tech teams and categories, and we’ll send you alerts when new content is published.
     </p>
 
     <form id="subscribe-form" class="subscription-form">
@@ -92,6 +105,16 @@
     </form>
   </main>
 
+  <section class="seo-text">
+    <h3>Why Subscribe with OneSearch.blog?</h3>
+    <p>
+      Software engineers, data analysts, data scientists, and testers use OneSearch.blog
+      to follow technical blogs without the hassle of RSS feeds or manual checking.
+      Get curated, top-ranked alerts from leading tech teams like Facebook, Netflix, AWS, Slack, and Kubernetes,
+      as well as from individuals and communities — so you never miss important engineering insights.
+    </p>
+  </section>
+
   <!-- ✅ Small footer for credibility -->
   <footer class="footer">
     <p>© {{ current_year }} OneSearch Blog Alerts. Stay connected with engineering blogs worldwide.</p>
@@ -99,7 +122,7 @@
 
   <div id="subscribe-message" class="subscription-toast"></div>
   <div id="notification-wrapper">
-    <i id="notification-icon" class="fas fa-bars"></i>
+    <img id="logo" src="{{ url_for('static', filename='logo.png') }}" alt="OneSearch" class="logo" />
     <span id="notification-dot"></span>
   </div>
   <div id="right-panel" class="right-panel">
@@ -138,7 +161,7 @@
     </div>
   </div>
 
-<script src="{{ url_for('static', filename='script2.js') }}?v={{ time() }}"></script>
+  <script src="{{ url_for('static', filename='script2.js') }}?v={{ time() }}"></script>
 </body>
 
 </html>
