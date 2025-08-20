@@ -57,7 +57,7 @@ class BaseScraper:
                 "title": entry.title,
                 "url": entry.link,
                 "published": published.isoformat(),
-                "categories": categories
+                "tags": categories
             })    
 
         return matching_posts

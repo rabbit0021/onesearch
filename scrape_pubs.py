@@ -17,65 +17,66 @@ def parse_datetime(dt_str):
 # Load subscribers
 logger = get_logger("notify_worker")
 
-db = get_database()
-conn = db.get_connection()
+def scrape_pubs(db, conn):
+    subscriptions = db.get_subscriptions(conn)    
 
-subscriptions = db.get_subscriptions(conn)
+    publishers = {}    
 
-publishers = {}
-
-for sub in subscriptions:
-    pub = sub['publisher']
-    publishers[pub['id']] = pub
-    
-for publisher_id in publishers:
-    publisher = publishers[publisher_id]
-    
-    last_scraped_at =  parse_datetime(publisher.get("last_scraped_at"))
-    
-    # if last_scraped_at is None:
-    if not last_scraped_at:
-        last_scraped_at = datetime.fromisoformat("2025-01-01T00:00:00+00:00")
-
-    if publisher.get("publisher_type") == "techteam":
-
-        subscribers = db.get_subscriptions_by_publisher(conn, publisher["id"])
-        if not subscribers:
-            logger.info(f"No subscribers found for {publisher['publisher_name']}")
-            continue
+    for sub in subscriptions:
+        pub = sub['publisher']
+        publishers[pub['id']] = pub
         
-        scraper = ScraperFactory.get_scraper(publisher["publisher_name"])
+    for publisher_id in publishers:
+        publisher = publishers[publisher_id]
         
-        if not scraper:
-            continue
+        last_scraped_at =  parse_datetime(publisher.get("last_scraped_at"))
+        
+        # if last_scraped_at is None:
+        if not last_scraped_at:
+            last_scraped_at = datetime.fromisoformat("2025-01-01T00:00:00+00:00")    
 
-        logger.info(f"🔍 Scraping {publisher['publisher_name']} for new blog posts after {last_scraped_at}...")
+        if publisher.get("publisher_type") == "techteam":    
 
-        blog_posts = scraper.search_blog_posts("", last_scraped_at)
-        
-        if not blog_posts:
-            logger.info(f"No new blog posts found for {publisher['publisher_name']}")
-            continue
-        
-        try:
-            for post in blog_posts:
-                tags = ', '.join(post["tags"])
-                logger.info(f"Found new post: {post['title']} published by {post['published']} with tags: {tags}")
-                category = classify_post(post["title"], tags)
-                if not category:
-                    logger.error(f"⚠️ Could not classify post: {post['title']}")
-                    category = enums.PublisherCategory.GENERAL.value
-                
-                logger.info(f" {category} - Classified post '{post['title']}'")
-    
-                db.add_post(conn, post['url', post['title']], publisher['id'], post['tags'], post['published'], category)                    
+            subscribers = db.get_subscriptions_by_publisher(conn, publisher["id"])
+            if not subscribers:
+                logger.info(f"No subscribers found for {publisher['publisher_name']}")
+                continue
             
-            publisher["last_scraped_at"] = datetime.now().isoformat()
-            db.update_publisher(conn, publisher["id"], publisher["last_scraped_at"])
-            conn.commit()
-        except Exception as e:
-            logger.error(f"Error while scraping publisher: {publisher['publisher_name']}, error: {e}")
-            conn.rollback()
+            scraper = ScraperFactory.get_scraper(publisher["publisher_name"])
+            
+            if not scraper:
+                continue    
 
-conn.close()
-logger.info("Notification run ended.")
+            logger.info(f"🔍 Scraping {publisher['publisher_name']} for new blog posts after {last_scraped_at}...")    
+
+            blog_posts = scraper.search_blog_posts("", last_scraped_at)
+            
+            if not blog_posts:
+                logger.info(f"No new blog posts found for {publisher['publisher_name']}")
+                continue
+            
+            try:
+                for post in blog_posts:
+                    tags = ', '.join(post["tags"])
+                    logger.info(f"Found new post: {post['title']} published by {post['published']} with tags: {tags}")
+                    category = classify_post(post["title"], tags)
+                    if not category:
+                        logger.error(f"⚠️ Could not classify post: {post['title']}")
+                        category = enums.PublisherCategory.GENERAL.value
+                    
+                    logger.info(f" {category} - Classified post '{post['title']}'")
+        
+                    db.add_post(conn, post['url'], post['title'], publisher['id'], tags, post['published'], category)                    
+                
+                publisher["last_scraped_at"] = datetime.now().isoformat()
+                db.update_publisher(conn, publisher["id"], publisher["last_scraped_at"])
+                conn.commit()
+            except Exception as e:
+                logger.exception(f"Error while scraping publisher: {publisher['publisher_name']}")
+                conn.rollback()    
+
+if __name__ == "__main__":
+    db = get_database()
+    conn = db.get_connection()
+    conn.close()
+
