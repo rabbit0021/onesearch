@@ -164,9 +164,9 @@ class SQLiteDatabase:
         rows = c.fetchall()
         return [dict(row) for row in rows]
 
-    def add_subscription(self, conn, email, topic, publisher_id, joined_time=None, operation=""):
+    def add_subscription(self, conn, email, topic, publisher_id, joined_time=None, operation="", frequency=3):
         c = conn.cursor()
-        logger.info(f"Adding subscription for email: {email}, topic: {topic}, publisher_id: {publisher_id}, joined_time: {joined_time}")   
+        logger.info(f"Adding subscription for email: {email}, topic: {topic}, publisher_id: {publisher_id}, joined_time: {joined_time}, frequency: {frequency}")   
         
         sub = self.get_subscriptions_by_email_and_topic_and_publisher_id(conn, email, topic, publisher_id); 
 
@@ -185,14 +185,14 @@ class SQLiteDatabase:
            if joined_time is None:
                # Let SQLite fill in the default CURRENT_TIMESTAMP
                c.execute("""
-                   INSERT INTO subscriptions (email, topic, publisher_id)
-                   VALUES (?, ?, ?)
-               """, (email, topic, publisher_id))
+                   INSERT INTO subscriptions (email, topic, publisher_id, frequency_in_days)
+                   VALUES (?, ?, ?, ?)
+               """, (email, topic, publisher_id, frequency))
            else:
                c.execute("""
                    INSERT INTO subscriptions (email, topic, publisher_id, joined_time)
-                   VALUES (?, ?, ?, ?)
-               """, (email, topic, publisher_id, joined_time))    
+                   VALUES (?, ?, ?, ?, ?)
+               """, (email, topic, publisher_id, joined_time, frequency))    
    
            logger.info(f"Subscription for {email} addeed successfully")
            
