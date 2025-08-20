@@ -3,10 +3,14 @@ import logging
 import os
 
 # Detect environment
-env = os.getenv('FLASK_ENV', 'development')
+env = os.getenv('FLASK_ENV')
+print(">>> logger_config imported, env:", env)
+
 # Log directory based on environment
 if env == "production":
     log_dir = os.path.join(os.path.dirname(__file__), 'logs', 'prod')
+elif env == "test":
+    log_dir = os.path.join(os.path.dirname(__file__), 'logs', 'test')
 else:
     log_dir = os.path.join(os.path.dirname(__file__), 'logs', 'dev')
 

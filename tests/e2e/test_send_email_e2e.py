@@ -1,6 +1,7 @@
 from email import message_from_string
 import pytest
 from send_notifications import process_notifications
+from datetime import datetime, timedelta
 
 
 @pytest.mark.notifications
@@ -13,7 +14,8 @@ def test_send_email_e2e(db, dummy_smtp):
     - Email subject/body contains correct info
     - Notification is marked deleted
     """
-    db_instance, conn = db
+    db_instance = db
+    conn = db_instance.get_connection()
     email = "manav0611@gmail.com"
     heading = "CompanyX, Software Engineering"
     post_title = "How We Scaled PostgreSQL"
@@ -23,12 +25,21 @@ def test_send_email_e2e(db, dummy_smtp):
     post_url3 = "https://example.com/postgres3"
     post_title3 = "How We Scaled Meta 2"
     email2 = "manavoriginal@gmail.com"
-    # Insert a notification into DB
-    db_instance.add_notification(conn, email, heading, 1, post_url, post_title)
-    db_instance.add_notification(conn, email, heading, 1, post_url, post_title)
-    db_instance.add_notification(conn, email, "Meta, Software Engineering", 1, post_url2, post_title2)
-    db_instance.add_notification(conn, email2, "Meta, Software Engineering", 1, post_url3, post_title3)
+    email3 = "xyz@gmail.com"
+    
+    maturity_date = datetime.now().isoformat()
+    maturity_date2 = datetime.now() + timedelta(days=1)
+    maturity_date2 = maturity_date2.isoformat()
 
+    # Insert a notification into DB
+    db_instance.add_notification(conn, email, heading, 1, post_url, post_title, maturity_date)
+    db_instance.add_notification(conn, email, heading, 1, post_url, post_title, maturity_date)
+    db_instance.add_notification(conn, email, "Meta, Software Engineering", 1, post_url2, post_title2, maturity_date)
+    db_instance.add_notification(conn, email2, "Meta, Software Engineering", 1, post_url3, post_title3, maturity_date)
+    db_instance.add_notification(conn, email2, "Meta, Data Science", 1, "new post url for manav", post_title3, maturity_date2)
+    db_instance.add_notification(conn, email3, "Meta, Data Science", 1, "new post url", post_title3, maturity_date2)
+    conn.commit()
+    
     # Process and send notifications
     process_notifications(db_instance, conn)
 
@@ -37,7 +48,7 @@ def test_send_email_e2e(db, dummy_smtp):
     
     from_addr, to_addrs, raw_msg = dummy_smtp.sent[0]
     from_addr2, to_addrs2, raw_msg2 = dummy_smtp.sent[1]
-    
+
     assert to_addrs == "manav0611@gmail.com"
     assert to_addrs2 == email2
 
@@ -98,19 +109,18 @@ def test_send_email_e2e(db, dummy_smtp):
     """, (email,))
     row = c.fetchall()
     assert len(row) == 3
-    assert row is not None
     assert row[0][0] == 1
     assert row[1][0] == 1
     assert row[2][0] == 1
     
-    c.execute("""
-        SELECT deleted FROM notifications
-        WHERE email = ? 
-    """, (email2,))
-    row = c.fetchall()
-    assert len(row) == 1
-    assert row is not None
-    assert row[0][0] == 1
+    notifications = db.get_notifications_by_email(conn, email2)
+    assert len(notifications) == 2
+    assert notifications[0]['deleted'] == 1
+    assert notifications[1]["deleted"] == 0
+    
+    notifications = db.get_notifications_by_email(conn, email3)
+    assert len(notifications) == 1
+    assert notifications[0]['deleted'] == 0
     
     conn.close()
 
@@ -124,7 +134,8 @@ def test_send_email_real(db):
     - Verifies notifications are marked deleted
     - ⚠️ Actually sends an email (check inbox!)
     """
-    db_instance, conn = db
+    db_instance = db
+    conn = db_instance.get_connection()
     email = "manav0611@gmail.com"
 
     # Notifications from real engineering blogs

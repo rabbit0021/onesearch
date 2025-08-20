@@ -11,3 +11,4 @@ class PublisherCategory(Enum):
     DATA_SCIENCE = "Data Science"
     SOFTWARE_TESTING = "Software Testing"
     PRODUCT_MANAGEMENT = "Product Management"
+    GENERAL = "General"

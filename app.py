@@ -36,6 +36,8 @@ def get_companies():
 
     techteams = app.db.get_publishers_by_type(conn, publisher_type="techteam")
     teamNames = [team["publisher_name"] for team in techteams if query in team["publisher_name"].lower()]
+    teamNames.sort()
+    conn.close()  
     return jsonify(teamNames)
 
 @app.route('/subscribe', methods=['POST'])
@@ -102,6 +104,7 @@ def subscriptions_for_email():
             
     # Convert sets to lists for JSON serializability
     result = {topic: list(publishers) for topic, publishers in grouped.items()}
+    conn.close()  
     return jsonify(result)
 
 @app.route("/interested", methods=["POST"])

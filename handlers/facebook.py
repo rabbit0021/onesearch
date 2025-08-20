@@ -105,7 +105,7 @@ class FacebookScraper(BaseScraper):
                 posts.append({
                     "title": title,
                     "url": post_url,
-                    "categories": cats,
+                    "tags": cats,
                     "published": published.isoformat()
                 })
     

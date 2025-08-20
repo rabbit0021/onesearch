@@ -1,108 +1,76 @@
-import json
-import sqlite3
-from datetime import datetime
-
-from handlers import ScraperFactory  # maps company -> handler class
 from db import get_database
-import os
 from logger_config import get_logger
-from classifier import classify_post
-import time
-
-def parse_datetime(dt_str):
-    if dt_str is None:
-        return None
-    try:
-        return datetime.fromisoformat(dt_str)
-    except ValueError:
-        print(f"Warning: invalid datetime string: {dt_str}")
-        return None
-    
-# Load subscribers
-env = os.getenv('FLASK_ENV', 'development')
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+from datetime import timedelta, datetime
 
 logger = get_logger("notify_worker")
 
-db = get_database()
-conn = db.get_connection()
-
-subscriptions = db.get_subscriptions(conn)
-
-publishers = {}
-
-for sub in subscriptions:
-    pub = sub['publisher']
-    publishers[pub['id']] = pub
+def notify(db, conn):
     
-for publisher_id in publishers:
-    publisher = publishers[publisher_id]
-    
-    last_scraped_at =  parse_datetime(publisher.get("last_scraped_at"))
-    
-    # if last_scraped_at is None:
-    if not last_scraped_at:
-        last_scraped_at = datetime.fromisoformat("2025-01-01T00:00:00+00:00")
+    subscriptions = db.get_subscriptions(conn)    
 
-    if publisher.get("publisher_type") == "techteam":
+    postcache = {}    
 
-        subscribers = db.get_subscriptions_by_publisher(conn, publisher["id"])
-        if not subscribers:
-            logger.info(f"No subscribers found for {publisher['publisher_name']}")
-            continue
-        
-        scraper = ScraperFactory.get_scraper(publisher["publisher_name"])
-        
-        if not scraper:
-            continue
+    for subscriber in subscriptions:
+        email = subscriber['email']
+        pub_id = subscriber['publisher']['id']
+        pub_name = subscriber['publisher']['publisher_name']
+        topic = subscriber['topic']
+        logger.debug(f"working for {email} and topic: {topic} and publusher_id: {pub_id}")
 
-        logger.info(f"🔍 Scraping {publisher['publisher_name']} for new blog posts after {last_scraped_at}...")
-
-        blog_posts = scraper.search_blog_posts("", last_scraped_at)
+        last_notified_at = subscriber['last_notified_at']
         
-        if not blog_posts:
-            logger.info(f"No new blog posts found for {publisher['publisher_name']}")
-            continue
-        
-        for post in blog_posts:
-            tags = ', '.join(post["categories"])
-            logger.info(f"Found new post: {post['title']} published by {post['published']} with tags: {tags}")
-            category = classify_post(post["title"], tags)
-            if not category:
-                logger.warning(f"⚠️ Could not classify post: {post['title']}")
-                continue
+        if last_notified_at is None:
+            last_notified_at_dt = datetime.fromisoformat(subscriber['joined_time'])
+        else:
+            last_notified_at_dt = datetime.fromisoformat(last_notified_at)
             
-            logger.info(f" {category} - Classified post '{post['title']}'")
-
-            topic_subscribers = [sub for sub in subscribers if sub["topic"] == category]
-            
-            if not topic_subscribers:
-                logger.info(f"No subscribers found for category '{category}' in {publisher['publisher_name']}")
-                continue
-            
-            for subscriber in topic_subscribers:
-                if category != subscriber["topic"]:
-                    logger.debug(f"Skipping {subscriber['email']} for {post['title']} - category mismatch: {category} != {subscriber['topic']}")
-                    continue
-                
-                # Add notification
+        if ((pub_id, topic)) not in postcache:
+            posts = db.get_labelled_post_by_publisher_and_topic(conn, pub_id, topic)
+            postcache[(pub_id, topic)] = posts
+        else:
+            posts = postcache[(pub_id, topic)]
+        
+        logger.debug(f"total posts to be notified before filtering: {len(posts)}")
+        
+        logger.debug(f"filtering posts afer: {last_notified_at_dt}")
+        posts_filtered = [
+            post for post in posts
+            if datetime.fromisoformat(post['modified_at']) >= last_notified_at_dt
+        ]
+        
+        logger.debug(f"total posts to be notified: {len(posts_filtered)}")
+        
+        try:
+            for post in posts_filtered:
+                frequency = subscriber['frequency_in_days']
+                maturity_date = last_notified_at_dt + timedelta(days=frequency)
+                maturity_date = maturity_date.isoformat()
+                topic = post['topic']
                 logger.info(f"Adding notification for {subscriber['email']} about {post['title']}")
                 notification = {
-                    "email": subscriber["email"].lower(),
-                    "heading": publisher["publisher_name"] + " ," + category,
+                    "email": email.lower(),
+                    "heading": pub_name + " ," + topic,
                     "style_version": "v1",
                     "post_url": post["url"],
-                    "post_title": post["title"]
+                    "post_title": post["title"],
+                    "maturity_date": maturity_date
                 }
                 
                 db.add_notification(conn, **notification)
-                conn.commit()
-                    
-        
-        publisher["last_scraped_at"] = datetime.now().isoformat()
-        db.update_publisher(conn, publisher["id"], publisher["last_scraped_at"])
-        conn.commit()
+            conn.commit()
+        except Exception as e:
+            conn.rollback()
+            logger.error(f"Unable to process notifications for email: {email}, error: {e}")
 
-
-conn.close()
-logger.info("Notification run ended.")
+    
+if __name__ == "__main__":
+    db = get_database()
+    conn = db.get_connection()
+    notify(db, conn)
+    conn.close()
+    
+    
+    
+    
+    
+    

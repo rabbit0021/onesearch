@@ -22,7 +22,7 @@ categories = {
     enums.PublisherCategory.PRODUCT_MANAGEMENT.value: (
         "product strategy, design, UX/UI, customer research, roadmap planning, prioritization, market analysis, cross-functional collaboration, agile, lean, product launch, product lifecycle management, product metrics, stakeholder communication"
     ),
-    "GENERAL": (
+    enums.PublisherCategory.GENERAL.value: (
         "general technology, business, professional development, industry news, opinions, AI and tech trends, interdisciplinary topics, updates not fitting other categories"
     )
 }
@@ -89,6 +89,6 @@ def classify_post(post_title, tags="", content=""):
     top_score = sorted_scores[0]
     second_score = sorted_scores[1] if len(sorted_scores) > 1 else 0.0
     if top_score < 0.25 or (top_score - second_score) < 0.05:
-        return "GENERAL"
+        return enums.PublisherCategory.GENERAL.value
 
     return best_cat

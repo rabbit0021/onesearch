@@ -19,7 +19,7 @@ SMTP_PORT = 587
 SMTP_USERNAME = os.getenv('SMTP_USERNAME', 'xxxx@domain.com')
 SMTP_PASSWORD = os.getenv('SMTP_PASSWORD', 'xxxxx')
 
-logger = get_logger("notify_worker")
+logger = get_logger("send_notification_worker")
 
 # === EMAIL TEMPLATE ===
 
@@ -88,13 +88,23 @@ def deduplicate_notifications(notifications):
             deduped.append(row)
     return deduped
 
+def leave_unmature_notifications(notifications):
+    """Remove duplicates based on (email, heading, post_url)."""
+    matured = []
+    for row in notifications:
+        if datetime.fromisoformat(row['maturity_date']) <= datetime.now():
+            matured.append(row)
+    return matured
+
 def process_notifications(db, conn):
-    # notifications = db.get_notifications_by_email(conn, "manav0611@gmail.com")
-    notifications = db.get_notifications(conn)
+    notifications = db.get_active_notifications(conn)
     logger.info(f"found {len(notifications)} notifications to be processed")
 
     notifications = deduplicate_notifications(notifications)
     logger.info(f"After dedup, found {len(notifications)} notifications to be processed")
+
+    notifications = leave_unmature_notifications(notifications)
+    logger.info(f"After leaving unmatured, found {len(notifications)} notifications to be processed")
 
     notifications_by_email = defaultdict(list)
     for row in notifications:
@@ -118,7 +128,7 @@ def process_notifications(db, conn):
         subject = get_random_subject()
         
         category_sections = ""
-        for heading, posts in heading_map.items():
+        for heading, notifications_for_email in heading_map.items():
             category = heading
 
             blog_items = "".join([
@@ -126,15 +136,15 @@ def process_notifications(db, conn):
                 <div style="padding:14px; margin-bottom:12px; border-radius:10px;
                             background:#f9fafb; border:1px solid #e5e7eb;">
                     <div style="font-size:15px; color:#374151; margin-bottom:6px;">
-                        <strong style="color:#111827;">{p['publisher']}</strong>
+                        <strong style="color:#111827;">{notification['publisher']}</strong>
                     </div>
-                    <a href="{p['post_url']}" style="font-size:16px; font-weight:500;
+                    <a href="{notification['post_url']}" style="font-size:16px; font-weight:500;
                             color:#2563eb; text-decoration:none;">
-                        {p['post_title']}
+                        {notification['post_title']}
                     </a>
                 </div>
                 """
-                for p in posts
+                for notification in notifications_for_email
             ])
 
             category_sections += f"""
@@ -158,16 +168,17 @@ def process_notifications(db, conn):
 
         try:
             send_email(email, subject, html_body, logo_path=logo_file, header_path=header_file)
+            logger.info(f"Email sent successfully: {email}")
         except Exception as e:
             logger.error(f"❌ Failed to send to {email}: {e}")
             continue
-
-        try:
-            db.delete_notifications_by_email(conn, email)
-            conn.commit()
-        except Exception as e:
-            logger.error(f"❌ Failed to cleanup for {email}: {e}")
+        
+        for notification in notifications_for_email:   
+            logger.info(f"Deleting notification for email: {email} and post url: {notification['post_url']}")
             
+        for notification in notifications_for_email:             
+            db.delete_notification(conn, email, notification['post_url'])
+            conn.commit()
             
 if __name__ == "__main__":
     db = get_database()

@@ -26,7 +26,7 @@ class BaseDatabase(ABC):
         pass
     
     @abstractmethod
-    def get_notifications(self):
+    def get_active_notifications(self):
         pass                                
     
     @abstractmethod
