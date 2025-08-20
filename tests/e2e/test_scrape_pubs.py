@@ -8,14 +8,17 @@ from scrape_pubs import scrape_pubs
 def test_scrape_pubs_techteams(db):
     conn = db.get_connection()
     
-    db.add_publisher(conn, "aws", "techteam")
-    db.add_subscription(conn, "newemail@gmail.com", enums.PublisherCategory.SOFTWARE_ENGINEERING.value, 1)
+    db.add_publisher(conn, "facebook", "techteam")
+    db.add_subscription(conn, "newemail5@gmail.com", enums.PublisherCategory.SOFTWARE_ENGINEERING.value, 1)
     
     scrape_pubs(db, conn)
     
     posts = db.get_posts(conn)
     
     assert len(posts) > 10
+    
+    conn.close()
+
     
 
     

@@ -62,6 +62,8 @@ def test_scrape_pubs_techteams(db, dummy_smtp):
     process_notifications(db, conn)
     assert len(dummy_smtp.sent) == 1
     
+    conn.close()
+
     
 
 
