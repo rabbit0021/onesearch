@@ -108,10 +108,9 @@ def test_send_email_e2e(db, dummy_smtp):
         WHERE email = ? 
     """, (email,))
     row = c.fetchall()
-    assert len(row) == 3
+    assert len(row) == 2
     assert row[0][0] == 1
     assert row[1][0] == 1
-    assert row[2][0] == 1
     
     notifications = db.get_notifications_by_email(conn, email2)
     assert len(notifications) == 2

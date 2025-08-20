@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>OneSearch - Manage Posts</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style3.css') }}?v={{ time() }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" />
+  <style>
+    /* Posts Table Styling */
+    .posts-container {
+      max-width: 900px;
+      margin: 2rem auto;
+      background: #fff;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+      font-size: 0.9rem;
+      color: #333;
+    }
+
+    th {
+      background-color: #f9f9f9;
+      font-weight: 600;
+    }
+
+    select.topic-select {
+      padding: 5px 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    button.update-btn {
+      padding: 5px 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: background-color 0.2s;
+    }
+
+    button.update-btn:hover {
+      background-color: #0056b3;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #e6f4ea;
+      color: #2e7d32;
+      padding: 12px 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      transform: translateY(20px);
+      z-index: 9999;
+    }
+
+    .toast.show {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container posts-container">
+    <h2 style="text-align:center; margin-bottom: 1.5rem;">Manage Posts</h2>
+
+    <table id="posts-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Title</th>
+          <th>Topic</th>
+          <th>Labelled</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Posts will be injected here via JS -->
+      </tbody>
+    </table>
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const SECRET_KEY = prompt("Enter Secret Key:");
+
+    const allowedTopics = ['Software Engineering', 'Data Analytics', 'Data Science', 'Software Testing', 'Product Management', 'General'];
+
+    async function fetchPosts() {
+      const res = await fetch("/posts", {
+        headers: {
+          "X-SECRET-KEY": SECRET_KEY
+        }
+      });
+      if (!res.ok) {
+        alert("Unauthorized or failed to fetch posts");
+        return;
+      }
+      const posts = await res.json();
+      const tbody = document.querySelector("#posts-table tbody");
+      tbody.innerHTML = "";
+
+      posts.forEach(post => {
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+          <td>${post.id}</td>
+          <td><a href="${post.url}" target="_blank">${post.title}</a></td>
+          <td>
+            <select class="topic-select">
+              ${allowedTopics.map(t => `<option value="${t}" ${t === post.topic ? 'selected' : ''}>${t}</option>`).join('')}
+            </select>
+          </td>
+          <td>${post.labelled ? '✅' : '❌'}</td>
+          <td><button class="update-btn">Update</button></td>
+        `;
+
+        const select = tr.querySelector(".topic-select");
+        const btn = tr.querySelector(".update-btn");
+
+        btn.addEventListener("click", async () => {
+          const newTopic = select.value;
+          const res = await fetch(`/posts/${post.id}`, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              "X-SECRET-KEY": SECRET_KEY
+            },
+            body: JSON.stringify({ topic: newTopic })
+          });
+
+          const data = await res.json();
+          showToast(data.message);
+          if (res.ok) fetchPosts(); // refresh table
+        });
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 3000);
+    }
+
+    fetchPosts();
+  </script>
+</body>
+</html>

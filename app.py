@@ -8,10 +8,11 @@ from logger_config import get_logger
 from datetime import timezone
 from db import get_database
 import time
+from functools import wraps
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'default-secret')
 app.db = get_database()
+SECRET_KEY = os.getenv("POSTS_SECRET_KEY", "******")
 
 # Logging    
 app.logger = get_logger("app")
@@ -23,6 +24,15 @@ else:
 
 # test log
 register_middlewares(app)
+
+def require_secret_key(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        key = request.headers.get("X-SECRET-KEY")
+        if key != SECRET_KEY:
+            return jsonify({"status": "error", "message": "Unauthorized"}), 401
+        return f(*args, **kwargs)
+    return decorated
 
 @app.route("/")
 def index():
@@ -48,6 +58,10 @@ def subscribe():
     techteams = data.get('techteams')
     individuals = data.get('individuals')
     communities = data.get('communities')
+    frequency = data.get('frquency') 
+    
+    if not frequency:
+        frequency = 3
 
     if not email or not topic or (not techteams and not individuals and not communities):
         return jsonify({"status": "error", "message": "Missing email or topic or publisher"
@@ -68,7 +82,7 @@ def subscribe():
                 
                 existing_subscriptions = app.db.get_subscriptions_by_email(conn, email)
                 if not any(sub["publisher"]["id"] == publisher["id"] and sub["topic"] == topic for sub in existing_subscriptions):
-                    app.db.add_subscription(conn, email, topic, publisher['id'])
+                    app.db.add_subscription(conn, email, topic, publisher['id'], frequency=frequency)
         
         conn.commit()
         return jsonify({
@@ -163,6 +177,47 @@ def robots_txt():
 def sitemap_xml():
     return send_from_directory(app.static_folder, "sitemap.xml")
 
+@app.route("/postview.html")
+def postview():
+    return send_from_directory(app.template_folder, "posts.html")
+        
+@app.route("/posts", methods=["GET"])
+@require_secret_key
+def get_posts():
+    conn = app.db.get_connection()
+    try:
+        posts = app.db.get_posts(conn)
+        result = []
+        for post in posts:
+            result.append({
+                "id": post["id"],
+                "url": post["url"],
+                "title": post["title"],
+                "topic": post["topic"],
+                "labelled": post['labelled']
+            })
+        return jsonify(result)
+    finally:
+        conn.close()
+        
+@app.route("/posts/<int:post_id>", methods=["PATCH"])
+def update_post(post_id):
+    key = request.headers.get("X-SECRET-KEY")
+    if key != SECRET_KEY:
+        return jsonify({"status": "error", "message": "Unauthorized"}), 401
+
+    data = request.get_json()
+    topic = data.get("topic")
+    if not topic:
+        return jsonify({"status": "error", "message": "No topic provided"}), 400
+
+    conn = app.db.get_connection()
+    try:
+        app.db.update_post_label(conn, post_id, topic)
+        return jsonify({"status": "success", "message": f"Post {post_id} updated"})
+    finally:
+        conn.close()
+        
 if __name__ == "__main__":
     if os.getenv("FLASK_ENV") == "Production":
         app.run()

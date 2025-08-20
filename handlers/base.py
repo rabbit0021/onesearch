@@ -1,4 +1,3 @@
-from datetime import datetime
 import feedparser
 from datetime import timezone
 import ssl
@@ -8,7 +7,7 @@ from email.utils import parsedate_to_datetime
 
 HEADERS = {'User-Agent': 'Mozilla/5.0'}
 
-logger = get_logger("handlers")
+logger = get_logger("base-handler")
 
 class BaseScraper:        
     def get_feed_url(self):
@@ -39,25 +38,28 @@ class BaseScraper:
 
             try:
                 # Parse published date using the correct format
-                published = parsedate_to_datetime(entry.published)
-            except ValueError as e:
-                logger.error(f"Date parse error: {entry.published} -> {e}")
-                continue
-            
-            if last_scan_time.tzinfo is None:
-                last_scan_time = last_scan_time.replace(tzinfo=timezone.utc)
-            if published <= last_scan_time:
-                logger.debug(f"Skipping {entry.title}: article published on {published} before last scan time: {last_scan_time}")
-                continue    
-            
-            # full_content = entry.content[0].value if entry.content else ""
-            # content = full_content[:100]  # truncate to first 100 chars
-
-            matching_posts.append({
-                "title": entry.title,
-                "url": entry.link,
-                "published": published.isoformat(),
-                "tags": categories
-            })    
+                published = None
+                if hasattr(entry, "published"):
+                    published = parsedate_to_datetime(entry.published)
+                elif hasattr(entry, "updated"):
+                    published = parsedate_to_datetime(entry.updated)
+                
+                if published is None:
+                   published = self.get_date_from_url(entry)
+                                                          
+                if last_scan_time.tzinfo is None:
+                    last_scan_time = last_scan_time.replace(tzinfo=timezone.utc)
+                if published <= last_scan_time:
+                    logger.debug(f"Skipping {entry.title}: article published on {published} before last scan time: {last_scan_time}")
+                    continue    
+                
+                matching_posts.append({
+                    "title": entry.title,
+                    "url": entry.link,
+                    "published": published.isoformat(),
+                    "tags": categories
+                })   
+            except Exception:
+                logger.exception(f"Date parse error: {entry}") 
 
         return matching_posts

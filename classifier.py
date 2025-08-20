@@ -1,11 +1,19 @@
+# classifier_model.py
+import os
 from sentence_transformers import SentenceTransformer, util
 from db import enums
-import torch
+import pickle
+from logger_config import get_logger
 
-# 1. Load a stronger model
-model = SentenceTransformer('all-mpnet-base-v2')
+env = os.getenv('FLASK_ENV', 'development')
+MODEL_PATH = os.getenv("MODEL_PATH") if env == 'production' else 'data/dev/trained_classifier.pkl'
+CONFIDENCE_THRESHOLD = 0.7
 
-# 2. Concise category descriptions
+logger = get_logger("classifier")
+# Load embedding model
+embedding_model = SentenceTransformer('all-mpnet-base-v2')
+
+# Category descriptions
 categories = {
     enums.PublisherCategory.SOFTWARE_ENGINEERING.value: (
         "frontend, backend, APIs, microservices, databases, relational databases, cloud databases, DevOps, system design, CI/CD, containers, scalability, performance, distributed systems, mobile, UI/UX"
@@ -27,17 +35,17 @@ categories = {
     )
 }
 
-# 3. Encode category descriptions
+# Precompute embeddings for baseline
 category_embeddings = {
-    cat: model.encode(desc, convert_to_tensor=True)
+    cat: embedding_model.encode(desc, convert_to_tensor=True)
     for cat, desc in categories.items()
 }
 
-# Optional: simple keyword mapping to override embeddings
+# Optional keyword mapping
 keywords_map = {
     enums.PublisherCategory.SOFTWARE_ENGINEERING.value: [
-        "react", "angular", "vue", "node.js", "django", "java", "go", 
-        "microservices", "api", "devops", "kubernetes", 
+        "react", "angular", "vue", "node.js", "django", "java", "go",
+        "microservices", "api", "devops", "kubernetes",
         "aurora", "rds", "cloud database", "postgresql", "mysql", "mongodb", "redis", "database"
     ],
     enums.PublisherCategory.SOFTWARE_TESTING.value: [
@@ -54,26 +62,25 @@ keywords_map = {
     ]
 }
 
-def classify_post(post_title, tags="", content=""):
-    """
-    Classify a post into a category using title + tags + first 100 chars of content.
-    Uses embeddings similarity with optional keyword boost.
-    """
+# ===== Load trained classifier if exists =====
+trained_clf = None
+label_encoder = None
+os.makedirs(os.path.dirname(MODEL_PATH), exist_ok=True)
 
-    # 1. Prepare text
+if os.path.exists(MODEL_PATH):
+    with open(MODEL_PATH, "rb") as f:
+        trained_clf, label_encoder = pickle.load(f)
+    logger.info(f"[Classifier] Loaded trained classifier from {MODEL_PATH}")
+
+# ===== Baseline classifier =====
+def classify_with_embeddings(title, tags="", content=""):
     content_snippet = content[:100] if content else ""
-    combined_text = f"Title: {post_title}. Tags: {tags}. Content: {content_snippet}".lower()
+    combined_text = f"Title: {title}. Tags: {tags}. Content: {content_snippet}".lower()
+    text_embedding = embedding_model.encode(combined_text, convert_to_tensor=True)
 
-    # 2. Encode input
-    text_embedding = model.encode(combined_text, convert_to_tensor=True)
+    scores = {cat: util.cos_sim(text_embedding, emb).item()
+              for cat, emb in category_embeddings.items()}
 
-    # 3. Compute similarity
-    scores = {
-        cat: util.cos_sim(text_embedding, emb).item()
-        for cat, emb in category_embeddings.items()
-    }
-
-    # 4. Keyword boost: add 0.1 if a keyword exists in title/tags/content
     combined_lower = combined_text.lower()
     for cat, kw_list in keywords_map.items():
         for kw in kw_list:
@@ -81,14 +88,30 @@ def classify_post(post_title, tags="", content=""):
                 scores[cat] += 0.1
                 break
 
-    # 5. Assign category with highest similarity
     best_cat = max(scores, key=scores.get)
-
-    # 6. Adaptive fallback: check relative score
     sorted_scores = sorted(scores.values(), reverse=True)
     top_score = sorted_scores[0]
     second_score = sorted_scores[1] if len(sorted_scores) > 1 else 0.0
     if top_score < 0.25 or (top_score - second_score) < 0.05:
         return enums.PublisherCategory.GENERAL.value
-
     return best_cat
+
+# ===== Unified classifier =====
+def classify_post(title, tags="", content=""):
+    global trained_clf, label_encoder
+
+    if trained_clf and label_encoder:
+        logger.info("Attempt to use trained classifier")
+
+        text_embedding = embedding_model.encode(f"Title: {title}. Tags: {tags}. Content: {content[:100]}")
+        pred_proba = trained_clf.predict_proba([text_embedding])[0]
+        max_prob = pred_proba.max()
+        if max_prob >= CONFIDENCE_THRESHOLD:
+            logger.info("Good confidence score with trained classifier")
+            pred_label = trained_clf.predict([text_embedding])[0]
+            return label_encoder.inverse_transform([pred_label])[0]
+        else:
+            logger.info(f"Fallback to normal without trained mode due to low confidence: {max_prob}")
+
+    # fallback
+    return classify_with_embeddings(title, tags, content)

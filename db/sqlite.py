@@ -230,15 +230,32 @@ class SQLiteDatabase:
         """, (email,))
         rows = c.fetchall()
         return [dict(row) for row in rows]
+    
+    def get_active_notifications_by_email_and_url(self, conn, email, url):
+        c = conn.cursor()
+        c.execute("""
+            SELECT *
+            FROM notifications
+            WHERE email = ? and post_url = ? and deleted=0
+        """, (email,url))
+        row = c.fetchone()
+        return dict(row) if row else None
 
     def add_notification(self, conn, email, heading, style_version, post_url, post_title, maturity_date):
         logger.info(f"Adding notification: {email}, type: {post_title}")
-        c = conn.cursor()
-        c.execute("""
-            INSERT INTO notifications (email, heading, style_version, post_url, post_title, maturity_date)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, (email, heading, style_version, post_url, post_title, maturity_date))
-        logger.info("notification added successfully!")
+        
+        notf = self.get_active_notifications_by_email_and_url(conn, email, post_url)
+        
+        if not notf:
+            c = conn.cursor()
+            c.execute("""
+                INSERT INTO notifications (email, heading, style_version, post_url, post_title, maturity_date)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (email, heading, style_version, post_url, post_title, maturity_date))
+            logger.info("notification added successfully!")
+        else:
+            logger.info("notification already existed!")
+
     
     def delete_notification(self, conn, email, post_url):
         logger.info(f"Deleting notification: {email}, url: {post_url}")

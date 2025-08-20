@@ -61,9 +61,11 @@ def notify(db, conn):
         except Exception as e:
             conn.rollback()
             logger.error(f"Unable to process notifications for email: {email}, error: {e}")
-
+    
+    logger.info("Notify run ended")
     
 if __name__ == "__main__":
+    logger.info("Notify run started")
     db = get_database()
     conn = db.get_connection()
     notify(db, conn)

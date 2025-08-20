@@ -1,6 +1,7 @@
 // #region Element References
 const emailInput = document.getElementById('email');
 const companyInput = document.getElementById('companyInput');
+const frequencyInput = document.getElementById('frequencyInput');
 const techTeamGroup = document.querySelector('.form-group.tech-team-group');
 const tagContainer = document.getElementById('selected-techteams');
 const hiddenInput = document.getElementById('categories-hidden');
@@ -18,8 +19,12 @@ const chatContainer = document.getElementById("chat-message");
 const interestedButton = document.getElementById("interested-button");
 const feedbackButton = document.getElementById("feedback-button");
 const feedbackContainer = document.getElementById("feedback-form-container");
+const slider = document.getElementById('frequencySlider');
+const output = document.getElementById('frequencyValue');
 
-// #endregion
+// Initialize value
+output.textContent = slider.value;
+
 
 // #region State
 let selectedTechTeams = [];
@@ -35,6 +40,7 @@ form.addEventListener("submit", function (e) {
     const individuals = [];
     const communities = [];
     const topic = topicInput.value.trim();
+    const frquency = slider.value
 
     if (!email || !topic || (techteams.length === 0 && individuals.length === 0 && communities.length === 0)) {
         alert("Please enter your email, topic, and select at least one publisher.");
@@ -45,6 +51,7 @@ form.addEventListener("submit", function (e) {
         email: email,
         techteams: techteams.join(","),
         topic: topicInput.value,
+        frquency: frquency
     });
 
     fetch("/subscribe", {
@@ -83,6 +90,10 @@ emailInput.addEventListener("blur", () => {
         .then(data => {
             displaySubscriptionStatus(data);
         });
+});
+
+slider.addEventListener('input', () => {
+  output.textContent = slider.value;
 });
 
 function displaySubscriptionStatus(data) {

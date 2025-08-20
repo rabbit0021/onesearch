@@ -18,7 +18,7 @@ def parse_datetime(dt_str):
 logger = get_logger("notify_worker")
 
 def scrape_pubs(db, conn):
-    subscriptions = db.get_subscriptions(conn)    
+    subscriptions = db.get_subscriptions(conn)  
 
     publishers = {}    
 
@@ -76,7 +76,11 @@ def scrape_pubs(db, conn):
                 conn.rollback()    
 
 if __name__ == "__main__":
+    logger.info("Scraping pubs started")
     db = get_database()
     conn = db.get_connection()
+    scrape_pubs(db, conn)
     conn.close()
+    logger.info("Scraping pubs ended")
+
 
