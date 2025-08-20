@@ -9,7 +9,7 @@ from logger_config import get_logger
 
 env = os.getenv('FLASK_ENV', 'development')
 MODEL_PATH = os.getenv("MODEL_PATH") if env == 'production' else 'data/dev/trained_classifier.pkl'
-MIN_LABELED_POSTS = 0
+MIN_LABELED_POSTS = 50
 
 logger = get_logger("training")
 
