@@ -314,6 +314,7 @@ class SQLiteDatabase:
             VALUES (?, ?)
         """, (publisher_name, publisher_type))
         logger.info(f"Publisher {publisher_name} added successfully")
+        return c.lastrowid
     
     def update_publisher(self, conn, publisher_id, last_scraped_at):
         logger.info(f"Updating publisher: {publisher_id}, last_scraped_at: {last_scraped_at}")
@@ -369,6 +370,16 @@ class SQLiteDatabase:
             SELECT *
             FROM posts
         """)
+        rows = c.fetchall()
+        return [dict(row) for row in rows]
+    
+    def get_posts_by_publisher_id(self, conn, pub_id):
+        c = conn.cursor()
+        c.execute("""
+            SELECT *
+            FROM posts
+            WHERE publisher_id = ?
+        """, (pub_id,))
         rows = c.fetchall()
         return [dict(row) for row in rows]
     
