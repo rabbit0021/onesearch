@@ -124,7 +124,7 @@ def test_send_email_e2e(db, dummy_smtp):
     
     conn.close()
 
-@pytest.mark.e2e
+@pytest.mark.real
 def test_send_email_real(db):
     """
     End-to-end test for sending a real email via configured SMTP server.
