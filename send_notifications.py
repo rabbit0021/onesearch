@@ -16,8 +16,8 @@ from jinja2 import Template
 # === CONFIG ===
 SMTP_SERVER = "smtp.zoho.in"
 SMTP_PORT = 587
-SMTP_USERNAME = os.getenv('SMTP_USERNAME', 'noreply@onesearch.blog')
-SMTP_PASSWORD = os.getenv('SMTP_PASSWORD', 'MHBXNAeAY90M')
+SMTP_USERNAME = os.getenv('SMTP_USERNAME', 'xxxx@onesearch.blog')
+SMTP_PASSWORD = os.getenv('SMTP_PASSWORD', 'xxxxx')
 
 logger = get_logger("send_notification_worker")
 
@@ -136,6 +136,12 @@ def process_notifications(db, conn):
         category_sections = ""
         for heading, notifications_for_email in heading_map.items():
             category = heading
+            
+            #formatting before sending mail
+            for notification in notifications_for_email:
+                notification['post_title'] = notification['post_title'][0].upper() + notification['post_title'][1:]
+                notification['publisher'] = notification['publisher'][0].upper() + notification['publisher'][1:]
+
 
             blog_items = "".join([
                 f"""

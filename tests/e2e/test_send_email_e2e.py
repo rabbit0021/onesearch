@@ -123,55 +123,57 @@ def test_send_email_e2e(db, dummy_smtp):
     
     conn.close()
 
-# @pytest.mark.real
-# def test_send_email_real(db):
-#     """
-#     End-to-end test for sending a real email via configured SMTP server.
-#     This test:
-#     - Inserts notifications into DB
-#     - Calls process_notifications (sends via real SMTP)
-#     - Verifies notifications are marked deleted
-#     - ⚠️ Actually sends an email (check inbox!)
-#     """
-#     db_instance = db
-#     conn = db_instance.get_connection()
-#     email = "manav0611@gmail.com"
+@pytest.mark.real
+def test_send_email_real(db):
+    """
+    End-to-end test for sending a real email via configured SMTP server.
+    This test:
+    - Inserts notifications into DB
+    - Calls process_notifications (sends via real SMTP)
+    - Verifies notifications are marked deleted
+    - ⚠️ Actually sends an email (check inbox!)
+    """
+    db_instance = db
+    conn = db_instance.get_connection()
+    email = "manav0611@gmail.com"
 
-#     # Notifications from real engineering blogs
-#     notifications = [
-#         {
-#             "heading": "Google, Software Engineering",
-#             "post_title": "Announcing Android 15: What's New",
-#             "post_url": "https://android-developers.googleblog.com/2025/08/android-15-whats-new.html"
-#         },
-#         {
-#             "heading": "Facebook, Software Engineering",
-#             "post_title": "Scaling GraphQL at Meta",
-#             "post_url": "https://engineering.fb.com/2025/08/16/scaling-graphql/"
-#         },
-#         {
-#             "heading": "Stripe, Software Engineering",
-#             "post_title": "Stripe's Migration to Rust Microservices",
-#             "post_url": "https://stripe.com/blog/migration-to-rust-microservices"
-#         }
-#     ]
+    # Notifications from real engineering blogs
+    notifications = [
+        {
+            "heading": "Google, Software Engineering",
+            "post_title": "Announcing Android 15: What's New",
+            "post_url": "https://android-developers.googleblog.com/2025/08/android-15-whats-new.html"
+        },
+        {
+            "heading": "Facebook, Software Engineering",
+            "post_title": "Scaling GraphQL at Meta",
+            "post_url": "https://engineering.fb.com/2025/08/16/scaling-graphql/"
+        },
+        {
+            "heading": "Stripe, Software Engineering",
+            "post_title": "Stripe's Migration to Rust Microservices",
+            "post_url": "https://stripe.com/blog/migration-to-rust-microservices"
+        }
+    ]
+    
+    maturity_date = datetime.now(timezone.utc).isoformat()
 
-#     # Insert notifications into DB
-#     for n in notifications:
-#         db_instance.add_notification(conn, email, n["heading"], 1, n["post_url"], n["post_title"])
+    # Insert notifications into DB
+    for n in notifications:
+        db_instance.add_notification(conn, email, n["heading"], 1, n["post_url"], n["post_title"], maturity_date)
 
-#     # Process and send notifications via real SMTP
-#     process_notifications(db_instance, conn)
+    # Process and send notifications via real SMTP
+    process_notifications(db_instance, conn)
 
-#     # Verify all notifications are marked deleted in DB
-#     c = conn.cursor()
-#     c.execute("""
-#         SELECT deleted FROM notifications WHERE email = ?
-#     """, (email,))
-#     rows = c.fetchall()
+    # Verify all notifications are marked deleted in DB
+    c = conn.cursor()
+    c.execute("""
+        SELECT deleted FROM notifications WHERE email = ?
+    """, (email,))
+    rows = c.fetchall()
 
-#     assert len(rows) == len(notifications)
-#     for r in rows:
-#         assert r[0] == 1  # deleted flag set
+    assert len(rows) == len(notifications)
+    for r in rows:
+        assert r[0] == 1  # deleted flag set
 
-#     conn.close()
+    conn.close()
