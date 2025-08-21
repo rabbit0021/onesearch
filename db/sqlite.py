@@ -201,7 +201,16 @@ class SQLiteDatabase:
             logger.info(f"Subscription for {email} already exists")
             return sub['id']
 
-           
+    def update_subscription_last_notified(self, conn, email):
+        logger.info(f"Updating subscription: {email}")
+        c = conn.cursor()
+        c.execute("""
+                UPDATE subscriptions
+                SET last_notified_at = CURRENT_TIMESTAMP
+                WHERE email = ?
+            """, (email, ))
+        
+        logger.info(f"Subscription's {email} last notified updated to current time")
         
     def remove_subscription(self, conn, id):
         c = conn.cursor()
@@ -233,10 +242,11 @@ class SQLiteDatabase:
     
     def get_notifications_by_email_and_url(self, conn, email, url):
         c = conn.cursor()
+        
         c.execute("""
             SELECT *
             FROM notifications
-            WHERE email = ? and post_url = ? and deleted=0
+            WHERE email = ? and post_url = ?
         """, (email,url))
         row = c.fetchone()
         return dict(row) if row else None

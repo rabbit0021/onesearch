@@ -92,8 +92,14 @@ def leave_unmature_notifications(notifications):
     """Remove duplicates based on (email, heading, post_url)."""
     matured = []
     for row in notifications:
-        if datetime.fromisoformat(row['maturity_date']) <= datetime.now():
+        maturity_dt = datetime.fromisoformat(row['maturity_date'])        
+
+        if maturity_dt.tzinfo is None:
+            maturity_dt = maturity_dt.replace(tzinfo=timezone.utc)        
+
+        if maturity_dt <= datetime.now(timezone.utc):
             matured.append(row)
+            
     return matured
 
 def process_notifications(db, conn):
@@ -175,10 +181,12 @@ def process_notifications(db, conn):
         
         for notification in notifications_for_email:   
             logger.info(f"Deleting notification for email: {email} and post url: {notification['post_url']}")
-            
+        
         for notification in notifications_for_email:             
             db.delete_notification(conn, email, notification['post_url'])
             conn.commit()
+        
+        db.update_subscription_last_notified(conn, email)
             
 if __name__ == "__main__":
     db = get_database()

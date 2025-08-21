@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timezone
 from db import enums
 from handlers import ScraperFactory  # maps company -> handler class
 from db import get_database
@@ -68,7 +68,7 @@ def scrape_pubs(db, conn):
         
                     db.add_post(conn, post['url'], post['title'], publisher['id'], tags, post['published'], category)                    
                 
-                publisher["last_scraped_at"] = datetime.now().isoformat()
+                publisher["last_scraped_at"] = datetime.now(timezone.utc).isoformat()
                 db.update_publisher(conn, publisher["id"], publisher["last_scraped_at"])
                 conn.commit()
             except Exception as e:

@@ -1,7 +1,7 @@
 from email import message_from_string
 import pytest
 from send_notifications import process_notifications
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 
 @pytest.mark.notifications
@@ -27,8 +27,8 @@ def test_send_email_e2e(db, dummy_smtp):
     email2 = "manavoriginal@gmail.com"
     email3 = "xyz@gmail.com"
     
-    maturity_date = datetime.now().isoformat()
-    maturity_date2 = datetime.now() + timedelta(days=1)
+    maturity_date = datetime.now(timezone.utc).isoformat()
+    maturity_date2 = datetime.now(timezone.utc) + timedelta(days=1)
     maturity_date2 = maturity_date2.isoformat()
 
     # Insert a notification into DB
