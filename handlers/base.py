@@ -49,9 +49,11 @@ class BaseScraper:
                                                           
                 if last_scan_time.tzinfo is None:
                     last_scan_time = last_scan_time.replace(tzinfo=timezone.utc)
+                
+                # breaking the loop when first article appears having stale
                 if published <= last_scan_time:
                     logger.debug(f"Skipping {entry.title}: article published on {published} before last scan time: {last_scan_time}")
-                    continue    
+                    break    
                 
                 matching_posts.append({
                     "title": entry.title,

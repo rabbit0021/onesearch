@@ -66,6 +66,7 @@ class FacebookScraper(BaseScraper):
             try:
                 title_tag = article.select_one(".entry-title a")
                 if not title_tag:
+                    logger.exception("Title not found")
                     continue
                 title = title_tag.get_text(strip=True)
                 post_url = title_tag["href"]
@@ -76,7 +77,9 @@ class FacebookScraper(BaseScraper):
                 # Date
                 date_tag = article.select_one("time.entry-date")
                 if not date_tag:
+                    logger.exception("Published Date not found")
                     continue
+                
                 date_str = date_tag.get_text(strip=True)
     
                 try:
@@ -91,16 +94,9 @@ class FacebookScraper(BaseScraper):
                 if last_scan_time.tzinfo is None:
                     last_scan_time = last_scan_time.replace(tzinfo=timezone.utc)
                 
+                # breaking the loop when first article appears having stale
                 if published <= last_scan_time:
-                    continue
-                
-                # content_block = article.select_one(".entry-content")
-                # if content_block:
-                #     paragraphs = content_block.find_all("p")
-                #     full_content = " ".join(p.get_text(strip=True) for p in paragraphs)
-                #     content = full_content[:100]  # first 100 characters
-                # else:
-                #     content = ""
+                    break
     
                 posts.append({
                     "title": title,

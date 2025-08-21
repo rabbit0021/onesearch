@@ -231,7 +231,7 @@ class SQLiteDatabase:
         rows = c.fetchall()
         return [dict(row) for row in rows]
     
-    def get_active_notifications_by_email_and_url(self, conn, email, url):
+    def get_notifications_by_email_and_url(self, conn, email, url):
         c = conn.cursor()
         c.execute("""
             SELECT *
@@ -244,7 +244,7 @@ class SQLiteDatabase:
     def add_notification(self, conn, email, heading, style_version, post_url, post_title, maturity_date):
         logger.info(f"Adding notification: {email}, type: {post_title}")
         
-        notf = self.get_active_notifications_by_email_and_url(conn, email, post_url)
+        notf = self.get_notifications_by_email_and_url(conn, email, post_url)
         
         if not notf:
             c = conn.cursor()
@@ -368,7 +368,8 @@ class SQLiteDatabase:
         c = conn.cursor()
         c.execute("""
             SELECT *
-            FROM posts
+            FROM posts po
+            JOIN publishers p ON po.publisher_id = p.id
         """)
         rows = c.fetchall()
         return [dict(row) for row in rows]

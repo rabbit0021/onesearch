@@ -16,8 +16,8 @@ from jinja2 import Template
 # === CONFIG ===
 SMTP_SERVER = "smtp.zoho.in"
 SMTP_PORT = 587
-SMTP_USERNAME = os.getenv('SMTP_USERNAME', 'xxxx@domain.com')
-SMTP_PASSWORD = os.getenv('SMTP_PASSWORD', 'xxxxx')
+SMTP_USERNAME = os.getenv('SMTP_USERNAME', 'noreply@onesearch.blog')
+SMTP_PASSWORD = os.getenv('SMTP_PASSWORD', 'MHBXNAeAY90M')
 
 logger = get_logger("send_notification_worker")
 

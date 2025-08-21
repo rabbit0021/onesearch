@@ -12,7 +12,7 @@ from functools import wraps
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
 app.db = get_database()
-SECRET_KEY = os.getenv("POSTS_SECRET_KEY", "******")
+SECRET_KEY = os.getenv("POSTS_SECRET_KEY", "123")
 
 # Logging    
 app.logger = get_logger("app")
@@ -194,6 +194,9 @@ def get_posts():
                 "url": post["url"],
                 "title": post["title"],
                 "topic": post["topic"],
+                "publisher": post["publisher_name"],
+                "published_at": post["published_at"],
+                "tags": post["tags"],
                 "labelled": post['labelled']
             })
         return jsonify(result)

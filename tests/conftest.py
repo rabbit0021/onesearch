@@ -14,13 +14,13 @@ logger = get_logger("TEST_LOGGER")
 
 logger.debug("=================== Test Session Starts =================== ")
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def db():
     db_path = "data/tests.db"
     if os.path.exists(db_path):
         os.remove(db_path)
     # use in-memory DB for testing
-    db_instance = SQLiteDatabase.get_instance(db_path)
+    db_instance = SQLiteDatabase(db_path)
     logger.debug("Test Database Initialised")
     yield db_instance
     

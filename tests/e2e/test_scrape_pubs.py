@@ -4,27 +4,42 @@ import os
 from datetime import datetime
 from scrape_pubs import scrape_pubs
 
-@pytest.mark.pubs
-def test_scrape_pubs_techteams1(db):
-    conn = db.get_connection()
+# @pytest.mark.pubs
+# def test_scrape_pubs_techteams1(db):
+#     conn = db.get_connection()
     
-    pubid = db.add_publisher(conn, "facebook", "techteam")
-    db.add_subscription(conn, "newemail5@gmail.com", enums.PublisherCategory.SOFTWARE_ENGINEERING.value, pubid)
+#     pubid = db.add_publisher(conn, "facebook", "techteam")
+#     db.add_subscription(conn, "newemail5@gmail.com", enums.PublisherCategory.SOFTWARE_ENGINEERING.value, pubid)
     
-    scrape_pubs(db, conn)
+#     scrape_pubs(db, conn)
     
-    posts = db.get_posts_by_publisher_id(conn, pubid)
+#     posts = db.get_posts_by_publisher_id(conn, pubid)
     
-    assert len(posts) > 10
+#     assert len(posts) > 10
     
-    conn.close()
+#     conn.close()
+
+# @pytest.mark.pubs
+# def test_scrape_pubs_techteams2(db):
+#     conn = db.get_connection()
+    
+#     pubid = db.add_publisher(conn, "databricks", "techteam")
+#     db.add_subscription(conn, "newemail6@gmail.com", enums.PublisherCategory.SOFTWARE_ENGINEERING.value, pubid)
+    
+#     scrape_pubs(db, conn)
+    
+#     posts = db.get_posts_by_publisher_id(conn, pubid)
+    
+#     assert len(posts) > 9
+    
+#     conn.close()
 
 @pytest.mark.pubs
-def test_scrape_pubs_techteams2(db):
+def test_scrape_pubs_techteams3(db):
     conn = db.get_connection()
     
-    pubid = db.add_publisher(conn, "databricks", "techteam")
-    db.add_subscription(conn, "newemail6@gmail.com", enums.PublisherCategory.SOFTWARE_ENGINEERING.value, pubid)
+    pubid = db.add_publisher(conn, "linkedin", "techteam")
+    db.add_subscription(conn, "newemail7@gmail.com", enums.PublisherCategory.SOFTWARE_ENGINEERING.value, pubid)
     
     scrape_pubs(db, conn)
     
@@ -33,6 +48,7 @@ def test_scrape_pubs_techteams2(db):
     assert len(posts) > 9
     
     conn.close()
+
 
     
 

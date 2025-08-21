@@ -93,7 +93,10 @@
           <th>ID</th>
           <th>Title</th>
           <th>Topic</th>
-          <th>Labelled</th>
+          <th>Publisher</th>
+          <th>Published At</th>
+          <th>Tags</th>
+          <th>Classified</th>
           <th>Action</th>
         </tr>
       </thead>
@@ -135,6 +138,9 @@
               ${allowedTopics.map(t => `<option value="${t}" ${t === post.topic ? 'selected' : ''}>${t}</option>`).join('')}
             </select>
           </td>
+          <td>${post.publisher}</td>
+          <td>${post.published_at}</td>
+          <td>${post.tags}</td>
           <td>${post.labelled ? '✅' : '❌'}</td>
           <td><button class="update-btn">Update</button></td>
         `;
