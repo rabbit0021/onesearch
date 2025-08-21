@@ -53,7 +53,6 @@ def scrape_pubs(db, conn):
             
             if not blog_posts:
                 logger.info(f"No new blog posts found for {publisher['publisher_name']}")
-                continue
             
             try:
                 for post in blog_posts:
