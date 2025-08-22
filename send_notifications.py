@@ -17,7 +17,7 @@ from jinja2 import Template
 SMTP_SERVER = "smtp.zoho.in"
 SMTP_PORT = 587
 SMTP_USERNAME = os.getenv('SMTP_USERNAME', 'xxxx@onesearch.blog')
-SMTP_PASSWORD = os.getenv('SMTP_PASSWORD', 'xxxxx')
+SMTP_PASSWORD = os.getenv('SMTP_PASSWORD', 'xxxx')
 
 logger = get_logger("send_notification_worker")
 
@@ -55,13 +55,13 @@ def send_email(to_email, subject, html_body, logo_path=None, header_path=None):
     msg.attach(alt_part)
 
     # Optional inline image
-    if logo_path and os.path.exists(logo_path):
-        with open(logo_path, "rb") as f:
-            img_data = f.read()
-        image = MIMEImage(img_data)
-        image.add_header("Content-ID", "<logo>")
-        image.add_header("Content-Disposition", "inline", filename=os.path.basename(logo_path))
-        msg.attach(image)
+    # if logo_path and os.path.exists(logo_path):
+    #     with open(logo_path, "rb") as f:
+    #         img_data = f.read()
+    #     image = MIMEImage(img_data)
+    #     image.add_header("Content-ID", "<logo>")
+    #     image.add_header("Content-Disposition", "inline", filename=os.path.basename(logo_path))
+    #     msg.attach(image)
     
     if header_path and os.path.exists(header_path):
         with open(header_path, "rb") as f:
@@ -176,7 +176,7 @@ def process_notifications(db, conn):
         BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
         logo_file = os.path.join(BASE_DIR, "static", "logo.png")
-        header_file = os.path.join(BASE_DIR, "static", "header.png")
+        header_file = os.path.join(BASE_DIR, "static", "header2.png")
 
         try:
             send_email(email, subject, html_body, logo_path=logo_file, header_path=header_file)

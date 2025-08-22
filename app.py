@@ -199,6 +199,10 @@ def get_posts():
                 "tags": post["tags"],
                 "labelled": post['labelled']
             })
+        result.sort(
+            key=lambda x: datetime.fromisoformat(x['published_at']),
+            reverse=True
+        )
         return jsonify(result)
     finally:
         conn.close()
