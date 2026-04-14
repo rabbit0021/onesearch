@@ -1,0 +1,20 @@
+.footer {
+  text-align: center;
+  border-top: 1px solid #ddd;
+  padding: 1.5rem 1rem;
+  background: #f4f6f9;
+  margin-top: 2rem;
+}
+
+.seo {
+  font-size: 0.78rem;
+  color: #aaa;
+  max-width: 580px;
+  margin: 0 auto 8px;
+  line-height: 1.6;
+}
+
+.copy {
+  font-size: 0.8rem;
+  color: #828282;
+}

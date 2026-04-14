@@ -1,0 +1,36 @@
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #444;
+}
+
+.hint {
+  font-size: 0.78rem;
+  color: #888;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.slider {
+  flex: 1;
+  accent-color: #007bff;
+  height: 4px;
+  cursor: pointer;
+}
+
+.output {
+  min-width: 90px;
+  font-size: 0.85rem;
+  color: #555;
+  text-align: right;
+}

@@ -175,7 +175,7 @@ def process_notifications(db, conn):
         # print(html_body)
         BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-        logo_file = os.path.join(BASE_DIR, "static", "logo.png")
+        logo_file = os.path.join(BASE_DIR, "static", "nosearch_logo.jpeg")
         header_file = os.path.join(BASE_DIR, "static", "header2.png")
 
         try:

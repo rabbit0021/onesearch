@@ -1,0 +1,32 @@
+.box {
+  background: #f0f4ff;
+  border-left: 3px solid #007bff;
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.heading {
+  font-weight: 600;
+  color: #444;
+  margin-bottom: 2px;
+}
+
+.row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.topic {
+  font-weight: 600;
+  color: #1d4ed8;
+  white-space: nowrap;
+}
+
+.pubs {
+  color: #555;
+}

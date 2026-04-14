@@ -1,0 +1,62 @@
+.row:nth-child(even) {
+  background: #f9f9f9;
+}
+
+.row:hover {
+  background: #f0f4ff;
+}
+
+.cell {
+  padding: 8px 10px;
+  font-size: 0.85rem;
+  vertical-align: middle;
+  border-bottom: 1px solid #eee;
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.link {
+  color: #007bff;
+  text-decoration: underline;
+}
+
+.link:hover {
+  color: #0056b3;
+}
+
+.select {
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 0.82rem;
+  outline: none;
+  cursor: pointer;
+}
+
+.select:focus {
+  border-color: #007bff;
+}
+
+.btn {
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.btn:hover:not(:disabled) {
+  background: #0056b3;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

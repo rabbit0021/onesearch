@@ -1,0 +1,25 @@
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+// Flask dev server runs on port 5000
+const FLASK = 'http://localhost:5000'
+
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    port: 5173,
+    proxy: {
+      '/subscribe': FLASK,
+      '/techteams': FLASK,
+      '/subscriptions_for_email': FLASK,
+      '/posts': FLASK,
+      '/interested': FLASK,
+      '/feedback': FLASK,
+      '/static': FLASK,
+    },
+  },
+  build: {
+    outDir: 'dist',
+    emptyOutDir: true,
+  },
+})

@@ -1,4 +1,4 @@
-from flask import Flask, send_from_directory, jsonify, request, send_from_directory, render_template
+from flask import Flask, send_from_directory, jsonify, request, render_template
 import json
 import os
 from handlers import ScraperFactory
@@ -11,6 +11,9 @@ import time
 from functools import wraps
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
+
+# React build directory — used in production to serve the SPA
+REACT_BUILD_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "frontend", "dist")
 app.db = get_database()
 SECRET_KEY = os.getenv("POSTS_SECRET_KEY", "123")
 
@@ -34,8 +37,15 @@ def require_secret_key(f):
         return f(*args, **kwargs)
     return decorated
 
-@app.route("/")
-def index():
+@app.route("/", defaults={"path": ""})
+@app.route("/<path:path>")
+def index(path):
+    # Serve React SPA build if it exists, otherwise fall back to the Jinja2 template
+    if os.path.isdir(REACT_BUILD_DIR):
+        target = os.path.join(REACT_BUILD_DIR, path)
+        if path and os.path.isfile(target):
+            return send_from_directory(REACT_BUILD_DIR, path)
+        return send_from_directory(REACT_BUILD_DIR, "index.html")
     return render_template("index.html", time=time.time)
 
 @app.route("/techteams", methods=["GET"])
@@ -177,10 +187,6 @@ def robots_txt():
 def sitemap_xml():
     return send_from_directory(app.static_folder, "sitemap.xml")
 
-@app.route("/postview.html")
-def postview():
-    return send_from_directory(app.template_folder, "posts.html")
-        
 @app.route("/posts", methods=["GET"])
 @require_secret_key
 def get_posts():

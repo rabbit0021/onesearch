@@ -1,0 +1,27 @@
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #79e7a1;
+  color: #2e7d32;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.remove {
+  background: none;
+  border: none;
+  color: #2e7d32;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0 0 0 2px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.remove:hover {
+  color: #1b5e20;
+}

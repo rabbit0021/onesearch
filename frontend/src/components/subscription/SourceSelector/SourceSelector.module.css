@@ -1,0 +1,86 @@
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #444;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chipWrapper {
+  position: relative;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  background: #f3f4f6;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.chip:hover:not(.disabled) {
+  background: #e8eaf0;
+}
+
+.checked {
+  background: #dbeafe;
+  border-color: #007bff;
+  color: #1d4ed8;
+}
+
+.disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.hidden {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.tooltip {
+  visibility: hidden;
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #dadada;
+  color: #333;
+  font-size: 0.72rem;
+  border-radius: 4px;
+  padding: 3px 8px;
+  white-space: nowrap;
+  z-index: 10;
+}
+
+.chipWrapper:hover .tooltip {
+  visibility: visible;
+}
+
+@media (max-width: 480px) {
+  .row {
+    gap: 6px;
+  }
+
+  .chip {
+    padding: 5px 10px;
+    font-size: 0.85rem;
+  }
+}
