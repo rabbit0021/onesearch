@@ -16,6 +16,11 @@ export default defineConfig({
       '/interested': FLASK,
       '/feedback': FLASK,
       '/static': FLASK,
+      '/auth': {
+        target: FLASK,
+        changeOrigin: true,
+        cookieDomainRewrite: 'localhost',
+      },
     },
   },
   build: {

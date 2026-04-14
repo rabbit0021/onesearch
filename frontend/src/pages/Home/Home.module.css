@@ -9,14 +9,25 @@
   padding: 2rem 1rem;
 }
 
+.layout {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
 .form {
+  flex: 0 0 50%;
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
   padding: 1.75rem;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  max-width: 50%;
+}
+
+.sidebar {
+  flex: 1;
+  min-width: 0;
 }
 
 .submitBtn {
@@ -39,6 +50,17 @@
 .submitBtn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .layout {
+    flex-direction: column;
+  }
+
+  .form {
+    flex: none;
+    width: 100%;
+  }
 }
 
 @media (max-width: 600px) {

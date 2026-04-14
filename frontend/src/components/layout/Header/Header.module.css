@@ -10,6 +10,13 @@
   flex-shrink: 0;
 }
 
+.logoWrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+
 .logo {
   width: 350px;
   height: 100px;

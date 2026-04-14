@@ -1,0 +1,51 @@
+.connectBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: #d97757;
+  color: #fff;
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.connectBtn:hover {
+  background: #c46040;
+}
+
+.connected {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #fdf0eb;
+  border: 1px solid #d97757;
+  color: #7a3520;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.check {
+  color: #d97757;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.site {
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.icon {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}

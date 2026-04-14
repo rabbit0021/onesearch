@@ -14,6 +14,7 @@ import CompanySelector from '../../components/subscription/CompanySelector/Compa
 import FrequencySlider from '../../components/subscription/FrequencySlider/FrequencySlider'
 import SubscriptionStatus from '../../components/subscription/SubscriptionStatus/SubscriptionStatus'
 
+import JiraIssuesSummary from '../../components/jira/JiraIssuesSummary/JiraIssuesSummary'
 import styles from './Home.module.css'
 
 export default function Home() {
@@ -91,31 +92,37 @@ export default function Home() {
       <main className={styles.container}>
         <Header />
 
-        <form className={styles.form} onSubmit={handleSubmit} noValidate>
-          <EmailInput
-            value={email}
-            onChange={setEmail}
-            onBlur={handleEmailBlur}
-          />
+        <div className={styles.layout}>
+          <form className={styles.form} onSubmit={handleSubmit} noValidate>
+            <EmailInput
+              value={email}
+              onChange={setEmail}
+              onBlur={handleEmailBlur}
+            />
 
-          <SubscriptionStatus data={existingSubs} />
+            <SubscriptionStatus data={existingSubs} />
 
-          <TopicSelector value={topic} onChange={setTopic} />
+            <TopicSelector value={topic} onChange={setTopic} />
 
-          <SourceSelector selected={sources} onChange={handleSourceChange} />
+            <SourceSelector selected={sources} onChange={handleSourceChange} />
 
-          <CompanySelector
-            selected={companies}
-            onChange={setCompanies}
-            disabled={!sources.includes('techteams')}
-          />
+            <CompanySelector
+              selected={companies}
+              onChange={setCompanies}
+              disabled={!sources.includes('techteams')}
+            />
 
-          <FrequencySlider value={frequency} onChange={setFrequency} />
+            <FrequencySlider value={frequency} onChange={setFrequency} />
 
-          <button type="submit" className={styles.submitBtn} disabled={submitting}>
-            {submitting ? 'Subscribing…' : 'Subscribe'}
-          </button>
-        </form>
+            <button type="submit" className={styles.submitBtn} disabled={submitting}>
+              {submitting ? 'Subscribing…' : 'Subscribe'}
+            </button>
+          </form>
+
+          <div className={styles.sidebar}>
+            <JiraIssuesSummary />
+          </div>
+        </div>
 
         <Footer />
       </main>

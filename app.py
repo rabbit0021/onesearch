@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 from flask import Flask, send_from_directory, jsonify, request, render_template
 import json
 import os
@@ -9,13 +12,17 @@ from datetime import timezone
 from db import get_database
 import time
 from functools import wraps
+from auth import jira_bp
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'dev-secret-change-in-production')
 
 # React build directory — used in production to serve the SPA
 REACT_BUILD_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "frontend", "dist")
 app.db = get_database()
 SECRET_KEY = os.getenv("POSTS_SECRET_KEY", "123")
+
+app.register_blueprint(jira_bp)
 
 # Logging    
 app.logger = get_logger("app")
