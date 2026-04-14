@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { subscribe, getSubscriptionsForEmail } from '../../api'
 import { useToast } from '../../context/ToastContext'
 
@@ -31,6 +31,7 @@ export default function Home() {
   // Sidebar state
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [hasDot, setHasDot] = useState(true)
+  const toggleRef = useRef(null)
 
   function handleSourceChange(id, checked) {
     setSources((prev) =>
@@ -49,8 +50,8 @@ export default function Home() {
     }
   }
 
-  function handleSidebarOpen() {
-    setSidebarOpen(true)
+  function handleSidebarToggle() {
+    setSidebarOpen((prev) => !prev)
     setHasDot(false)
   }
 
@@ -84,8 +85,8 @@ export default function Home() {
 
   return (
     <div className={styles.page}>
-      <NotificationIcon hasDot={hasDot} onClick={handleSidebarOpen} />
-      <Sidebar open={sidebarOpen} onClose={closeSidebar} />
+      <NotificationIcon open={sidebarOpen} hasDot={hasDot} onClick={handleSidebarToggle} btnRef={toggleRef} />
+      <Sidebar open={sidebarOpen} onClose={closeSidebar} toggleRef={toggleRef} />
 
       <main className={styles.container}>
         <Header />

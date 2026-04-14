@@ -36,12 +36,12 @@
 }
 
 .reloadBtn {
-  background: #007bff;
+  background: var(--color-primary);
   color: #fff;
 }
 
 .reloadBtn:hover:not(:disabled) {
-  background: #0056b3;
+  background: var(--color-primary-hover);
 }
 
 .reloadBtn:disabled {

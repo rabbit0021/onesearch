@@ -8,23 +8,30 @@ import styles from './Sidebar.module.css'
 
 /**
  * Props:
- *   open      – boolean
- *   onClose   – () => void
+ *   open         – boolean
+ *   onClose      – () => void
+ *   toggleRef    – ref to the toggle button so outside-click excludes it
  */
-export default function Sidebar({ open, onClose }) {
+export default function Sidebar({ open, onClose, toggleRef }) {
   const ref = useRef(null)
   const { showToast } = useToast()
 
-  // Close on outside click
+  // Close when clicking outside, but not when clicking the toggle button
+  // (the toggle button handles its own open/close)
   useEffect(() => {
     function handler(e) {
-      if (open && ref.current && !ref.current.contains(e.target)) {
+      if (
+        open &&
+        ref.current &&
+        !ref.current.contains(e.target) &&
+        !(toggleRef?.current && toggleRef.current.contains(e.target))
+      ) {
         onClose()
       }
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
-  }, [open, onClose])
+  }, [open, onClose, toggleRef])
 
   async function handleInterested() {
     try {
@@ -37,10 +44,6 @@ export default function Sidebar({ open, onClose }) {
 
   return (
     <aside ref={ref} className={`${styles.sidebar} ${open ? styles.open : ''}`}>
-      <button className={styles.close} onClick={onClose} aria-label="Close">
-        &times;
-      </button>
-
       <div className={styles.content}>
         <FeatureCard title="New Feature in Beta 🚀">
           <p>Publisher recommendations based on your reading patterns.</p>

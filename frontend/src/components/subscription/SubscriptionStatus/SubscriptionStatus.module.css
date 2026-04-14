@@ -1,6 +1,6 @@
 .box {
   background: #f0f4ff;
-  border-left: 3px solid #007bff;
+  border-left: 3px solid var(--color-primary);
   border-radius: 6px;
   padding: 10px 14px;
   font-size: 0.85rem;
@@ -23,7 +23,7 @@
 
 .topic {
   font-weight: 600;
-  color: #1d4ed8;
+  color: var(--color-primary-text);
   white-space: nowrap;
 }
 

@@ -19,22 +19,8 @@
   right: 0;
 }
 
-.close {
-  align-self: flex-end;
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  color: #666;
-  padding: 12px 14px 0;
-  cursor: pointer;
-  line-height: 1;
-}
-
-.close:hover {
-  color: #333;
-}
-
 .content {
+  padding-top: 64px; /* clear the fixed toggle button */
   padding: 8px 14px 20px;
   display: flex;
   flex-direction: column;
@@ -43,7 +29,7 @@
 
 .actionBtn {
   margin-top: 6px;
-  background: #007bff;
+  background: var(--color-primary);
   color: #fff;
   border: none;
   border-radius: 6px;
@@ -55,7 +41,7 @@
 }
 
 .actionBtn:hover {
-  background: #0056b3;
+  background: var(--color-primary-hover);
 }
 
 .list {

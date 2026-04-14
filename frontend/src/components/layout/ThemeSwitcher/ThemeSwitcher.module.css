@@ -1,0 +1,25 @@
+.switcher {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.15s, border-color 0.15s;
+  outline: none;
+}
+
+.swatch:hover {
+  transform: scale(1.2);
+}
+
+.active {
+  border-color: #333;
+  transform: scale(1.25);
+}

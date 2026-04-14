@@ -31,7 +31,7 @@
 }
 
 .input:focus {
-  border-color: #007bff;
+  border-color: var(--color-primary);
 }
 
 .inputDisabled {

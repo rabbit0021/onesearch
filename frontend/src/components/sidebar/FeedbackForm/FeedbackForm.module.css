@@ -16,12 +16,12 @@
 }
 
 .textarea:focus {
-  border-color: #007bff;
+  border-color: var(--color-primary);
 }
 
 .btn {
   align-self: flex-end;
-  background: #007bff;
+  background: var(--color-primary);
   color: #fff;
   border: none;
   border-radius: 6px;
@@ -33,7 +33,7 @@
 }
 
 .btn:hover:not(:disabled) {
-  background: #0056b3;
+  background: var(--color-primary-hover);
 }
 
 .btn:disabled {

@@ -1,27 +1,29 @@
 .header {
   display: flex;
   align-items: center;
-  gap: 14px;
-  margin-bottom: 1.5rem;
+  gap: 20px;
+  flex-direction: column;
 }
 
-.logoWrap {
+.themeSwitcherWrap {
+  margin-left: auto;
   flex-shrink: 0;
 }
 
 .logo {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  border: 2px solid #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  width: 350px;
+  height: 100px;
   object-fit: cover;
+  margin-left: 45px;
 }
 
 .text {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 10px;
+  align-self: flex-start;
+  margin-left: 28px;
+
 }
 
 .title {
@@ -33,6 +35,6 @@
 
 .intro {
   font-size: 0.8rem;
-  color: #828282;
+  color: #2d2d2d;
   line-height: 1.5;
 }

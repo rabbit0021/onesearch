@@ -23,7 +23,7 @@
 
 .slider {
   flex: 1;
-  accent-color: #007bff;
+  accent-color: var(--color-primary);
   height: 4px;
   cursor: pointer;
 }

@@ -38,9 +38,9 @@
 }
 
 .checked {
-  background: #dbeafe;
-  border-color: #007bff;
-  color: #1d4ed8;
+  background: var(--color-primary-tint);
+  border-color: var(--color-primary);
+  color: var(--color-primary-text);
 }
 
 .disabled {

@@ -1,6 +1,6 @@
 .toast {
   background: #e6f4ea;
-  color: #2e7d32;
+  color: var(--color-primary-text);
   border-radius: 8px;
   padding: 12px 18px;
   font-size: 0.9rem;

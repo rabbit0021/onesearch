@@ -1,16 +1,26 @@
 import styles from './NotificationIcon.module.css'
 
 /**
- * Fixed top-right hamburger icon that toggles the sidebar.
+ * Fixed top-right toggle button.
+ * Shows a hamburger when the sidebar is closed, an ✕ when open.
+ *
  * Props:
- *   hasDot    – boolean  show the red notification dot
+ *   open      – boolean  sidebar open state
+ *   hasDot    – boolean  show the red notification dot (only when closed)
  *   onClick   – () => void
+ *   btnRef    – ref forwarded so Sidebar can exclude it from outside-click detection
  */
-export default function NotificationIcon({ hasDot, onClick }) {
+export default function NotificationIcon({ open, hasDot, onClick, btnRef }) {
   return (
-    <div className={styles.wrapper} onClick={onClick} role="button" aria-label="Open menu" tabIndex={0}>
-      <i className="fas fa-bars" />
-      {hasDot && <span className={styles.dot} />}
-    </div>
+    <button
+      ref={btnRef}
+      className={`${styles.wrapper} ${open ? styles.active : ''}`}
+      onClick={onClick}
+      aria-label={open ? 'Close menu' : 'Open menu'}
+      aria-expanded={open}
+    >
+      <i className={open ? 'fas fa-times' : 'fas fa-bars'} />
+      {!open && hasDot && <span className={styles.dot} />}
+    </button>
   )
 }

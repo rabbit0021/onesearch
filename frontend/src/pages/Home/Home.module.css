@@ -4,23 +4,23 @@
 }
 
 .container {
-  max-width: 620px;
+  max-width: 100%;
   margin: 0 auto;
   padding: 2rem 1rem;
 }
 
 .form {
-  background: #fff;
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
   padding: 1.75rem;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+  max-width: 50%;
 }
 
 .submitBtn {
-  background: #007bff;
+  background: var(--color-primary);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -33,7 +33,7 @@
 }
 
 .submitBtn:hover:not(:disabled) {
-  background: #0056b3;
+  background: var(--color-primary-hover);
 }
 
 .submitBtn:disabled {
