@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { subscribe, getSubscriptionsForEmail } from '../../api'
 import { useToast } from '../../context/ToastContext'
 
@@ -6,6 +6,7 @@ import Header from '../../components/layout/Header/Header'
 import Footer from '../../components/layout/Footer/Footer'
 import NotificationIcon from '../../components/layout/NotificationIcon/NotificationIcon'
 import ThemeSwitcher from '../../components/layout/ThemeSwitcher/ThemeSwitcher'
+import JiraHeaderButton from '../../components/jira/JiraHeaderButton/JiraHeaderButton'
 import Sidebar from '../../components/sidebar/Sidebar/Sidebar'
 
 import EmailInput from '../../components/subscription/EmailInput/EmailInput'
@@ -35,6 +36,13 @@ export default function Home() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [hasDot, setHasDot] = useState(true)
   const toggleRef = useRef(null)
+
+  const [atTop, setAtTop] = useState(true)
+  useEffect(() => {
+    const onScroll = () => setAtTop(window.scrollY <= 50)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   function handleSourceChange(id, checked) {
     setSources((prev) =>
@@ -88,8 +96,13 @@ export default function Home() {
 
   return (
     <div className={styles.page}>
-      <NotificationIcon open={sidebarOpen} hasDot={hasDot} onClick={handleSidebarToggle} btnRef={toggleRef} />
-      <ThemeSwitcher />
+      <div className={styles.topRight}>
+        <div className={`${styles.topRightHideable} ${atTop && !sidebarOpen ? '' : styles.topRightHidden}`}>
+          <JiraHeaderButton />
+          <ThemeSwitcher />
+        </div>
+        <NotificationIcon open={sidebarOpen} hasDot={hasDot} onClick={handleSidebarToggle} btnRef={toggleRef} />
+      </div>
       <Sidebar open={sidebarOpen} onClose={closeSidebar} toggleRef={toggleRef} />
 
       <main className={styles.container}>

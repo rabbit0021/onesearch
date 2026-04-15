@@ -1,9 +1,9 @@
 .header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 20px;
   flex-direction: column;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
 .themeSwitcherWrap {
@@ -18,8 +18,7 @@
 
 .logo {
   width: 350px;
-  height: 100px;
-  object-fit:fill;
-  margin-left: 45px;
+  height: 70px;
+  object-fit:cover;
 }
 

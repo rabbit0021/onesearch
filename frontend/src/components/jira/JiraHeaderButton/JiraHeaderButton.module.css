@@ -11,7 +11,7 @@
   text-decoration: none;
   transition: background 0.2s;
   white-space: nowrap;
-  margin-left: -50px;
+  margin-left: 0;
 }
 
 .connectBtn:hover {

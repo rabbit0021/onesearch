@@ -1,6 +1,34 @@
+.topRight {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.topRightHideable {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.topRightHidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+}
+
 .page {
   min-height: 100vh;
   background: #f4f6f9;
+  padding-left: 10px;
+  padding-right: 10px;
+
 }
 
 .container {
@@ -17,13 +45,13 @@
 
 .form {
   flex: 0 0 40%;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
-  margin: 1.25rem;
   padding: .5rem;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+  margin-top: 20px;
+  position: sticky;
+  top:20px
 }
 
 .sidebar {
@@ -44,7 +72,7 @@
   letter-spacing: 0.05em;
   cursor: pointer;
   transition: box-shadow 0.2s, background 0.2s, color 0.2s;
-  margin-top: 4px;
+  margin-top: 15px;
 }
 
 .submitBtn:hover:not(:disabled) {
