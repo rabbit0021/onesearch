@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
-import { getFeed } from '../../../api'
+import { getFeed, getSuggestedFeed } from '../../../api'
+import { getJiraStatus, getJiraIssues } from '../../../api/jira'
 import styles from './BlogFeed.module.css'
 
 const TOPIC_COLORS = {
@@ -41,13 +42,14 @@ function BlogCard({ post }) {
   const color = TOPIC_COLORS[post.topic] || TOPIC_COLORS['General']
   const favicon = faviconUrl(post.url)
   const tags = post.tags ? post.tags.split(',').map(t => t.trim()).filter(Boolean) : []
+  const match = post.matched_issue
 
   return (
     <a
       href={post.url}
       target="_blank"
       rel="noopener noreferrer"
-      className={styles.card}
+      className={`${styles.card} ${match ? styles.cardMatched : ''}`}
     >
       <div className={styles.thumbnail} style={{ background: color }}>
         {favicon && (
@@ -73,6 +75,13 @@ function BlogCard({ post }) {
             ))}
           </div>
         )}
+        {match && (
+          <div className={styles.matchTip}>
+            <span className={styles.matchPrompt}>▸</span>
+            <span className={styles.matchKey}>{match.key}</span>
+            <span className={styles.matchSummary}>{match.summary}</span>
+          </div>
+        )}
       </div>
     </a>
   )
@@ -90,10 +99,28 @@ export default function BlogFeed() {
   const [tagSearch, setTagSearch] = useState('')
 
   useEffect(() => {
-    getFeed(100)
-      .then(setPosts)
-      .catch(e => setError(e.message))
-      .finally(() => setLoading(false))
+    async function loadFeed() {
+      try {
+        const status = await getJiraStatus()
+        if (status.connected) {
+          const data = await getJiraIssues()
+          const issues = data.issues || []
+          if (issues.length > 0) {
+            const suggested = await getSuggestedFeed(issues, 100)
+            setPosts(suggested)
+            setLoading(false)
+            return
+          }
+        }
+      } catch {
+        // fall through to regular feed
+      }
+      getFeed(100)
+        .then(setPosts)
+        .catch(e => setError(e.message))
+        .finally(() => setLoading(false))
+    }
+    loadFeed()
   }, [])
 
   const publishers = useMemo(
@@ -132,7 +159,27 @@ export default function BlogFeed() {
 
   const hasFilters = search || publisher || dateDays || activeTags.length > 0
 
-  if (loading) return <p className={styles.hint}>Loading posts…</p>
+  const grouped = useMemo(() => {
+    const groups = {}
+    const unmatched = []
+    filtered.forEach(post => {
+      if (post.matched_issue) {
+        const key = post.matched_issue.key
+        if (!groups[key]) groups[key] = { issue: post.matched_issue, posts: [] }
+        groups[key].posts.push(post)
+      } else {
+        unmatched.push(post)
+      }
+    })
+    return { groups: Object.values(groups), unmatched }
+  }, [filtered])
+
+  if (loading) return (
+    <div className={styles.loadingWrap}>
+      <span className={styles.spinner} />
+      <span className={styles.loadingText}>loading posts<span className={styles.blink}>_</span></span>
+    </div>
+  )
   if (error) return <p className={styles.hint}>Could not load posts. {error}</p>
   if (posts.length === 0) return <p className={styles.hint}>No posts yet.</p>
 
@@ -214,18 +261,37 @@ export default function BlogFeed() {
       <p className={styles.heading}>
         {hasFilters
           ? `${filtered.length} post${filtered.length !== 1 ? 's' : ''} found`
-          : 'Engineering Posts for You'}
+          : 'Posts for You'}
       </p>
 
       {filtered.length === 0
         ? <p className={styles.hint}>No posts match your filters.</p>
-        : (
-          <div className={styles.grid}>
-            {filtered.map(post => (
-              <BlogCard key={post.id} post={post} />
+        : <>
+            {grouped.groups.map(group => (
+              <div key={group.issue.key} className={styles.issueSection}>
+                <div className={styles.issueHeading}>
+                  <img src="https://cdn.simpleicons.org/jira/2584FF" className={styles.issueIcon} alt="" />
+                  <span className={styles.issueKey}>{group.issue.key}</span>
+                  <span className={styles.issueSummary}>{group.issue.summary}</span>
+                </div>
+                <div className={styles.grid}>
+                  {group.posts.map(post => <BlogCard key={post.id} post={post} />)}
+                </div>
+              </div>
             ))}
-          </div>
-        )
+            {grouped.unmatched.length > 0 && (
+              <div className={styles.issueSection}>
+                {grouped.groups.length > 0 && (
+                  <div className={styles.heading}>
+                    other posts
+                  </div>
+                )}
+                <div className={styles.grid}>
+                  {grouped.unmatched.map(post => <BlogCard key={post.id} post={post} />)}
+                </div>
+              </div>
+            )}
+          </>
       }
     </div>
   )

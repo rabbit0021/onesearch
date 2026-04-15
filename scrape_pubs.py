@@ -6,7 +6,7 @@ from db import enums
 from handlers import ScraperFactory  # maps company -> handler class
 from db import get_database
 from logger_config import get_logger
-from classifier import classify_post
+from classifier import classify_post, get_embedding
 
 def parse_datetime(dt_str):
     if dt_str is None:
@@ -81,7 +81,9 @@ def scrape_pubs(db, conn, target_publishers=None):
                     
                     logger.info(f" {category} - Classified post '{post['title']}'")
         
-                    db.add_post(conn, post['url'], post['title'], publisher['id'], tags, post['published'], category)                    
+                    post_id = db.add_post(conn, post['url'], post['title'], publisher['id'], tags, post['published'], category)
+                    embedding = get_embedding(f"{post['title']} {tags}")
+                    db.save_post_embedding(conn, post_id, embedding.tobytes())                    
                 
                 publisher["last_scraped_at"] = datetime.now(timezone.utc).isoformat()
                 db.update_publisher(conn, publisher["id"], publisher["last_scraped_at"])

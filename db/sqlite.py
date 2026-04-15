@@ -65,6 +65,13 @@ class SQLiteDatabase:
             UNIQUE (url)
         )
         """)
+        # Migration: add embedding column if it doesn't exist yet
+        try:
+            c.execute("ALTER TABLE posts ADD COLUMN embedding BLOB")
+            logger.info("Migration: added embedding column to posts")
+        except Exception:
+            pass  # column already exists
+
         logger.info(f"SQLite database initialized Successfully")
         conn.commit()
         conn.close()
@@ -355,6 +362,10 @@ class SQLiteDatabase:
             return post['id']
 
     
+    def save_post_embedding(self, conn, post_id, embedding_bytes):
+        c = conn.cursor()
+        c.execute("UPDATE posts SET embedding = ? WHERE id = ?", (embedding_bytes, post_id))
+
     def get_post_by_url(self, conn, url):
         c = conn.cursor()
         c.execute("""
@@ -378,7 +389,9 @@ class SQLiteDatabase:
     def get_posts(self, conn):
         c = conn.cursor()
         c.execute("""
-            SELECT *
+            SELECT po.id, po.url, po.title, po.tags, po.published_at,
+                   po.modified_at, po.labelled, po.topic, po.embedding,
+                   p.id AS publisher_id, p.publisher_name, p.publisher_type
             FROM posts po
             JOIN publishers p ON po.publisher_id = p.id
         """)

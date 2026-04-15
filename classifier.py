@@ -72,6 +72,11 @@ if os.path.exists(MODEL_PATH):
         trained_clf, label_encoder = pickle.load(f)
     logger.info(f"[Classifier] Loaded trained classifier from {MODEL_PATH}")
 
+# ===== Embedding helper =====
+def get_embedding(text):
+    """Return a numpy array embedding for the given text."""
+    return embedding_model.encode(text, convert_to_numpy=True)
+
 # ===== Baseline classifier =====
 def classify_with_embeddings(title, tags="", content=""):
     content_snippet = content[:100] if content else ""

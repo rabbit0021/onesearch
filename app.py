@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 load_dotenv()
 
-from flask import Flask, send_from_directory, jsonify, request, render_template
+from flask import Flask, send_from_directory, jsonify, request, render_template, session
 import json
 import os
 from handlers import ScraperFactory
@@ -13,6 +13,38 @@ from db import get_database
 import time
 from functools import wraps
 from auth import jira_bp
+from classifier import get_embedding
+import numpy as np
+import pickle
+import hashlib
+
+# In-memory cache for Jira issue embeddings: { cache_key -> { embeddings, expires_at } }
+_issue_embedding_cache = {}
+_ISSUE_CACHE_TTL = 2 * 24 * 3600  # 2 days in seconds
+
+def _get_issue_embeddings(cloud_id, issues):
+    """Return cached issue embeddings or compute and cache them."""
+    text_blob = cloud_id + ''.join(
+        i.get('summary', '') + (i.get('description') or '') for i in issues
+    )
+    cache_key = hashlib.md5(text_blob.encode()).hexdigest()
+
+    cached = _issue_embedding_cache.get(cache_key)
+    if cached and cached['expires_at'] > time.time():
+        return cached['embeddings']
+
+    embeddings = []
+    for issue in issues:
+        text = issue.get('summary', '')
+        if issue.get('description'):
+            text += ' ' + issue['description']
+        embeddings.append((issue, get_embedding(text)))
+
+    _issue_embedding_cache[cache_key] = {
+        'embeddings': embeddings,
+        'expires_at': time.time() + _ISSUE_CACHE_TTL,
+    }
+    return embeddings
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'dev-secret-change-in-production')
@@ -266,6 +298,69 @@ def update_post(post_id):
     finally:
         conn.close()
         
+@app.route("/feed/suggested", methods=["POST"])
+def suggested_feed():
+    data = request.get_json()
+    issues = data.get("issues", [])
+    limit = int(request.args.get("limit", 100))
+
+    if not issues:
+        return jsonify([])
+
+    cloud_id = session.get('jira_cloud_id', 'anonymous')
+    issue_embeddings = _get_issue_embeddings(cloud_id, issues)
+
+    conn = app.db.get_connection()
+    try:
+        posts = app.db.get_posts(conn)
+        feed = []
+        for post in posts:
+            if not post.get("labelled"):
+                continue
+            feed.append({
+                "id": post["id"],
+                "url": post["url"],
+                "title": post["title"],
+                "topic": post["topic"],
+                "publisher": post["publisher_name"],
+                "published_at": post["published_at"],
+                "tags": post["tags"],
+                "embedding": post.get("embedding"),
+            })
+        feed.sort(key=lambda x: datetime.fromisoformat(x["published_at"]), reverse=True)
+        feed = feed[:limit]
+    finally:
+        conn.close()
+
+    # Score each post against all issues
+    result = []
+    for post in feed:
+        raw = post.pop("embedding")
+        best_score = 0.0
+        best_issue = None
+
+        if raw:
+            try:
+                post_vec = np.frombuffer(raw, dtype=np.float32).copy()
+                post_vec = post_vec / (np.linalg.norm(post_vec) + 1e-9)
+                for issue, issue_vec in issue_embeddings:
+                    iv = issue_vec / (np.linalg.norm(issue_vec) + 1e-9)
+                    score = float(np.dot(post_vec, iv))
+                    if score > best_score:
+                        best_score = score
+                        best_issue = issue
+            except Exception:
+                pass  # bad embedding bytes — post still included, just unranked
+
+        post["matched_issue"] = {"key": best_issue["key"], "summary": best_issue["summary"]} if best_issue and best_score > 0.4 else None
+        post["score"] = round(best_score, 4)
+        result.append(post)
+
+    # Sort: matched posts first (by score desc), then rest by date
+    result.sort(key=lambda x: (x["score"] if x["matched_issue"] else 0), reverse=True)
+    return jsonify(result)
+
+
 if __name__ == "__main__":
     if os.getenv("FLASK_ENV") == "Production":
         app.run()

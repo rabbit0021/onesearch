@@ -130,7 +130,7 @@ export default function Home() {
 
           <BlogFeed />
 
-          <JiraIssuesSummary />
+          {/* <JiraIssuesSummary /> */}
 
           <div className={styles.sidebar}>
           </div>

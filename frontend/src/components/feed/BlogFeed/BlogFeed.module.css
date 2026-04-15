@@ -1,7 +1,7 @@
 .wrapper {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1rem;
   margin: 1.25rem;
   padding: .5rem;
   box-sizing: border-box;
@@ -15,13 +15,15 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #9ca3af;
-  margin: 0;
+  margin-top: 35px;
+  margin-bottom: 10px;
 }
 
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 0.75rem;
+  gap: 1rem;
+  row-gap: 2rem;
 }
 
 .card {
@@ -136,11 +138,52 @@
   font-size: 0.8rem;
   color: #9ca3af;
   margin: 0;
+  padding: 0.7rem 0.85rem;
 }
 
-/* ── Filter bar container ── */
+/* ── Loading state ── */
+.loadingWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 200px;
+  width: 100%;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spinner {
+  display: block;
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(85, 255, 85, 0.15);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+.loadingText {
+  font-size: 1rem;
+  color: var(--color-primary);
+  letter-spacing: 0.1em;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+.blink {
+  animation: blink 0.9s step-start infinite;
+}
+
+/* ── Filter bar container 4e4e4e ── */
 .filterBar {
-  background: #4e4e4e;
+  background: #4e4e4e; 
   border: 1px solid #2a2a2a;
   border-top: 2px solid var(--color-primary);
   border-radius: 8px;
@@ -315,4 +358,93 @@
 .resetAll:hover {
   background: var(--color-primary);
   color: #0a0a0a;
+}
+
+/* ── Jira suggestion tip ── */
+.cardMatched {
+}
+
+.matchTip {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-top: 0.4rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid #f0f0f0;
+  overflow: hidden;
+}
+
+.matchPrompt {
+  font-size: 0.85rem;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.matchKey {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #555;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.matchSummary {
+  font-size: 0.65rem;
+  color: #888;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Jira issue grouped sections ── */
+.issueSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 5px;
+}
+
+.issueHeading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 14px 7px 0;
+  background: transparent;
+  border: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.issuePrompt {
+  font-size: 0.7rem;
+  color: var(--color-primary);
+  flex-shrink: 0;
+  margin-left: 12px;
+  opacity: 0.7;
+}
+
+.issueKey {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #126add;
+  letter-spacing: 0.06em;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.issueSummary {
+  font-size: 0.75rem;
+  color: #555;
+  text-decoration: underline;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-style: italic;
+}
+
+.issueIcon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  margin: 5px;
 }

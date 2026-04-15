@@ -59,6 +59,16 @@ export async function getPosts(secretKey) {
   return res.json()
 }
 
+export async function getSuggestedFeed(issues, limit = 100) {
+  const res = await fetch(`/feed/suggested?limit=${limit}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ issues }),
+  })
+  if (!res.ok) throw new Error('Failed to fetch suggested feed')
+  return res.json()
+}
+
 export async function updatePost(id, topic, tags, secretKey) {
   const res = await fetch(`/posts/${id}`, {
     method: 'PATCH',
