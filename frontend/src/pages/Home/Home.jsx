@@ -96,17 +96,21 @@ export default function Home() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.topRight}>
-        <div className={`${styles.topRightHideable} ${atTop && !sidebarOpen ? '' : styles.topRightHidden}`}>
-          <JiraHeaderButton />
-          <ThemeSwitcher />
-        </div>
-        <NotificationIcon open={sidebarOpen} hasDot={hasDot} onClick={handleSidebarToggle} btnRef={toggleRef} />
-      </div>
       <Sidebar open={sidebarOpen} onClose={closeSidebar} toggleRef={toggleRef} />
 
       <main className={styles.container}>
-        <Header />
+        <div className={styles.headerRow}>
+          <Header />
+          <div className={styles.topRight}>
+            <div className={`${styles.topRightHideable} ${atTop && !sidebarOpen ? '' : styles.topRightHidden}`}>
+              <JiraHeaderButton />
+              <ThemeSwitcher />
+            </div>
+            <div className={styles.notifBtn}>
+              <NotificationIcon open={sidebarOpen} hasDot={hasDot} onClick={handleSidebarToggle} btnRef={toggleRef} />
+            </div>
+          </div>
+        </div>
 
         <div className={styles.layout}>
           <form className={styles.form} onSubmit={handleSubmit} noValidate>

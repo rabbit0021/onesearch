@@ -9,6 +9,32 @@
   width: 700px;
 }
 
+@media (max-width: 768px) {
+  .wrapper {
+    width: 100%;
+    max-width: 100%;
+    margin: 0.5rem 0;
+  }
+
+  .toolbar {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .searchWrap {
+    grid-column: 1 / -1;
+  }
+
+  .tagFilter {
+    flex-wrap: wrap;
+  }
+
+  .tagSearch {
+    flex: 1;
+    width: auto;
+    min-width: 80px;
+  }
+}
+
 .heading {
   font-size: 1rem;
   font-weight: 700;
@@ -210,7 +236,7 @@
 .searchPrompt {
   position: absolute;
   left: 10px;
-  color: #aaa;
+  color: var(--color-primary);
   font-size: 0.8rem;
   pointer-events: none;
   line-height: 1;

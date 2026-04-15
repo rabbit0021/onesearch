@@ -231,7 +231,7 @@ export default function BlogFeed() {
             />
             {(() => {
               const filtered = allTags.filter(t => t.toLowerCase().includes(tagSearch.toLowerCase()))
-              const visible = filtered.slice(0, 8)
+              const visible = filtered.slice(0, 4)
               const extra = filtered.length - visible.length
               return <>
                 {visible.map(tag => (
