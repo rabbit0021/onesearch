@@ -17,14 +17,6 @@ export const THEMES = {
     '--color-primary-text':  '#0d47a1',
     '--color-primary-tint':  '#e3f2fd',
   },
-  sunset: {
-    label: 'Sunset',
-    swatch: '#ff7043',
-    '--color-primary':       '#ff7043',
-    '--color-primary-hover': '#e64a19',
-    '--color-primary-text':  '#bf360c',
-    '--color-primary-tint':  '#fbe9e7',
-  },
   lavender: {
     label: 'Lavender',
     swatch: '#7c3aed',
