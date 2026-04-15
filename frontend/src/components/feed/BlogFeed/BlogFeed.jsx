@@ -327,15 +327,19 @@ export default function BlogFeed() {
             </div>
           )}
 
-          {/* 3. Other Posts */}
-          {grouped.unmatched.length > 0 && (
-            <div className={styles.section}>
-              <p className={styles.heading}>Other Posts</p>
-              <div className={styles.grid}>
-                {grouped.unmatched.map(post => <BlogCard key={post.id} post={post} jiraConnected={jiraConnected} />)}
+          {/* 3. Other Posts — exclude posts already shown in Most Liked */}
+          {(() => {
+            const mostLikedIds = new Set(mostLiked.map(p => p.id))
+            const otherPosts = grouped.unmatched.filter(p => !mostLikedIds.has(p.id))
+            return otherPosts.length > 0 && (
+              <div className={styles.section}>
+                <p className={styles.heading}>Other Posts</p>
+                <div className={styles.grid}>
+                  {otherPosts.map(post => <BlogCard key={post.id} post={post} jiraConnected={jiraConnected} />)}
+                </div>
               </div>
-            </div>
-          )}
+            )
+          })()}
         </>
       ) : (
         <>
@@ -359,18 +363,24 @@ export default function BlogFeed() {
             ) : null}
           </div>
 
-          {/* 2. Posts for You */}
-          <div className={styles.section}>
-            <p className={styles.heading}>
-              {hasFilters ? `${filtered.length} post${filtered.length !== 1 ? 's' : ''} found` : 'Posts for You'}
-            </p>
-            {filtered.length === 0
-              ? <p className={styles.hint}>No posts match your filters.</p>
-              : <div className={styles.grid}>
-                  {filtered.map(post => <BlogCard key={post.id} post={post} jiraConnected={jiraConnected} />)}
-                </div>
-            }
-          </div>
+          {/* 2. Posts for You — exclude posts already shown in Most Liked */}
+          {(() => {
+            const mostLikedIds = new Set(mostLiked.map(p => p.id))
+            const postsForYou = jiraConnected ? filtered.filter(p => !mostLikedIds.has(p.id)) : filtered
+            return (
+              <div className={styles.section}>
+                <p className={styles.heading}>
+                  {hasFilters ? `${postsForYou.length} post${postsForYou.length !== 1 ? 's' : ''} found` : 'Posts for You'}
+                </p>
+                {postsForYou.length === 0
+                  ? <p className={styles.hint}>No posts match your filters.</p>
+                  : <div className={styles.grid}>
+                      {postsForYou.map(post => <BlogCard key={post.id} post={post} jiraConnected={jiraConnected} />)}
+                    </div>
+                }
+              </div>
+            )
+          })()}
         </>
       )}
       

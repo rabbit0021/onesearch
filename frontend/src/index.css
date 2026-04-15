@@ -14,9 +14,10 @@
 
 body {
   font-family: 'Courier New', Courier, monospace;
-  background-color: #f4f6f9;
   color: #333;
   min-height: 100vh;
+  background-color: rgb(251, 251, 249)
+
 }
 
 a {

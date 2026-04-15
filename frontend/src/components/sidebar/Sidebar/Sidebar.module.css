@@ -4,7 +4,7 @@
   right: -280px;
   width: 260px;
   height: 100dvh;
-  background: rgba(234, 236, 240, 0.62);
+  background: rgba(240, 240, 237, 0.62);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-left: 2px solid rgba(200, 200, 200, 0.4);

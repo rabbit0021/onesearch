@@ -215,7 +215,7 @@
 
 /* ── Filter bar container 4e4e4e ── */
 .filterBar {
-  background: #dedede; 
+  background: #f0eeeb; 
   border: 1px solid #a2a2a2;
   border-top: 2px solid var(--color-primary);
   border-radius: 8px;
@@ -256,7 +256,7 @@
   border-radius: 6px;
   font-size: 1rem;
   outline: none;
-  background: transparent;
+  background: rgb(236, 236, 236);
   color: #404040;
   caret-color: var(--color-primary);
 }
@@ -330,7 +330,7 @@
   height: 22px;
   border-radius: 3px;
   padding: 0 8px;
-  background-color:transparent;
+  background-color:rgb(236, 236, 236);
   font-size: 0.72rem;
   color: #404040;
   outline: none;
@@ -372,7 +372,8 @@
 }
 
 .tagPillActive {
-  background: var(--color-primary);
+  border-color: var(--color-primary);
+  background: var(--color-primary-tint);
   color: #404040;
 }
 
