@@ -69,6 +69,18 @@ export async function getSuggestedFeed(issues, limit = 100) {
   return res.json()
 }
 
+export async function likePost(id) {
+  const res = await fetch(`/posts/${id}/like`, { method: 'POST' })
+  if (!res.ok) throw new Error('Failed to like post')
+  return res.json()
+}
+
+export async function getMostLikedFeed(limit = 5) {
+  const res = await fetch(`/feed/most-liked?limit=${limit}`)
+  if (!res.ok) throw new Error('Failed to fetch most liked feed')
+  return res.json()
+}
+
 export async function updatePost(id, topic, tags, secretKey) {
   const res = await fetch(`/posts/${id}`, {
     method: 'PATCH',

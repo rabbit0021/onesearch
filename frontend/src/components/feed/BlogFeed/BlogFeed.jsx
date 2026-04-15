@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { getFeed, getSuggestedFeed } from '../../../api'
+import { getFeed, getSuggestedFeed, getMostLikedFeed, likePost } from '../../../api'
 import { getJiraStatus, getJiraIssues } from '../../../api/jira'
 import styles from './BlogFeed.module.css'
 
@@ -38,11 +38,22 @@ function timeAgo(iso) {
   return `${months}mo ago`
 }
 
-function BlogCard({ post }) {
+function BlogCard({ post, jiraConnected }) {
   const color = TOPIC_COLORS[post.topic] || TOPIC_COLORS['General']
   const favicon = faviconUrl(post.url)
   const tags = post.tags ? post.tags.split(',').map(t => t.trim()).filter(Boolean) : []
   const match = post.matched_issue
+  const [likeCount, setLikeCount] = useState(post.like_count || 0)
+
+  async function handleLike(e) {
+    e.preventDefault()
+    e.stopPropagation()
+    if (!jiraConnected) return
+    try {
+      const data = await likePost(post.id)
+      setLikeCount(data.count)
+    } catch { /* silently fail */ }
+  }
 
   return (
     <a
@@ -61,6 +72,17 @@ function BlogCard({ post }) {
           />
         )}
         <span className={styles.topicLabel}>{post.topic}</span>
+        <div
+          className={`${styles.likeBtn} ${!jiraConnected ? styles.likeBtnLocked : ''}`}
+          role="button"
+          tabIndex={0}
+          onClick={handleLike}
+        >
+          {jiraConnected
+            ? <><i className="fas fa-heart" /><span className={styles.likeCount}>{likeCount}</span></>
+            : <><i className="fas fa-heart" /><span className={styles.likeCount}>–</span></>
+          }
+        </div>
       </div>
       <div className={styles.body}>
         <div className={styles.meta}>
@@ -91,6 +113,8 @@ export default function BlogFeed() {
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [jiraConnected, setJiraConnected] = useState(false)
+  const [mostLiked, setMostLiked] = useState([])
 
   const [search, setSearch] = useState('')
   const [publisher, setPublisher] = useState('')
@@ -99,10 +123,13 @@ export default function BlogFeed() {
   const [tagSearch, setTagSearch] = useState('')
 
   useEffect(() => {
+    getMostLikedFeed(5).then(setMostLiked).catch(() => {})
+
     async function loadFeed() {
       try {
         const status = await getJiraStatus()
         if (status.connected) {
+          setJiraConnected(true)
           const data = await getJiraIssues()
           const issues = data.issues || []
           if (issues.length > 0) {
@@ -185,6 +212,9 @@ export default function BlogFeed() {
 
   return (
     <div className={styles.wrapper}>
+
+      
+
       <div className={styles.filterBar}>
         <div className={styles.toolbar}>
           <div className={styles.searchWrap}>
@@ -258,41 +288,92 @@ export default function BlogFeed() {
         )}
       </div>
 
-      <p className={styles.heading}>
-        {hasFilters
-          ? `${filtered.length} post${filtered.length !== 1 ? 's' : ''} found`
-          : 'Posts for You'}
-      </p>
+      {/* ── Section order:
+            Jira connected + matches → [Posts for You (grouped)] → [Most Liked] → [Other Posts]
+            Otherwise               → [Most Liked (locked/real)] → [Posts for You]
+      ── */}
 
-      {filtered.length === 0
-        ? <p className={styles.hint}>No posts match your filters.</p>
-        : <>
-            {grouped.groups.map(group => (
-              <div key={group.issue.key} className={styles.issueSection}>
-                <div className={styles.issueHeading}>
-                  <img src="https://cdn.simpleicons.org/jira/2584FF" className={styles.issueIcon} alt="" />
-                  <span className={styles.issueKey}>{group.issue.key}</span>
-                  <span className={styles.issueSummary}>{group.issue.summary}</span>
-                </div>
-                <div className={styles.grid}>
-                  {group.posts.map(post => <BlogCard key={post.id} post={post} />)}
-                </div>
-              </div>
-            ))}
-            {grouped.unmatched.length > 0 && (
-              <div className={styles.issueSection}>
-                {grouped.groups.length > 0 && (
-                  <div className={styles.heading}>
-                    other posts
+      {jiraConnected && grouped.groups.length > 0 ? (
+        <>
+          {/* 1. Posts for You — Jira grouped */}
+          <div className={styles.section}>
+            <p className={styles.heading}>
+              {hasFilters ? `${filtered.length} post${filtered.length !== 1 ? 's' : ''} found` : 'Posts for You'}
+            </p>
+            {filtered.length === 0
+              ? <p className={styles.hint}>No posts match your filters.</p>
+              : grouped.groups.map(group => (
+                  <div key={group.issue.key} className={styles.issueSection}>
+                    <div className={styles.issueHeading}>
+                      <img src="https://cdn.simpleicons.org/jira/2584FF" className={styles.issueIcon} alt="" />
+                      <span className={styles.issueKey}>{group.issue.key}</span>
+                      <span className={styles.issueSummary}>{group.issue.summary}</span>
+                    </div>
+                    <div className={styles.grid}>
+                      {group.posts.map(post => <BlogCard key={post.id} post={post} jiraConnected={jiraConnected} />)}
+                    </div>
                   </div>
-                )}
-                <div className={styles.grid}>
-                  {grouped.unmatched.map(post => <BlogCard key={post.id} post={post} />)}
+                ))
+            }
+          </div>
+
+          {/* 2. Most Liked Recently */}
+          {mostLiked.length > 0 && (
+            <div className={styles.section}>
+              <p className={styles.heading}>Most Liked Recently</p>
+              <div className={styles.grid}>
+                {mostLiked.map(post => <BlogCard key={post.id} post={post} jiraConnected={jiraConnected} />)}
+              </div>
+            </div>
+          )}
+
+          {/* 3. Other Posts */}
+          {grouped.unmatched.length > 0 && (
+            <div className={styles.section}>
+              <p className={styles.heading}>Other Posts</p>
+              <div className={styles.grid}>
+                {grouped.unmatched.map(post => <BlogCard key={post.id} post={post} jiraConnected={jiraConnected} />)}
+              </div>
+            </div>
+          )}
+        </>
+      ) : (
+        <>
+          {/* 1. Most Liked Recently (locked teaser or real) */}
+          <div className={styles.section}>
+            <p className={styles.heading}>Most Liked Recently</p>
+            {jiraConnected && mostLiked.length > 0 ? (
+              <div className={styles.grid}>
+                {mostLiked.map(post => <BlogCard key={post.id} post={post} jiraConnected={jiraConnected} />)}
+              </div>
+            ) : !jiraConnected ? (
+              <div className={styles.lockedContainer}>
+                <div className={styles.ghostGrid}>
+                  {[0, 1, 2].map(i => <div key={i} className={styles.ghostCard} />)}
+                </div>
+                <div className={styles.lockedOverlay}>
+                  <span className={styles.lockIcon}>⬡</span>
+                  <p className={styles.lockedMsg}>&gt;_ connect jira to see most liked posts recently</p>
                 </div>
               </div>
-            )}
-          </>
-      }
+            ) : null}
+          </div>
+
+          {/* 2. Posts for You */}
+          <div className={styles.section}>
+            <p className={styles.heading}>
+              {hasFilters ? `${filtered.length} post${filtered.length !== 1 ? 's' : ''} found` : 'Posts for You'}
+            </p>
+            {filtered.length === 0
+              ? <p className={styles.hint}>No posts match your filters.</p>
+              : <div className={styles.grid}>
+                  {filtered.map(post => <BlogCard key={post.id} post={post} jiraConnected={jiraConnected} />)}
+                </div>
+            }
+          </div>
+        </>
+      )}
+      
     </div>
   )
 }

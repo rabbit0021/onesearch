@@ -65,6 +65,16 @@ class SQLiteDatabase:
             UNIQUE (url)
         )
         """)
+        c.execute("""
+        CREATE TABLE IF NOT EXISTS post_likes (
+            post_id INTEGER NOT NULL,
+            jira_account_id TEXT NOT NULL,
+            liked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (post_id, jira_account_id),
+            FOREIGN KEY (post_id) REFERENCES posts(id)
+        )
+        """)
+
         # Migration: add embedding column if it doesn't exist yet
         try:
             c.execute("ALTER TABLE posts ADD COLUMN embedding BLOB")
@@ -391,10 +401,45 @@ class SQLiteDatabase:
         c.execute("""
             SELECT po.id, po.url, po.title, po.tags, po.published_at,
                    po.modified_at, po.labelled, po.topic, po.embedding,
-                   p.id AS publisher_id, p.publisher_name, p.publisher_type
+                   p.id AS publisher_id, p.publisher_name, p.publisher_type,
+                   COALESCE(lc.like_count, 0) AS like_count
             FROM posts po
             JOIN publishers p ON po.publisher_id = p.id
+            LEFT JOIN (
+                SELECT post_id, COUNT(*) AS like_count
+                FROM post_likes
+                GROUP BY post_id
+            ) lc ON lc.post_id = po.id
         """)
+        rows = c.fetchall()
+        return [dict(row) for row in rows]
+
+    def like_post(self, conn, post_id, jira_account_id):
+        c = conn.cursor()
+        c.execute(
+            "INSERT OR IGNORE INTO post_likes (post_id, jira_account_id) VALUES (?, ?)",
+            (post_id, jira_account_id)
+        )
+        conn.commit()
+        c.execute("SELECT COUNT(*) FROM post_likes WHERE post_id = ?", (post_id,))
+        return c.fetchone()[0]
+
+    def get_most_liked_this_month(self, conn, limit=5):
+        c = conn.cursor()
+        c.execute("""
+            SELECT po.id, po.url, po.title, po.tags, po.published_at,
+                   po.modified_at, po.labelled, po.topic,
+                   p.id AS publisher_id, p.publisher_name, p.publisher_type,
+                   COUNT(pl.jira_account_id) AS like_count
+            FROM post_likes pl
+            JOIN posts po ON pl.post_id = po.id
+            JOIN publishers p ON po.publisher_id = p.id
+            WHERE strftime('%Y-%m', pl.liked_at) = strftime('%Y-%m', 'now')
+              AND po.labelled = 1
+            GROUP BY po.id
+            ORDER BY like_count DESC
+            LIMIT ?
+        """, (limit,))
         rows = c.fetchall()
         return [dict(row) for row in rows]
     

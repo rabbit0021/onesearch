@@ -14,7 +14,7 @@ JIRA_CLIENT_ID = os.environ.get('JIRA_CLIENT_ID')
 JIRA_CLIENT_SECRET = os.environ.get('JIRA_CLIENT_SECRET')
 JIRA_REDIRECT_URI = os.environ.get('JIRA_REDIRECT_URI', 'http://localhost:5000/auth/jira/callback')
 FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
-JIRA_SCOPES = 'read:jira-work offline_access'
+JIRA_SCOPES = 'read:jira-work read:me offline_access'
 
 
 @jira_bp.route('/login')
@@ -74,6 +74,14 @@ def callback():
     session['jira_cloud_id'] = resources[0]['id'] if resources else None
     session['jira_site_name'] = resources[0]['name'] if resources else None
 
+    # Fetch Atlassian account ID for use as a stable user identifier (e.g. likes)
+    me_res = requests.get(
+        'https://api.atlassian.com/me',
+        headers={'Authorization': f'Bearer {access_token}', 'Accept': 'application/json'},
+    )
+    if me_res.ok:
+        session['jira_account_id'] = me_res.json().get('account_id')
+
     return redirect(f'{FRONTEND_URL}/?jira=connected')
 
 
@@ -130,6 +138,7 @@ def logout():
     session.pop('jira_access_token', None)
     session.pop('jira_cloud_id', None)
     session.pop('jira_site_name', None)
+    session.pop('jira_account_id', None)
     return jsonify({'ok': True})
 
 

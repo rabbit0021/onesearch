@@ -244,6 +244,7 @@ def get_feed():
                 "publisher": post["publisher_name"],
                 "published_at": post["published_at"],
                 "tags": post["tags"],
+                "like_count": post.get("like_count", 0),
             })
         result.sort(
             key=lambda x: datetime.fromisoformat(x["published_at"]),
@@ -325,6 +326,7 @@ def suggested_feed():
                 "publisher": post["publisher_name"],
                 "published_at": post["published_at"],
                 "tags": post["tags"],
+                "like_count": post.get("like_count", 0),
                 "embedding": post.get("embedding"),
             })
         feed.sort(key=lambda x: datetime.fromisoformat(x["published_at"]), reverse=True)
@@ -359,6 +361,39 @@ def suggested_feed():
     # Sort: matched posts first (by score desc), then rest by date
     result.sort(key=lambda x: (x["score"] if x["matched_issue"] else 0), reverse=True)
     return jsonify(result)
+
+
+@app.route("/posts/<int:post_id>/like", methods=["POST"])
+def like_post(post_id):
+    jira_account_id = session.get('jira_account_id')
+    if not jira_account_id:
+        return jsonify({"error": "Not authenticated with Jira"}), 401
+    conn = app.db.get_connection()
+    try:
+        count = app.db.like_post(conn, post_id, jira_account_id)
+        return jsonify({"count": count})
+    finally:
+        conn.close()
+
+
+@app.route("/feed/most-liked", methods=["GET"])
+def most_liked_feed():
+    limit = min(int(request.args.get("limit", 5)), 20)
+    conn = app.db.get_connection()
+    try:
+        posts = app.db.get_most_liked_this_month(conn, limit=limit)
+        return jsonify([{
+            "id": post["id"],
+            "url": post["url"],
+            "title": post["title"],
+            "topic": post["topic"],
+            "publisher": post["publisher_name"],
+            "published_at": post["published_at"],
+            "tags": post["tags"],
+            "like_count": post["like_count"],
+        } for post in posts])
+    finally:
+        conn.close()
 
 
 if __name__ == "__main__":
