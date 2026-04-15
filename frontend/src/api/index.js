@@ -75,7 +75,7 @@ export async function likePost(id) {
   return res.json()
 }
 
-export async function getMostLikedFeed(limit = 5) {
+export async function getMostLikedFeed(limit = 50) {
   const res = await fetch(`/feed/most-liked?limit=${limit}`)
   if (!res.ok) throw new Error('Failed to fetch most liked feed')
   return res.json()
