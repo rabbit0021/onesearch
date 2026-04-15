@@ -18,8 +18,8 @@
 }
 
 .link {
-  color: var(--color-primary);
   text-decoration: underline;
+  font-size: medium;
 }
 
 .link:hover {
@@ -37,6 +37,25 @@
 
 .select:focus {
   border-color: var(--color-primary);
+}
+
+.tagsCell {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  min-width: 160px;
+  max-width: 260px;
+}
+
+.tagInput {
+  border: none;
+  outline: none;
+  font-size: 0.82rem;
+  min-width: 70px;
+  flex: 1;
+  padding: 2px 4px;
+  background: transparent;
 }
 
 .btn {

@@ -30,7 +30,7 @@ export default function JiraHeaderButton() {
     <div className={styles.connected}>
       <span className={styles.check}>✓</span>
       <img src="https://cdn.simpleicons.org/jira/d97757" alt="" className={styles.icon} />
-      <span className={styles.site}>{status.site} connected</span>
+      <span className={styles.site}>connected to Jira</span>
     </div>
   )
 }

@@ -12,6 +12,9 @@ from logger_config import get_logger
 from collections import defaultdict
 import random
 from jinja2 import Template
+from dotenv import load_dotenv                                                                                 
+
+load_dotenv()   
 
 # === CONFIG ===
 SMTP_SERVER = "smtp.zoho.in"

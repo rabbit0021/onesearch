@@ -11,6 +11,7 @@
   text-decoration: none;
   transition: background 0.2s;
   white-space: nowrap;
+  margin-left: -50px;
 }
 
 .connectBtn:hover {
@@ -38,7 +39,7 @@
 }
 
 .site {
-  max-width: 160px;
+  max-width: 210px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

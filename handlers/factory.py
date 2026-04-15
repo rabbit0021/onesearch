@@ -13,7 +13,7 @@ class ScraperFactory:
             return airbnb.AirbnbScraper()
         elif comapny.lower() == "dropbox":
             return dropbox.DropboxScraper()
-        elif comapny.lower() == 'facebook':
+        elif comapny.lower() == 'facebook' or comapny.lower() == 'meta':
             return facebook.FacebookScraper()
         elif comapny.lower() == 'github':
             return github.Githubcraper()

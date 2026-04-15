@@ -2,10 +2,6 @@
    Design tokens — edit here to retheme the entire app
    ============================================================ */
 :root {
-  --color-primary:       #0fa341;  /* buttons, borders, accents  */
-  --color-primary-hover: #0b8a37;  /* hover / active darken      */
-  --color-primary-text:  #065523;  /* text on light bg           */
-  --color-primary-tint:  #e1f9eb;  /* selected chip / light fill */
 }
 
 *,

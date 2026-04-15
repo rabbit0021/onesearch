@@ -1,7 +1,11 @@
 import re
 import csv
 import json
+from flask.cli import load_dotenv
 import requests
+from dotenv import load_dotenv                                                                                 
+
+load_dotenv()   
 
 # Fetch the raw README markdown
 url = "https://raw.githubusercontent.com/kilimchoi/engineering-blogs/master/README.md"

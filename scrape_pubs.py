@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 from datetime import datetime, timezone
 from db import enums
 from handlers import ScraperFactory  # maps company -> handler class

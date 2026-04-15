@@ -394,16 +394,17 @@ class SQLiteDatabase:
         rows = c.fetchall()
         return [dict(row) for row in rows]
     
-    def update_post_label(self, conn, post_id, label):
-        logger.info(f"Updating post: {post_id}, with label: {label}")
+    def update_post_label(self, conn, post_id, label, tags=None):
+        logger.info(f"Updating post: {post_id}, with label: {label}, tags: {tags}")
         c = conn.cursor()
         c.execute("""
             UPDATE posts
-            SET topic = ?, 
+            SET topic = ?,
+                tags = ?,
                 modified_at = CURRENT_TIMESTAMP,
                 labelled = 1
             WHERE id = ?
-        """, (label, post_id))
+        """, (label, tags, post_id))
         conn.commit()  # don’t forget to commit the change
         logger.info(f"Post {post_id} updated successfully")
 

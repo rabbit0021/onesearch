@@ -2,10 +2,11 @@
   background: #fff;
   border-radius: 10px;
   border: 1px solid #ede8e4;
-  padding: 1rem 1.25rem;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  margin: 1.25rem;
+  padding: 1rem;
 }
 
 .heading {

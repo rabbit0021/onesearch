@@ -15,6 +15,7 @@ import FrequencySlider from '../../components/subscription/FrequencySlider/Frequ
 import SubscriptionStatus from '../../components/subscription/SubscriptionStatus/SubscriptionStatus'
 
 import JiraIssuesSummary from '../../components/jira/JiraIssuesSummary/JiraIssuesSummary'
+import BlogFeed from '../../components/feed/BlogFeed/BlogFeed'
 import styles from './Home.module.css'
 
 export default function Home() {
@@ -94,6 +95,12 @@ export default function Home() {
 
         <div className={styles.layout}>
           <form className={styles.form} onSubmit={handleSubmit} noValidate>
+            <div className={styles.text}>
+              <h1 className={styles.title}>Subscribe to Engineering Blogs</h1>
+              <p className={styles.intro}>
+                Stay up to date with the latest posts from top engineering blogs. Select your topic and favorite publisher, and we will send you curated alerts.
+              </p>
+            </div>
             <EmailInput
               value={email}
               onChange={setEmail}
@@ -119,12 +126,15 @@ export default function Home() {
             </button>
           </form>
 
+          <BlogFeed />
+
+          <JiraIssuesSummary />
+
           <div className={styles.sidebar}>
-            <JiraIssuesSummary />
           </div>
         </div>
 
-        <Footer />
+        {/* <Footer /> */}
       </main>
     </div>
   )

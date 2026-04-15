@@ -42,6 +42,15 @@ export async function postFeedback(feedback) {
   return res.json()
 }
 
+export async function getFeed(limit = 30) {
+  const res = await fetch(`/feed?limit=${limit}`)
+  if (!res.ok){
+    console.error('Failed to fetch feed:', res.status, await res.text());
+    throw new Error('Failed to fetch feed');
+  } 
+  return res.json()
+}
+
 export async function getPosts(secretKey) {
   const res = await fetch('/posts', {
     headers: { 'X-SECRET-KEY': secretKey },
@@ -50,14 +59,14 @@ export async function getPosts(secretKey) {
   return res.json()
 }
 
-export async function updatePost(id, topic, secretKey) {
+export async function updatePost(id, topic, tags, secretKey) {
   const res = await fetch(`/posts/${id}`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
       'X-SECRET-KEY': secretKey,
     },
-    body: JSON.stringify({ topic }),
+    body: JSON.stringify({ topic, tags }),
   })
   return res.json()
 }

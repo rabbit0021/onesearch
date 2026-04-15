@@ -194,8 +194,34 @@ def robots_txt():
 def sitemap_xml():
     return send_from_directory(app.static_folder, "sitemap.xml")
 
+@app.route("/feed", methods=["GET"])
+def get_feed():
+    limit = min(int(request.args.get("limit", 30)), 100)
+    conn = app.db.get_connection()
+    try:
+        posts = app.db.get_posts(conn)
+        result = []
+        for post in posts:
+            if not post.get("labelled"):
+                continue
+            result.append({
+                "id": post["id"],
+                "url": post["url"],
+                "title": post["title"],
+                "topic": post["topic"],
+                "publisher": post["publisher_name"],
+                "published_at": post["published_at"],
+                "tags": post["tags"],
+            })
+        result.sort(
+            key=lambda x: datetime.fromisoformat(x["published_at"]),
+            reverse=True,
+        )
+        return jsonify(result[:limit])
+    finally:
+        conn.close()
+
 @app.route("/posts", methods=["GET"])
-@require_secret_key
 def get_posts():
     conn = app.db.get_connection()
     try:
@@ -215,7 +241,7 @@ def get_posts():
         result.sort(
             key=lambda x: datetime.fromisoformat(x['published_at']),
             reverse=True
-        )
+        )   
         return jsonify(result)
     finally:
         conn.close()
@@ -231,9 +257,11 @@ def update_post(post_id):
     if not topic:
         return jsonify({"status": "error", "message": "No topic provided"}), 400
 
+    tags = data.get("tags") or None
+
     conn = app.db.get_connection()
     try:
-        app.db.update_post_label(conn, post_id, topic)
+        app.db.update_post_label(conn, post_id, topic, tags=tags)
         return jsonify({"status": "success", "message": f"Post {post_id} updated"})
     finally:
         conn.close()

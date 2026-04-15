@@ -3,6 +3,7 @@
   align-items: center;
   gap: 20px;
   flex-direction: column;
+  margin-bottom: 2rem;
 }
 
 .themeSwitcherWrap {
@@ -13,35 +14,12 @@
 .logoWrap {
   display: flex;
   align-items: center;
-  gap: 10px;
 }
-
 
 .logo {
   width: 350px;
   height: 100px;
-  object-fit: cover;
+  object-fit:fill;
   margin-left: 45px;
 }
 
-.text {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  align-self: flex-start;
-  margin-left: 28px;
-
-}
-
-.title {
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: #585858;
-  line-height: 1.3;
-}
-
-.intro {
-  font-size: 0.8rem;
-  color: #2d2d2d;
-  line-height: 1.5;
-}
