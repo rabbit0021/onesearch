@@ -62,12 +62,12 @@ function applyTheme(theme) {
 
 export function ThemeProvider({ children }) {
   const [themeKey, setThemeKey] = useState(
-    () => localStorage.getItem('theme3') || 'claude'
+    () => localStorage.getItem('theme5') || 'rose'
   )
 
   useEffect(() => {
-    applyTheme(THEMES[themeKey] || THEMES.claude)
-    localStorage.setItem('theme3', themeKey)
+    applyTheme(THEMES[themeKey] || THEMES.rose)
+    localStorage.setItem('theme5', themeKey)
   }, [themeKey])
 
   return (

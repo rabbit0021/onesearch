@@ -5,6 +5,7 @@ import { useToast } from '../../context/ToastContext'
 import Header from '../../components/layout/Header/Header'
 import Footer from '../../components/layout/Footer/Footer'
 import NotificationIcon from '../../components/layout/NotificationIcon/NotificationIcon'
+import ThemeSwitcher from '../../components/layout/ThemeSwitcher/ThemeSwitcher'
 import Sidebar from '../../components/sidebar/Sidebar/Sidebar'
 
 import EmailInput from '../../components/subscription/EmailInput/EmailInput'
@@ -88,6 +89,7 @@ export default function Home() {
   return (
     <div className={styles.page}>
       <NotificationIcon open={sidebarOpen} hasDot={hasDot} onClick={handleSidebarToggle} btnRef={toggleRef} />
+      <ThemeSwitcher />
       <Sidebar open={sidebarOpen} onClose={closeSidebar} toggleRef={toggleRef} />
 
       <main className={styles.container}>
@@ -122,7 +124,7 @@ export default function Home() {
             <FrequencySlider value={frequency} onChange={setFrequency} />
 
             <button type="submit" className={styles.submitBtn} disabled={submitting}>
-              {submitting ? 'Subscribing…' : 'Subscribe'}
+              {submitting ? <>subscribing<span className={styles.blink}>_</span></> : <><span className={styles.prompt}>&gt;_</span> subscribe</>}
             </button>
           </form>
 
