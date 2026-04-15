@@ -1,11 +1,21 @@
+import { useEffect, useState } from 'react'
 import { THEMES, useTheme } from '../../../context/ThemeContext'
 import styles from './ThemeSwitcher.module.css'
 
 export default function ThemeSwitcher() {
   const { themeKey, setThemeKey } = useTheme()
+  const [atTop, setAtTop] = useState(true)
+
+  useEffect(() => {
+    function onScroll() {
+      setAtTop(window.scrollY <= 50)
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   return (
-    <div className={styles.switcher}>
+    <div className={`${styles.switcher} ${atTop ? '' : styles.hidden}`}>
       {Object.entries(THEMES).map(([key, theme]) => (
         <button
           key={key}

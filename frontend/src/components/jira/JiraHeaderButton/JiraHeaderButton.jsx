@@ -2,6 +2,27 @@ import { useState, useEffect } from 'react'
 import { getJiraStatus } from '../../../api/jira'
 import styles from './JiraHeaderButton.module.css'
 
+function ConnectButton() {
+  const [pending, setPending] = useState(false)
+
+  function handleClick() {
+    setPending(true)
+  }
+
+  return (
+    <a
+      href="/auth/jira/login"
+      className={`${styles.connectBtn} ${pending ? styles.connectBtnPending : ''}`}
+      onClick={handleClick}
+    >
+      {pending
+        ? <><span className={styles.spinner} /> Connecting…</>
+        : <><img src="https://cdn.simpleicons.org/jira/ffffff" alt="" className={styles.icon} /> Connect Jira</>
+      }
+    </a>
+  )
+}
+
 export default function JiraHeaderButton() {
   const [status, setStatus] = useState(null)
 
@@ -19,10 +40,7 @@ export default function JiraHeaderButton() {
 
   if (!status.connected) {
     return (
-      <a href="/auth/jira/login" className={styles.connectBtn}>
-        <img src="https://cdn.simpleicons.org/jira/ffffff" alt="" className={styles.icon} />
-        Connect Jira
-      </a>
+      <ConnectButton />
     )
   }
 

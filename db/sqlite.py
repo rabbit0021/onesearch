@@ -308,6 +308,7 @@ class SQLiteDatabase:
     
     def get_publisher_by_name(self, conn, name):
         c = conn.cursor()
+        logger.info(f"Getting publisher by name: {name}")
         c.execute("""
             SELECT id, publisher_name, publisher_type
             FROM publishers

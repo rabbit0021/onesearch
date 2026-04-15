@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 load_dotenv()
-
+import sys
 from datetime import datetime, timezone
 from db import enums
 from handlers import ScraperFactory  # maps company -> handler class
@@ -20,15 +20,28 @@ def parse_datetime(dt_str):
 # Load subscribers
 logger = get_logger("notify_worker")
 
-def scrape_pubs(db, conn):
+def scrape_pubs(db, conn, target_publishers=None):
     subscriptions = db.get_subscriptions(conn)  
 
-    publishers = {}    
+    publishers = {}
 
-    for sub in subscriptions:
-        pub = sub['publisher']
-        publishers[pub['id']] = pub
-        
+    if not target_publishers:    
+        for sub in subscriptions:
+            pub = sub['publisher']
+            publishers[pub['id']] = pub
+    else:
+        for name in target_publishers:
+            result = db.get_publisher_by_name(conn, name)
+    
+            if result and isinstance(result, list):
+                pub = result[0]
+                publishers[int(pub['id'])] = pub
+            elif result and isinstance(result, dict):
+                publishers[int(result['id'])] = result
+            else:
+                logger.error(f"Publisher '{name}' not found.")
+
+                       
     for publisher_id in publishers:
         publisher = publishers[publisher_id]
         
@@ -81,7 +94,13 @@ if __name__ == "__main__":
     logger.info("Scraping pubs started")
     db = get_database()
     conn = db.get_connection()
-    scrape_pubs(db, conn)
+
+    cli_args = sys.argv[1:]
+    if cli_args:
+        scrape_pubs(db, conn, target_publishers=cli_args)
+    else:
+        scrape_pubs(db, conn)
+
     conn.close()
     logger.info("Scraping pubs ended")
 

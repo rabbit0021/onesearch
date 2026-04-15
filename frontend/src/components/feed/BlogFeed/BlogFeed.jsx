@@ -3,11 +3,11 @@ import { getFeed } from '../../../api'
 import styles from './BlogFeed.module.css'
 
 const TOPIC_COLORS = {
-  'Software Engineering': '#55FFFF', // CGA bright cyan — classic terminal
-  'Data Analytics':       '#FFFF55', // CGA bright yellow — arcade score text
+  'Software Engineering': '#FF5555', // CGA bright cyan — classic terminal
+  'Data Analytics':       '#55FFFF', // CGA bright yellow — arcade score text
   'Data Science':         '#FF55FF', // CGA bright magenta — DOS highlight
   'Software Testing':     '#55FF55', // phosphor green — old-school monitor glow
-  'Product Management':   '#FF5555', // CGA bright red — danger/alert
+  'Product Management':   '#FFFF55', // CGA bright red — danger/alert
   'General':              '#AAAAAA', // grey — uncolored terminal text
 }
 
@@ -87,6 +87,7 @@ export default function BlogFeed() {
   const [publisher, setPublisher] = useState('')
   const [activeTags, setActiveTags] = useState([])
   const [dateDays, setDateDays] = useState(null)
+  const [tagSearch, setTagSearch] = useState('')
 
   useEffect(() => {
     getFeed(100)
@@ -174,19 +175,34 @@ export default function BlogFeed() {
         {allTags.length > 0 && (
           <div className={styles.tagFilter}>
             <span className={styles.tagLabel}>tags//</span>
-            {allTags.map(tag => (
-              <button
-                key={tag}
-                className={`${styles.tagPill} ${activeTags.includes(tag) ? styles.tagPillActive : ''}`}
-                onClick={() => toggleTag(tag)}
-              >
-                {tag}
-              </button>
-            ))}
+            <input
+              className={styles.tagSearch}
+              type="text"
+              placeholder="type"
+              value={tagSearch}
+              onChange={e => setTagSearch(e.target.value)}
+            />
+            {(() => {
+              const filtered = allTags.filter(t => t.toLowerCase().includes(tagSearch.toLowerCase()))
+              const visible = filtered.slice(0, 8)
+              const extra = filtered.length - visible.length
+              return <>
+                {visible.map(tag => (
+                  <button
+                    key={tag}
+                    className={`${styles.tagPill} ${activeTags.includes(tag) ? styles.tagPillActive : ''}`}
+                    onClick={() => toggleTag(tag)}
+                  >
+                    {tag}
+                  </button>
+                ))}
+                {extra > 0 && <span className={styles.moreTags}>+{extra} more</span>}
+              </>
+            })()}
             {hasFilters && (
               <button
                 className={styles.resetAll}
-                onClick={() => { setSearch(''); setPublisher(''); setDateDays(null); setActiveTags([]) }}
+                onClick={() => { setSearch(''); setPublisher(''); setDateDays(null); setActiveTags([]); setTagSearch('') }}
               >
                 reset
               </button>
