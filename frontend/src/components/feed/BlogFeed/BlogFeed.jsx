@@ -4,25 +4,25 @@ import { getJiraStatus, getJiraIssues } from '../../../api/jira'
 import styles from './BlogFeed.module.css'
 
 const TOPIC_COLORS = {
-  'Software Engineering':    '#FF5555', // CGA bright red
-  'Frontend Engineering':    '#55FFFF', // CGA bright cyan
-  'Backend Engineering':     '#5555FF', // CGA bright blue
-  'Mobile Engineering':      '#FF55FF', // CGA bright magenta
+  'Software Engineering': '#FF5555', // CGA bright red
+  'Frontend Engineering': '#55FFFF', // CGA bright cyan
+  'Backend Engineering': '#5555FF', // CGA bright blue
+  'Mobile Engineering': '#FF55FF', // CGA bright magenta
   'Platform & Infrastructure': '#FFAA55', // CGA orange
-  'Data Engineering':        '#55AAFF', // light blue
-  'Data Science':            '#AA55FF', // purple
-  'Machine Learning & AI':   '#FF55AA', // hot pink
-  'Data Analytics':          '#55FFAA', // mint green
-  'Security Engineering':    '#FF2222', // danger red
-  'QA & Testing':            '#55FF55', // phosphor green
-  'Product Management':      '#FFFF55', // CGA bright yellow
-  'General':                 '#AAAAAA', // grey
+  'Data Engineering': '#55AAFF', // light blue
+  'Data Science': '#AA55FF', // purple
+  'Machine Learning & AI': '#FF55AA', // hot pink
+  'Data Analytics': '#55FFAA', // mint green
+  'Security Engineering': '#FF2222', // danger red
+  'QA & Testing': '#55FF55', // phosphor green
+  'Product Management': '#FFFF55', // CGA bright yellow
+  'General': '#AAAAAA', // grey
 }
 
 const DATE_OPTIONS = [
-  { label: 'Any time',   days: null },
-  { label: 'Today',      days: 1 },
-  { label: 'This week',  days: 7 },
+  { label: 'Any time', days: null },
+  { label: 'Today', days: 1 },
+  { label: 'This week', days: 7 },
   { label: 'This month', days: 30 },
 ]
 
@@ -116,7 +116,7 @@ function BlogCard({ post, jiraConnected }) {
   )
 }
 
-export default function BlogFeed() {
+export default function BlogFeed({ formRef }) {
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -129,8 +129,11 @@ export default function BlogFeed() {
   const [dateDays, setDateDays] = useState(null)
   const [tagSearch, setTagSearch] = useState('')
 
+  const [filterClosed, setFilterClosed] = useState(false)
+  const [hasScrolled, setHasScrolled] = useState(false)
+
   useEffect(() => {
-    getMostLikedFeed(5).then(setMostLiked).catch(() => {})
+    getMostLikedFeed(5).then(setMostLiked).catch(() => { })
 
     async function loadFeed() {
       try {
@@ -156,6 +159,21 @@ export default function BlogFeed() {
     }
     loadFeed()
   }, [])
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const isMobile = window.innerWidth <= 768
+      if (isMobile && formRef?.current) {
+        const formBottom = formRef.current.getBoundingClientRect().bottom
+        setHasScrolled(formBottom < 0)
+      } else {
+        setHasScrolled(window.scrollY > 80)
+      }
+      if (window.scrollY < 5) setFilterClosed(false)
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [formRef])
 
   const publishers = useMemo(
     () => [...new Set(posts.map(p => p.publisher).filter(Boolean))].sort(),
@@ -223,7 +241,7 @@ export default function BlogFeed() {
   return (
     <div className={styles.wrapper}>
 
-      <div className={styles.filterBar}>
+      {!filterClosed && <div className={styles.filterBar}>
         <div className={styles.toolbar}>
           <div className={styles.searchWrap}>
             <span className={styles.searchPrompt}>▸</span>
@@ -238,6 +256,10 @@ export default function BlogFeed() {
               <button className={styles.searchClear} onClick={() => setSearch('')}>×</button>
             )}
           </div>
+          {hasScrolled && (
+            <button className={styles.filterCloseBtn} onClick={() => setFilterClosed(true)} title="hide filters">✕</button>
+          )}
+          <div className={styles.toolbarBreak} />
           <select
             className={styles.filterSelect}
             value={publisher}
@@ -294,7 +316,7 @@ export default function BlogFeed() {
             )}
           </div>
         )}
-      </div>
+      </div>}
 
       {/* ── Section order:
             Jira connected + matches → [Posts for You (grouped)] → [Most Liked] → [Other Posts]
@@ -311,17 +333,17 @@ export default function BlogFeed() {
             {filtered.length === 0
               ? <p className={styles.hint}>No posts match your filters.</p>
               : grouped.groups.map(group => (
-                  <div key={group.issue.key} className={styles.issueSection}>
-                    <div className={styles.issueHeading}>
-                      <img src="https://cdn.simpleicons.org/jira/2584FF" className={styles.issueIcon} alt="" />
-                      <span className={styles.issueKey}>{group.issue.key}</span>
-                      <span className={styles.issueSummary}>{group.issue.summary}</span>
-                    </div>
-                    <div className={styles.grid}>
-                      {group.posts.map(post => <BlogCard key={post.id} post={post} jiraConnected={jiraConnected} />)}
-                    </div>
+                <div key={group.issue.key} className={styles.issueSection}>
+                  <div className={styles.issueHeading}>
+                    <img src="https://cdn.simpleicons.org/jira/2584FF" className={styles.issueIcon} alt="" />
+                    <span className={styles.issueKey}>{group.issue.key}</span>
+                    <span className={styles.issueSummary}>{group.issue.summary}</span>
                   </div>
-                ))
+                  <div className={styles.grid}>
+                    {group.posts.map(post => <BlogCard key={post.id} post={post} jiraConnected={jiraConnected} />)}
+                  </div>
+                </div>
+              ))
             }
           </div>
 
@@ -391,15 +413,15 @@ export default function BlogFeed() {
                 {postsForYou.length === 0
                   ? <p className={styles.hint}>No posts match your filters.</p>
                   : <div className={styles.grid}>
-                      {postsForYou.map(post => <BlogCard key={post.id} post={post} jiraConnected={jiraConnected} />)}
-                    </div>
+                    {postsForYou.map(post => <BlogCard key={post.id} post={post} jiraConnected={jiraConnected} />)}
+                  </div>
                 }
               </div>
             )
           })()}
         </>
       )}
-      
+
     </div>
   )
 }

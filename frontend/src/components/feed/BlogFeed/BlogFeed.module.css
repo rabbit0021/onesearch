@@ -17,11 +17,30 @@
   }
 
   .toolbar {
-    grid-template-columns: 1fr 1fr;
+    flex-wrap: wrap;
+  }
+
+  .toolbarBreak {
+    display: block;
+    width: 100%;
+    height: 0;
   }
 
   .searchWrap {
-    grid-column: 1 / -1;
+    flex: 1 1 auto;
+    max-width: none;
+    width: auto;
+    min-width: 0;
+  }
+
+  /* Mobile order: search → close → (break) → publisher → date */
+  .toolbar .searchWrap     { order: 1; }
+  .toolbar .filterCloseBtn { order: 2; position: static; transform: none; flex-shrink: 0; }
+  .toolbar .toolbarBreak   { order: 3; }
+  .toolbar .filterSelect   { order: 4; }
+
+  .filterSelect {
+    flex: 1 1 auto;
   }
 
   .tagFilter {
@@ -225,22 +244,51 @@
   gap: 0.6rem;
   position: sticky;
   top: 0px;
-  z-index: 100;
+  z-index: 1200;
   max-width: 99%;
+  padding-bottom: 15px;
+}
+
+.filterCloseBtn {
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 5px;
+  z-index: 106;
+  transition: color 0.12s;
+}
+
+.filterCloseBtn:hover {
+  color: var(--color-primary);
 }
 
 /* Grid: search takes all leftover space, selects stay fixed */
 .toolbar {
-  display: grid;
-  grid-template-columns: 1fr auto auto;
+  display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex-wrap: wrap;
 }
+
+.toolbarBreak {
+  display: none;
+}
+
+/* Desktop order: search → publisher → date → close */
+.toolbar .searchWrap   { order: 1; }
+.toolbar .filterSelect { order: 2; }
+.toolbar .filterCloseBtn { order: 3; }
+.toolbar .toolbarBreak { order: 4; }
 
 .searchWrap {
   position: relative;
   display: flex;
   align-items: center;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .searchPrompt {

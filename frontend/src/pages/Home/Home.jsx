@@ -37,6 +37,7 @@ export default function Home() {
   const [hasDot, setHasDot] = useState(true)
   const toggleRef = useRef(null)
 
+  const formRef = useRef(null)
   const [atTop, setAtTop] = useState(true)
   useEffect(() => {
     const onScroll = () => setAtTop(window.scrollY <= 50)
@@ -113,7 +114,7 @@ export default function Home() {
         </div>
 
         <div className={styles.layout}>
-          <form className={styles.form} onSubmit={handleSubmit} noValidate>
+          <form ref={formRef} className={styles.form} onSubmit={handleSubmit} noValidate>
             <div className={styles.text}>
               <h1 className={styles.title}>Subscribe to Engineering Blogs</h1>
               <p className={styles.intro}>
@@ -145,7 +146,7 @@ export default function Home() {
             </button>
           </form>
 
-          <BlogFeed />
+          <BlogFeed formRef={formRef} />
 
           {/* <JiraIssuesSummary /> */}
 
