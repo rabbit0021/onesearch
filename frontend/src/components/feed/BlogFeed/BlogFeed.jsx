@@ -29,7 +29,7 @@ const DATE_OPTIONS = [
 function faviconUrl(postUrl) {
   try {
     const { origin } = new URL(postUrl)
-    return `https://www.google.com/s2/favicons?domain=${origin}&sz=32`
+    return `https://www.google.com/s2/favicons?domain=${origin}&sz=64`
   } catch {
     return null
   }
