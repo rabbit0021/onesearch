@@ -383,7 +383,7 @@ export default function BlogFeed({ formRef }) {
         <>
           {/* 1. Most Liked Recently (locked teaser or real) */}
           <div className={styles.section}>
-            <p className={styles.heading}>Most Liked Recently</p>
+            <p className={styles.heading}>Trending Blog Posts</p>
             {jiraConnected && filteredMostLiked.length > 0 ? (
               <div className={styles.scrollRow}>
                 {filteredMostLiked.map(post => (
