@@ -1,8 +1,8 @@
 .wrapper {
   cursor: pointer;
   font-size: 1.2rem;
-  color: #444;
-  background: rgba(255, 255, 255, 0.9);
+  color: var(--text-secondary);
+  background: var(--bg-card);
   border: none;
   border-radius: 8px;
   padding: 7px 11px;

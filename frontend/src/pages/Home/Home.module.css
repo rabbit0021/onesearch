@@ -19,7 +19,7 @@
 .topRightHideable {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 10px;
   opacity: 1;
   pointer-events: auto;
   transition: opacity 0.3s ease, transform 0.3s ease;

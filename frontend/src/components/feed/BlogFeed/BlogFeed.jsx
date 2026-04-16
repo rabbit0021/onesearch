@@ -275,7 +275,7 @@ export default function BlogFeed({ formRef }) {
 
           {/* 2. Most Liked Recently */}
           {filteredMostLiked.length > 0 && (
-            <div className={styles.section}>
+            <div className={styles.trendingSection}>
               <p className={styles.heading}>Trending Blog Posts</p>
               <div className={styles.scrollRow}>
                 {filteredMostLiked.map(post => (

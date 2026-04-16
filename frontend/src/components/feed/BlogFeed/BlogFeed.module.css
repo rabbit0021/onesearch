@@ -43,9 +43,18 @@
   text-transform: uppercase;
   color: var(--text-muted);
   margin: 0;
+  background-color: var(--bg-wizard);
+  padding: 5px;
 }
 
 .section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.trendingSection {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -56,7 +65,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 1rem;
-  row-gap: 2rem;
+  padding: 2px;
 }
 
 .hint {
@@ -430,6 +439,7 @@
   padding-bottom: 0.5rem;
   scrollbar-width: thin;
   scrollbar-color: var(--color-primary) transparent;
+  padding: 2px;
 }
 
 .scrollRow::-webkit-scrollbar {
@@ -468,7 +478,7 @@
 
 .ghostCard {
   height: 200px;
-  background: #c5c5c5;
+  background: var(--bg-wizard-option);
   border-radius:10px;
 }
 
@@ -480,7 +490,8 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  background: rgba(231, 231, 231, 0.65);
+  background: rgba(86, 86, 86, 0.3);
+  opacity: .8;
   padding: 15px;
 }
 
@@ -492,7 +503,7 @@
 
 .lockedMsg {
   font-size: 0.82rem;
-  color: var(--color-primary-text);
+  color: var(--color-primary-hover);
   font-family: 'Courier New', monospace;
   letter-spacing: 0.04em;
   margin: 0;
@@ -535,6 +546,8 @@
   border: none;
   position: relative;
   overflow: hidden;
+  border-left: 2px solid var(--color-primary);
+  border-radius: 6px;
 }
 
 .issuePrompt {
@@ -546,7 +559,7 @@
 }
 
 .issueKey {
-  font-size: 0.82rem;
+  font-size: .9rem;
   font-weight: 700;
   color: #126add;
   letter-spacing: 0.06em;
@@ -555,8 +568,8 @@
 }
 
 .issueSummary {
-  font-size: 0.75rem;
-  color: #555;
+  font-size: .8rem;
+  color: var(--text-base);
   text-decoration: underline;
   white-space: nowrap;
   overflow: hidden;
