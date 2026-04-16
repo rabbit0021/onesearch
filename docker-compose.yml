@@ -16,9 +16,10 @@ services:
     cpus: "0.5"
     volumes:
       - ./logs:/app/logs
-      - ./tmp:/app/tmp
       - ./data:/app/data
       - ./static:/app/static
+    tmpfs:
+      - /app/tmp
     networks:
       - appnet
     container_name: onesearch_app
