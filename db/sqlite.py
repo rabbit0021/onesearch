@@ -385,7 +385,7 @@ class SQLiteDatabase:
         c = conn.cursor()
         logger.info(f"Getting publisher by name: {name}")
         c.execute("""
-            SELECT id, publisher_name, publisher_type
+            SELECT id, publisher_name, publisher_type, last_scraped_at
             FROM publishers
             WHERE publisher_name = ?
         """, (name,))
