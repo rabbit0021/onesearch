@@ -52,10 +52,6 @@ export default function Sidebar({ open, onClose, toggleRef }) {
           </button>
         </FeatureCard>
 
-        <FeatureCard title="Send Feedback ✉️">
-          <FeedbackForm />
-        </FeatureCard>
-
         <FeatureCard title="Upcoming Improvements 🔧">
           <ul className={styles.list}>
             <li>Individual blogger subscriptions</li>
@@ -65,6 +61,10 @@ export default function Sidebar({ open, onClose, toggleRef }) {
         </FeatureCard>
 
         <ChatWidget />
+
+        <FeatureCard title="Send Feedback ✉️">
+          <FeedbackForm />
+        </FeatureCard>
       </div>
     </aside>
   )

@@ -223,7 +223,10 @@
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
-  max-width: 80%;
+  position: sticky;
+  top: 0px;
+  z-index: 100;
+  max-width: 99%;
 }
 
 /* Grid: search takes all leftover space, selects stay fixed */

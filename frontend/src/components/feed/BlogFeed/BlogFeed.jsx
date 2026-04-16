@@ -323,7 +323,7 @@ export default function BlogFeed() {
           {/* 2. Most Liked Recently */}
           {filteredMostLiked.length > 0 && (
             <div className={styles.section}>
-              <p className={styles.heading}>Most Liked Recently</p>
+              <p className={styles.heading}>Trending Blog Posts</p>
               <div className={styles.scrollRow}>
                 {filteredMostLiked.map(post => (
                   <div key={post.id} className={styles.scrollCard}>
