@@ -216,8 +216,6 @@ export default function BlogFeed() {
   return (
     <div className={styles.wrapper}>
 
-      
-
       <div className={styles.filterBar}>
         <div className={styles.toolbar}>
           <div className={styles.searchWrap}>
