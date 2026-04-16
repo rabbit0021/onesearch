@@ -163,10 +163,10 @@ export default function BlogFeed() {
     return [...set].sort()
   }, [posts])
 
-  const filtered = useMemo(() => {
+  const filterPredicate = useMemo(() => {
     const q = search.toLowerCase()
     const cutoff = dateDays ? Date.now() - dateDays * 86400000 : null
-    return posts.filter(p => {
+    return p => {
       if (q && !p.title.toLowerCase().includes(q)) return false
       if (publisher && p.publisher !== publisher) return false
       if (cutoff && new Date(p.published_at).getTime() < cutoff) return false
@@ -175,8 +175,11 @@ export default function BlogFeed() {
         if (!activeTags.every(t => postTags.includes(t))) return false
       }
       return true
-    })
-  }, [posts, search, publisher, dateDays, activeTags])
+    }
+  }, [search, publisher, dateDays, activeTags])
+
+  const filtered = useMemo(() => posts.filter(filterPredicate), [posts, filterPredicate])
+  const filteredMostLiked = useMemo(() => mostLiked.filter(filterPredicate), [mostLiked, filterPredicate])
 
   function toggleTag(tag) {
     setActiveTags(prev =>
@@ -261,7 +264,7 @@ export default function BlogFeed() {
             />
             {(() => {
               const filtered = allTags.filter(t => t.toLowerCase().includes(tagSearch.toLowerCase()))
-              const visible = filtered.slice(0, 4)
+              const visible = filtered.slice(0, 2)
               const extra = filtered.length - visible.length
               return <>
                 {visible.map(tag => (
@@ -318,18 +321,22 @@ export default function BlogFeed() {
           </div>
 
           {/* 2. Most Liked Recently */}
-          {mostLiked.length > 0 && (
+          {filteredMostLiked.length > 0 && (
             <div className={styles.section}>
               <p className={styles.heading}>Most Liked Recently</p>
-              <div className={styles.grid}>
-                {mostLiked.map(post => <BlogCard key={post.id} post={post} jiraConnected={jiraConnected} />)}
+              <div className={styles.scrollRow}>
+                {filteredMostLiked.map(post => (
+                  <div key={post.id} className={styles.scrollCard}>
+                    <BlogCard post={post} jiraConnected={jiraConnected} />
+                  </div>
+                ))}
               </div>
             </div>
           )}
 
           {/* 3. Other Posts — exclude posts already shown in Most Liked */}
           {(() => {
-            const mostLikedIds = new Set(mostLiked.map(p => p.id))
+            const mostLikedIds = new Set(filteredMostLiked.map(p => p.id))
             const otherPosts = grouped.unmatched.filter(p => !mostLikedIds.has(p.id))
             return otherPosts.length > 0 && (
               <div className={styles.section}>
@@ -346,9 +353,13 @@ export default function BlogFeed() {
           {/* 1. Most Liked Recently (locked teaser or real) */}
           <div className={styles.section}>
             <p className={styles.heading}>Most Liked Recently</p>
-            {jiraConnected && mostLiked.length > 0 ? (
-              <div className={styles.grid}>
-                {mostLiked.map(post => <BlogCard key={post.id} post={post} jiraConnected={jiraConnected} />)}
+            {jiraConnected && filteredMostLiked.length > 0 ? (
+              <div className={styles.scrollRow}>
+                {filteredMostLiked.map(post => (
+                  <div key={post.id} className={styles.scrollCard}>
+                    <BlogCard post={post} jiraConnected={jiraConnected} />
+                  </div>
+                ))}
               </div>
             ) : !jiraConnected ? (
               <div className={styles.lockedContainer}>
@@ -365,7 +376,7 @@ export default function BlogFeed() {
 
           {/* 2. Posts for You — exclude posts already shown in Most Liked */}
           {(() => {
-            const mostLikedIds = new Set(mostLiked.map(p => p.id))
+            const mostLikedIds = new Set(filteredMostLiked.map(p => p.id))
             const postsForYou = jiraConnected ? filtered.filter(p => !mostLikedIds.has(p.id)) : filtered
             return (
               <div className={styles.section}>

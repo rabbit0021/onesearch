@@ -5,8 +5,8 @@
   margin: 1.25rem;
   padding: .5rem;
   box-sizing: border-box;
-  max-width: 80%;
-  width: 700px;
+  max-width: 90%;
+  width: 800px;
 }
 
 @media (max-width: 768px) {
@@ -223,6 +223,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
+  max-width: 80%;
 }
 
 /* Grid: search takes all leftover space, selects stay fixed */
@@ -468,6 +469,34 @@
 
 /* ── Most Liked Recently ── */
 .mostLikedSection {}
+
+.scrollRow {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-primary) transparent;
+}
+
+.scrollRow::-webkit-scrollbar {
+  height: 4px;
+}
+
+.scrollRow::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollRow::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: 2px;
+}
+
+.scrollCard {
+  flex: 0 0 200px;
+  width: 200px;
+}
 
 .lockedContainer {
   position: relative;
