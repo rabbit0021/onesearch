@@ -6,9 +6,16 @@ import styles from './PostRow.module.css'
 
 const TOPICS = [
   'Software Engineering',
-  'Data Analytics',
+  'Frontend Engineering',
+  'Backend Engineering',
+  'Mobile Engineering',
+  'Platform & Infrastructure',
+  'Data Engineering',
   'Data Science',
-  'Software Testing',
+  'Machine Learning & AI',
+  'Data Analytics',
+  'Security Engineering',
+  'QA & Testing',
   'Product Management',
   'General',
 ]

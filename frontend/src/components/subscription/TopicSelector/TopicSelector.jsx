@@ -4,9 +4,16 @@ import styles from './TopicSelector.module.css'
 
 const TOPICS = [
   'Software Engineering',
+  'Frontend Engineering',
+  'Backend Engineering',
+  'Mobile Engineering',
+  'Platform & Infrastructure',
+  'Data Engineering',
   'Data Science',
+  'Machine Learning & AI',
   'Data Analytics',
-  'Software Testing',
+  'Security Engineering',
+  'QA & Testing',
   'Product Management',
 ]
 
@@ -36,7 +43,7 @@ export default function TopicSelector({ value, onChange }) {
   return (
     <div className={styles.group}>
       <label className={styles.label} htmlFor="topic">
-        Topic / Field
+        Field
       </label>
       <div className={styles.relative}>
         <input

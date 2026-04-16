@@ -4,12 +4,19 @@ import { getJiraStatus, getJiraIssues } from '../../../api/jira'
 import styles from './BlogFeed.module.css'
 
 const TOPIC_COLORS = {
-  'Software Engineering': '#FF5555', // CGA bright cyan — classic terminal
-  'Data Analytics':       '#55FFFF', // CGA bright yellow — arcade score text
-  'Data Science':         '#FF55FF', // CGA bright magenta — DOS highlight
-  'Software Testing':     '#55FF55', // phosphor green — old-school monitor glow
-  'Product Management':   '#FFFF55', // CGA bright red — danger/alert
-  'General':              '#AAAAAA', // grey — uncolored terminal text
+  'Software Engineering':    '#FF5555', // CGA bright red
+  'Frontend Engineering':    '#55FFFF', // CGA bright cyan
+  'Backend Engineering':     '#5555FF', // CGA bright blue
+  'Mobile Engineering':      '#FF55FF', // CGA bright magenta
+  'Platform & Infrastructure': '#FFAA55', // CGA orange
+  'Data Engineering':        '#55AAFF', // light blue
+  'Data Science':            '#AA55FF', // purple
+  'Machine Learning & AI':   '#FF55AA', // hot pink
+  'Data Analytics':          '#55FFAA', // mint green
+  'Security Engineering':    '#FF2222', // danger red
+  'QA & Testing':            '#55FF55', // phosphor green
+  'Product Management':      '#FFFF55', // CGA bright yellow
+  'General':                 '#AAAAAA', // grey
 }
 
 const DATE_OPTIONS = [

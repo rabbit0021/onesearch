@@ -16,22 +16,43 @@ embedding_model = SentenceTransformer('all-mpnet-base-v2')
 # Category descriptions
 categories = {
     enums.PublisherCategory.SOFTWARE_ENGINEERING.value: (
-        "frontend, backend, APIs, microservices, databases, relational databases, cloud databases, DevOps, system design, CI/CD, containers, scalability, performance, distributed systems, mobile, UI/UX"
+        "software engineering, fullstack development, system design, architecture, scalability, performance, distributed systems, microservices, APIs, CI/CD, code quality, refactoring, open source"
     ),
-    enums.PublisherCategory.SOFTWARE_TESTING.value: (
-        "manual testing, automated testing, Selenium, Cypress, Playwright, unit tests, integration tests, end-to-end tests, performance, load, stress, TDD, BDD, defect tracking, CI/CD testing"
+    enums.PublisherCategory.FRONTEND_ENGINEERING.value: (
+        "frontend, UI development, React, Vue, Angular, JavaScript, TypeScript, CSS, HTML, browser, web performance, accessibility, design systems, component libraries, single-page apps, web animations"
     ),
-    enums.PublisherCategory.DATA_ANALYTICS.value: (
-        "data analysis, business intelligence, dashboards, reporting, KPI, SQL, NoSQL, ETL pipelines, data visualization, Tableau, Power BI, Looker, anomaly detection, A/B testing, insights"
+    enums.PublisherCategory.BACKEND_ENGINEERING.value: (
+        "backend, server-side, APIs, REST, GraphQL, gRPC, databases, PostgreSQL, MySQL, Redis, caching, message queues, Kafka, RabbitMQ, Python, Java, Go, Node.js, microservices, service mesh"
+    ),
+    enums.PublisherCategory.MOBILE_ENGINEERING.value: (
+        "mobile development, iOS, Android, Swift, Kotlin, React Native, Flutter, mobile performance, push notifications, app store, cross-platform, mobile UI, mobile testing"
+    ),
+    enums.PublisherCategory.PLATFORM_INFRASTRUCTURE.value: (
+        "cloud, AWS, GCP, Azure, Kubernetes, Docker, infrastructure as code, Terraform, Helm, networking, DNS, load balancing, reliability, SRE, observability, monitoring, logging, Prometheus, Grafana, site reliability"
+    ),
+    enums.PublisherCategory.DATA_ENGINEERING.value: (
+        "data pipelines, ETL, ELT, Apache Spark, Flink, Airflow, dbt, data lake, data warehouse, Snowflake, BigQuery, Redshift, streaming, batch processing, data infrastructure, data quality, schema management"
     ),
     enums.PublisherCategory.DATA_SCIENCE.value: (
-        "machine learning, deep learning, AI, predictive modeling, NLP, computer vision, recommender systems, feature engineering, model training, Python, R, TensorFlow, PyTorch, scikit-learn, ML deployment, recommendation systems"
+        "data science, statistical modeling, experimentation, A/B testing, hypothesis testing, Python, R, Jupyter, feature engineering, predictive modeling, regression, classification, clustering, recommender systems"
+    ),
+    enums.PublisherCategory.ML_AI.value: (
+        "machine learning, deep learning, neural networks, large language models, LLMs, generative AI, NLP, computer vision, transformers, PyTorch, TensorFlow, MLOps, model training, model serving, fine-tuning, embeddings, RAG"
+    ),
+    enums.PublisherCategory.DATA_ANALYTICS.value: (
+        "data analysis, business intelligence, dashboards, reporting, KPI, SQL, metrics, Tableau, Power BI, Looker, data visualization, analytics engineering, product analytics, growth analytics"
+    ),
+    enums.PublisherCategory.SECURITY_ENGINEERING.value: (
+        "security, application security, AppSec, penetration testing, vulnerability, threat modeling, OWASP, authentication, authorization, OAuth, zero trust, encryption, secrets management, CVE, incident response, compliance"
+    ),
+    enums.PublisherCategory.QA_TESTING.value: (
+        "quality assurance, testing, test automation, Selenium, Cypress, Playwright, unit tests, integration tests, end-to-end tests, performance testing, load testing, TDD, BDD, test strategy, defect tracking, reliability"
     ),
     enums.PublisherCategory.PRODUCT_MANAGEMENT.value: (
-        "product strategy, design, UX/UI, customer research, roadmap planning, prioritization, market analysis, cross-functional collaboration, agile, lean, product launch, product lifecycle management, product metrics, stakeholder communication"
+        "product management, product strategy, roadmap, prioritization, product discovery, customer research, user feedback, agile, OKRs, product metrics, go-to-market, product launch, stakeholder management, product lifecycle"
     ),
     enums.PublisherCategory.GENERAL.value: (
-        "general technology, business, professional development, industry news, opinions, AI and tech trends, interdisciplinary topics, updates not fitting other categories"
+        "general technology, industry news, engineering culture, career development, team management, company engineering blog, tech trends, opinion, interdisciplinary topics"
     )
 }
 
@@ -44,21 +65,40 @@ category_embeddings = {
 # Optional keyword mapping
 keywords_map = {
     enums.PublisherCategory.SOFTWARE_ENGINEERING.value: [
-        "react", "angular", "vue", "node.js", "django", "java", "go",
-        "microservices", "api", "devops", "kubernetes",
-        "aurora", "rds", "cloud database", "postgresql", "mysql", "mongodb", "redis", "database"
+        "system design", "architecture", "microservices", "api", "ci/cd", "open source", "scalability", "distributed"
     ],
-    enums.PublisherCategory.SOFTWARE_TESTING.value: [
-        "selenium", "cypress", "playwright", "testing", "qa", "unit test", "integration test", "e2e test", "load testing", "performance testing", "performance engineering"
+    enums.PublisherCategory.FRONTEND_ENGINEERING.value: [
+        "react", "vue", "angular", "javascript", "typescript", "css", "html", "browser", "webpack", "vite", "frontend", "web app", "component"
     ],
-    enums.PublisherCategory.DATA_ANALYTICS.value: [
-        "sql", "nosql", "tableau", "power bi", "looker", "etl", "dashboard", "kpi", "analysis", "data pipelines"
+    enums.PublisherCategory.BACKEND_ENGINEERING.value: [
+        "node.js", "django", "java", "golang", "go lang", "postgresql", "mysql", "mongodb", "redis", "kafka", "rabbitmq", "grpc", "rest api", "graphql", "backend"
+    ],
+    enums.PublisherCategory.MOBILE_ENGINEERING.value: [
+        "ios", "android", "swift", "kotlin", "react native", "flutter", "mobile", "app store", "push notification"
+    ],
+    enums.PublisherCategory.PLATFORM_INFRASTRUCTURE.value: [
+        "kubernetes", "docker", "aws", "gcp", "azure", "terraform", "helm", "prometheus", "grafana", "devops", "sre", "cloud", "infrastructure", "observability"
+    ],
+    enums.PublisherCategory.DATA_ENGINEERING.value: [
+        "spark", "flink", "airflow", "dbt", "snowflake", "bigquery", "redshift", "etl", "elt", "data pipeline", "data lake", "data warehouse", "streaming"
     ],
     enums.PublisherCategory.DATA_SCIENCE.value: [
-        "machine learning", "deep learning", "ai", "nlp", "computer vision", "tensorflow", "pytorch", "scikit-learn"
+        "scikit-learn", "jupyter", "regression", "classification", "clustering", "a/b test", "experimentation", "feature engineering", "data science"
+    ],
+    enums.PublisherCategory.ML_AI.value: [
+        "machine learning", "deep learning", "llm", "large language model", "generative ai", "nlp", "computer vision", "tensorflow", "pytorch", "transformer", "embedding", "rag", "fine-tuning", "mlops"
+    ],
+    enums.PublisherCategory.DATA_ANALYTICS.value: [
+        "sql", "tableau", "power bi", "looker", "dashboard", "kpi", "business intelligence", "analytics", "data visualization"
+    ],
+    enums.PublisherCategory.SECURITY_ENGINEERING.value: [
+        "security", "appsec", "vulnerability", "owasp", "penetration", "authentication", "oauth", "zero trust", "encryption", "cve", "threat"
+    ],
+    enums.PublisherCategory.QA_TESTING.value: [
+        "selenium", "cypress", "playwright", "testing", "qa", "unit test", "integration test", "e2e test", "load testing", "performance testing", "tdd", "bdd"
     ],
     enums.PublisherCategory.PRODUCT_MANAGEMENT.value: [
-        "product strategy", "roadmap", "ux", "ui", "customer research", "agile", "lean", "launch", "metrics"
+        "product strategy", "roadmap", "customer research", "agile", "okr", "product launch", "stakeholder", "product metrics"
     ]
 }
 

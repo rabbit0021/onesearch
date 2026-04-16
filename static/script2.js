@@ -141,9 +141,16 @@ fetch('/techteams')
 
 allTopics = [
   "Software Engineering",
+  "Frontend Engineering",
+  "Backend Engineering",
+  "Mobile Engineering",
+  "Platform & Infrastructure",
+  "Data Engineering",
   "Data Science",
+  "Machine Learning & AI",
   "Data Analytics",
-  "Software Testing",
+  "Security Engineering",
+  "QA & Testing",
   "Product Management"
 ];
 

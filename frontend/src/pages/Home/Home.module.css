@@ -85,8 +85,8 @@
 .submitBtn:hover:not(:disabled) {
   background: var(--color-primary);
   color: #0a0a0a;
-  box-shadow: 0 0 12px rgba(85, 255, 85, 0.45);
 }
+
 
 .submitBtn:disabled {
   opacity: 0.45;

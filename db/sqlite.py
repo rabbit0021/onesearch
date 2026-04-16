@@ -33,7 +33,7 @@ class SQLiteDatabase:
             email TEXT NOT NULL,
             publisher_id INTEGER NOT NULL,
             joined_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            topic TEXT NOT NULL CHECK (topic IN ('Software Engineering', 'Data Analytics', 'Data Science', 'Software Testing', 'Product Management')),
+            topic TEXT NOT NULL CHECK (topic IN ('Software Engineering', 'Frontend Engineering', 'Backend Engineering', 'Mobile Engineering', 'Platform & Infrastructure', 'Data Engineering', 'Data Science', 'Machine Learning & AI', 'Data Analytics', 'Security Engineering', 'QA & Testing', 'Product Management')),
             frequency_in_days INTEGER DEFAULT 3,
             last_notified_at DATETIME DEFAULT NULL,
             active BOOL DEFAULT 1,
@@ -60,7 +60,7 @@ class SQLiteDatabase:
             published_at DATETIME NOT NULL,
             modified_at DATETIME NOT NULL,
             labelled BOOL DEFAULT 0,
-            topic TEXT NOT NULL CHECK (topic IN ('Software Engineering', 'Data Analytics', 'Data Science', 'Software Testing', 'Product Management', 'General')),
+            topic TEXT NOT NULL CHECK (topic IN ('Software Engineering', 'Frontend Engineering', 'Backend Engineering', 'Mobile Engineering', 'Platform & Infrastructure', 'Data Engineering', 'Data Science', 'Machine Learning & AI', 'Data Analytics', 'Security Engineering', 'QA & Testing', 'Product Management', 'General')),
             FOREIGN KEY (publisher_id) REFERENCES publishers(id),
             UNIQUE (url)
         )
@@ -81,6 +81,64 @@ class SQLiteDatabase:
             logger.info("Migration: added embedding column to posts")
         except Exception:
             pass  # column already exists
+
+        # Migration: expand topic CHECK constraints to new detailed categories
+        try:
+            c.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='posts'")
+            row = c.fetchone()
+            if row and 'Frontend Engineering' not in row[0]:
+                new_post_topics = ("'Software Engineering', 'Frontend Engineering', 'Backend Engineering', "
+                                   "'Mobile Engineering', 'Platform & Infrastructure', 'Data Engineering', "
+                                   "'Data Science', 'Machine Learning & AI', 'Data Analytics', "
+                                   "'Security Engineering', 'QA & Testing', 'Product Management', 'General'")
+                new_sub_topics = ("'Software Engineering', 'Frontend Engineering', 'Backend Engineering', "
+                                  "'Mobile Engineering', 'Platform & Infrastructure', 'Data Engineering', "
+                                  "'Data Science', 'Machine Learning & AI', 'Data Analytics', "
+                                  "'Security Engineering', 'QA & Testing', 'Product Management'")
+
+                # Rename old Software Testing → QA & Testing
+                c.execute("UPDATE posts SET topic = 'QA & Testing' WHERE topic = 'Software Testing'")
+                c.execute("UPDATE subscriptions SET topic = 'QA & Testing' WHERE topic = 'Software Testing'")
+
+                # Rebuild posts table with new constraint
+                c.execute(f"""CREATE TABLE posts_new (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    publisher_id INTEGER NOT NULL,
+                    url TEXT NOT NULL,
+                    title TEXT NOT NULL,
+                    tags TEXT,
+                    published_at DATETIME NOT NULL,
+                    modified_at DATETIME NOT NULL,
+                    labelled BOOL DEFAULT 0,
+                    topic TEXT NOT NULL CHECK (topic IN ({new_post_topics})),
+                    embedding BLOB,
+                    FOREIGN KEY (publisher_id) REFERENCES publishers(id),
+                    UNIQUE (url)
+                )""")
+                c.execute("INSERT INTO posts_new SELECT id, publisher_id, url, title, tags, published_at, modified_at, labelled, topic, embedding FROM posts")
+                c.execute("DROP TABLE posts")
+                c.execute("ALTER TABLE posts_new RENAME TO posts")
+
+                # Rebuild subscriptions table with new constraint
+                c.execute(f"""CREATE TABLE subscriptions_new (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    email TEXT NOT NULL,
+                    publisher_id INTEGER NOT NULL,
+                    joined_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    topic TEXT NOT NULL CHECK (topic IN ({new_sub_topics})),
+                    frequency_in_days INTEGER DEFAULT 3,
+                    last_notified_at DATETIME DEFAULT NULL,
+                    active BOOL DEFAULT 1,
+                    FOREIGN KEY (publisher_id) REFERENCES publishers(id),
+                    UNIQUE (email, publisher_id, topic)
+                )""")
+                c.execute("INSERT INTO subscriptions_new SELECT * FROM subscriptions")
+                c.execute("DROP TABLE subscriptions")
+                c.execute("ALTER TABLE subscriptions_new RENAME TO subscriptions")
+
+                logger.info("Migration: expanded topic categories and rebuilt posts/subscriptions tables")
+        except Exception as e:
+            logger.warning(f"Topic category migration failed: {e}")
 
         logger.info(f"SQLite database initialized Successfully")
         conn.commit()
