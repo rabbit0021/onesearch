@@ -39,7 +39,7 @@ export default function CompanySelector({ selected, onChange, disabled }) {
 
   return (
     <div className={styles.group}>
-      <label className={styles.label} htmlFor="company">
+      <label className={styles.label}>
         Select tech teams
       </label>
 
@@ -64,6 +64,7 @@ export default function CompanySelector({ selected, onChange, disabled }) {
             setOpen(true)
           }}
           onFocus={() => setOpen(true)}
+          onClick={() => setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 150)}
           autoComplete="off"
         />

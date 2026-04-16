@@ -42,7 +42,7 @@ export default function TopicSelector({ value, onChange }) {
 
   return (
     <div className={styles.group}>
-      <label className={styles.label} htmlFor="topic">
+      <label className={styles.label}>
         Field
       </label>
       <div className={styles.relative}>
@@ -54,6 +54,7 @@ export default function TopicSelector({ value, onChange }) {
           value={query}
           onChange={handleChange}
           onFocus={() => setOpen(true)}
+          onClick={() => setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 150)}
           autoComplete="off"
         />

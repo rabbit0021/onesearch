@@ -2,6 +2,86 @@
    Design tokens — edit here to retheme the entire app
    ============================================================ */
 :root {
+  --bg-page: rgb(249, 249, 249);
+  --bg-input: rgb(255, 255, 255);
+  --bg-card: rgb(254, 254, 254);
+  --bg-surface: rgb(242, 242, 242);
+  --bg-disabled: rgb(230, 230, 230);
+  --bg-wizard: rgb(238, 238, 235);
+  --bg-wizard-option: rgb(220, 220, 217);
+
+  --text-base: #333333;
+  --text-strong: #111827;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  --text-dim: #404040;
+
+  --border: #adadad;
+  --border-mid: #d0d0d0;
+  --border-strong: #a2a2a2;
+
+  --primary-button-bg: rgb(70, 70, 70);
+
+  --filter-bg: rgb(239, 239, 237);
+  --filter-border: rgb(230, 230, 228);
+  --filter-text: #2c2c2c;
+  --filter-dim: #666;
+  --filter-ghost: #999;
+  --filter-line: #b0b0b0;
+  --filter-line-subtle: #c8c8c8;
+  --filter-placeholder: #828282;
+  --filter-prefix-color: var(--color-primary-hover);
+
+  --card-bg: #ffffff;
+  --card-shadow: rgba(0, 0, 0, 0.07);
+  --card-shadow-hover: rgba(0, 0, 0, 0.12);
+  --card-title: #111827;
+  --card-publisher: #6b7280;
+
+  --arcade-highlight: #fdfdfd;  
+  --arcade-shadow-mid: #b5b5b5;    
+  --arcade-shadow-deep: #8d8d8d;    
+}
+
+[data-theme="dark"] {
+  --bg-page: rgb(18, 18, 18);
+  --bg-input: rgb(28, 28, 28);
+  --bg-card: rgb(38, 38, 38);
+  --bg-surface: rgb(58, 58, 58);
+  --bg-disabled: rgb(25, 25, 25);
+  --bg-wizard: rgb(30, 30, 27);
+  --bg-wizard-option: rgb(20, 20, 17);
+
+  --text-base: #e0dcd4;
+  --text-strong: #f0ece4;
+  --text-secondary: #a0a09a;
+  --text-muted: #6a6660;
+  --text-dim: #c8c4bc;
+
+  --border: #1a1a1a;
+  --border-mid: #3a3835;
+  --border-strong: #4a4845;
+
+  --primary-button-bg: rgb(49, 49, 49);
+
+  --filter-bg: rgb(40, 40, 40);
+  --filter-border: rgb(50, 50, 50);
+  --filter-text: #b4b4b4;
+  --filter-ghost: #b1ac99;
+  --filter-line: #484848;
+  --filter-line-subtle: #383838;
+  --filter-placeholder: #929292;
+  --filter-prefix-color: var(--color-primary);
+
+  --card-bg: #1c1a18;
+  --card-shadow: rgba(0, 0, 0, 0.4);
+  --card-shadow-hover: rgba(0, 0, 0, 0.6);
+  --card-title: #f0ece4;
+  --card-publisher: #a0a09a;
+
+  --arcade-highlight: #333333;     
+  --arcade-shadow-mid: #000000;     
+  --arcade-shadow-deep: #000000;
 }
 
 *,
@@ -14,9 +94,9 @@
 
 body {
   font-family: 'Courier New', Courier, monospace;
-  color: #333;
+  color: var(--text-base);
   min-height: 100vh;
-  background-color: rgb(249, 249, 249)
+  background-color: var(--bg-page);
 
 }
 

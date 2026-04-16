@@ -7,7 +7,7 @@
 .label {
   font-size: 0.9rem;
   font-weight: 600;
-  color: #444;
+  color: var(--text-secondary);
 }
 
 .row {
@@ -23,29 +23,31 @@
 .chip {
   display: inline-flex;
   align-items: center;
-  background: #f3f4f6;
-  border: 1px solid transparent;
+  background: var(--bg-card);
+  border: .1px solid var(--border);
   border-radius: 6px;
   padding: 6px 14px;
   font-size: 0.9rem;
   cursor: pointer;
   user-select: none;
   transition: background 0.15s, border-color 0.15s;
+  color: var(--text-strong);
 }
 
 .chip:hover:not(.disabled) {
-  background: #e8eaf0;
+  background: var(--bg-card);
 }
 
 .checked {
-  background: var(--color-primary-tint);
+  background: var(--bg-card);
   border-color: var(--color-primary);
-  color: var(--color-primary-text);
+  color: var(--color-primary);
 }
 
 .disabled {
-  opacity: 0.55;
+  opacity: 0.5;
   cursor: not-allowed;
+  background-color: var(--bg-disabled);
 }
 
 .hidden {
@@ -61,8 +63,8 @@
   bottom: 125%;
   left: 50%;
   transform: translateX(-50%);
-  background: #dadada;
-  color: #333;
+  background: var(--bg-card);
+  color: var(--text-secondary);
   font-size: 0.72rem;
   border-radius: 4px;
   padding: 3px 8px;

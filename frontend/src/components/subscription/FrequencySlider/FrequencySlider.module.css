@@ -7,12 +7,12 @@
 .label {
   font-size: 0.9rem;
   font-weight: 600;
-  color: #444;
+  color: var(--text-secondary);
 }
 
 .hint {
   font-size: 0.78rem;
-  color: #888;
+  color: var(--text-dim);
 }
 
 .row {
@@ -24,6 +24,7 @@
 .slider {
   flex: 1;
   accent-color: var(--color-primary);
+  
   height: 4px;
   cursor: pointer;
 }
@@ -31,6 +32,6 @@
 .output {
   min-width: 90px;
   font-size: 0.85rem;
-  color: #555;
+  color: var(--text-dim);
   text-align: right;
 }

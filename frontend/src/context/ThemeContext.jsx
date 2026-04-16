@@ -37,7 +37,7 @@ export const THEMES = {
     label: 'Claude',
     swatch: '#d97757',
     '--color-primary':       '#d97757',
-    '--color-primary-hover': '#c46040',
+    '--color-primary-hover': '#9c4d33',
     '--color-primary-text':  '#7a3520',
     '--color-primary-tint':  '#fdf0eb',
   },
@@ -57,13 +57,30 @@ export function ThemeProvider({ children }) {
     () => localStorage.getItem('theme5') || 'rose'
   )
 
+  const [darkMode, setDarkMode] = useState(
+    () => localStorage.getItem('darkMode') === 'true'
+  )
+
   useEffect(() => {
     applyTheme(THEMES[themeKey] || THEMES.rose)
     localStorage.setItem('theme5', themeKey)
   }, [themeKey])
 
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.setAttribute('data-theme', 'dark')
+    } else {
+      document.documentElement.removeAttribute('data-theme')
+    }
+    localStorage.setItem('darkMode', String(darkMode))
+  }, [darkMode])
+
+  function toggleDarkMode() {
+    setDarkMode(prev => !prev)
+  }
+
   return (
-    <ThemeContext.Provider value={{ themeKey, setThemeKey }}>
+    <ThemeContext.Provider value={{ themeKey, setThemeKey, darkMode, toggleDarkMode }}>
       {children}
     </ThemeContext.Provider>
   )

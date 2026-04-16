@@ -271,33 +271,42 @@ export default function BlogFeed({ formRef }) {
 
         {/* Row 2: publisher, date, topic */}
         <div className={styles.filterRow}>
-          <select
-            className={`${styles.filterSelect} ${publisher ? styles.filterSelectActive : ''}`}
-            value={publisher}
-            onChange={e => setPublisher(e.target.value)}
-          >
-            <option value="">All Publishers</option>
-            {publishers.map(p => <option key={p} value={p}>{p}</option>)}
-          </select>
-          <select
-            className={`${styles.filterSelect} ${dateDays ? styles.filterSelectActive : ''}`}
-            value={dateDays ?? ''}
-            onChange={e => setDateDays(e.target.value ? Number(e.target.value) : null)}
-          >
-            {DATE_OPTIONS.map(o => (
-              <option key={o.label} value={o.days ?? ''}>{o.label}</option>
-            ))}
-          </select>
-          <select
-            className={`${styles.filterSelect} ${topic ? styles.filterSelectActive : ''}`}
-            value={topic}
-            onChange={e => setTopic(e.target.value)}
-          >
-            <option value="">All Fields</option>
-            {Object.keys(TOPIC_COLORS).map(t => (
-              <option key={t} value={t}>{t}</option>
-            ))}
-          </select>
+          <label className={`${styles.filterLabel} ${publisher ? styles.filterLabelActive : ''}`}>
+            <span className={styles.filterPrefix}>pub //</span>
+            <select
+              className={styles.filterSelect}
+              value={publisher}
+              onChange={e => setPublisher(e.target.value)}
+            >
+              <option value="">all</option>
+              {publishers.map(p => <option key={p} value={p}>{p}</option>)}
+            </select>
+          </label>
+          <label className={`${styles.filterLabel} ${dateDays ? styles.filterLabelActive : ''}`}>
+            <span className={styles.filterPrefix}>date //</span>
+            <select
+              className={styles.filterSelect}
+              value={dateDays ?? ''}
+              onChange={e => setDateDays(e.target.value ? Number(e.target.value) : null)}
+            >
+              {DATE_OPTIONS.map(o => (
+                <option key={o.label} value={o.days ?? ''}>{o.label}</option>
+              ))}
+            </select>
+          </label>
+          <label className={`${styles.filterLabel} ${topic ? styles.filterLabelActive : ''}`}>
+            <span className={styles.filterPrefix}>field //</span>
+            <select
+              className={styles.filterSelect}
+              value={topic}
+              onChange={e => setTopic(e.target.value)}
+            >
+              <option value="">all</option>
+              {Object.keys(TOPIC_COLORS).map(t => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+          </label>
         </div>
 
         {/* Row 3: tags */}

@@ -19,7 +19,6 @@ export default function EmailInput({ value, onChange, onBlur }) {
         placeholder="you@example.com"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        onBlur={onBlur}
         required
         autoComplete="email"
       />

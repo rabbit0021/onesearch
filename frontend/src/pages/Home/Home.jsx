@@ -52,8 +52,12 @@ export default function Home() {
     if (id === 'techteams' && !checked) setCompanies([])
   }
 
-  async function handleEmailBlur() {
-    if (!email || !email.includes('@')) return
+  async function handleEmailBlur(email) {
+    setEmail(email)
+    if (!email || !email.includes('@')) {
+      setExistingSubs(null) 
+      return
+    }
     try {
       const data = await getSubscriptionsForEmail(email)
       setExistingSubs(Object.keys(data).length > 0 ? data : null)
@@ -123,8 +127,7 @@ export default function Home() {
             </div>
             <EmailInput
               value={email}
-              onChange={setEmail}
-              onBlur={handleEmailBlur}
+              onChange={handleEmailBlur}
             />
 
             <SubscriptionStatus data={existingSubs} />

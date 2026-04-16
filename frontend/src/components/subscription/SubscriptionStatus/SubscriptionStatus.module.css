@@ -10,7 +10,7 @@
 
 .heading {
   font-weight: 600;
-  color: #444;
+  color: var(--text-dim);
   margin-bottom: 2px;
 }
 
@@ -22,10 +22,10 @@
 
 .topic {
   font-weight: 600;
-  color: var(--color-primary-text);
+  color: var(--color-primary-hover);
   white-space: nowrap;
 }
 
 .pubs {
-  color: #555;
+  color: var(--text-base);
 }

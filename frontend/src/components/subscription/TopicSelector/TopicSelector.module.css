@@ -1,13 +1,13 @@
 .group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 10px;
 }
 
 .label {
   font-size: 0.9rem;
   font-weight: 600;
-  color: #444;
+  color: var(--text-secondary);
 }
 
 .relative {
@@ -17,11 +17,16 @@
 .input {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
+  border: .1px solid var(--border);
   font-size: 0.95rem;
   outline: none;
   transition: border-color 0.2s;
+  background: var(--bg-input);
+  color: var(--text-strong);
+}
+
+.input::placeholder{
+  color: var(--text-muted);
 }
 
 .input:focus {

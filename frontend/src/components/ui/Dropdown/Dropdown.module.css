@@ -4,13 +4,11 @@
   left: 0;
   right: 0;
   z-index: 10;
-  background: #fff;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  background: var(--bg-wizard);
+  border: 1px solid var(--border-mid);
   max-height: 180px;
   overflow-y: auto;
   list-style: none;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   margin-top: 2px;
 }
 
@@ -18,8 +16,10 @@
   padding: 8px 12px;
   font-size: 0.9rem;
   cursor: pointer;
+  color: var(--text-dim);
 }
 
 .item:hover {
-  background: #f0f4ff;
+  background: var(--bg-wizard-option);
+  color: var(--color-primary-hover);
 }

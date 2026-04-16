@@ -7,17 +7,30 @@
 .label {
   font-size: 0.9rem;
   font-weight: 600;
-  color: #444;
+  color: var(--text-secondary);
 }
 
 .input {
   padding: 0.75rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
+  border: .1px solid var(--border);
   font-size: 0.95rem;
   transition: border-color 0.2s;
   outline: none;
   width: 100%;
+  background: var(--bg-input);
+  color: var(--text-strong);
+  background-color: var(--bg-input);
+}
+
+.input::placeholder{
+  color: var(--text-muted);
+}
+
+.input:-webkit-autofill {
+  /* This creates a giant internal shadow that hides the blue */
+  -webkit-box-shadow: 0 0 0px 1000px var(--bg-input) inset !important;
+  /* This ensures your custom text color stays visible */
+  -webkit-text-fill-color: var(--text-base) !important;
 }
 
 .input:focus {

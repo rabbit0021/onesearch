@@ -1,13 +1,13 @@
 .group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .label {
   font-size: 0.9rem;
   font-weight: 600;
-  color: #444;
+  color: var(--text-secondary);
 }
 
 .tags {
@@ -23,19 +23,25 @@
 .input {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
+  border: .1px solid var(--border);
   font-size: 0.95rem;
   outline: none;
   transition: border-color 0.2s, background 0.2s;
+  background-color: var(--bg-input);
+  color: var(--text-strong);
 }
+
+.input::placeholder{
+  color: var(--text-muted);
+}
+
 
 .input:focus {
   border-color: var(--color-primary);
 }
 
 .inputDisabled {
-  background: #f0f0f0;
-  color: #999;
+  background-color: var(--bg-disabled);
+  opacity: 0.5;
   cursor: not-allowed;
 }

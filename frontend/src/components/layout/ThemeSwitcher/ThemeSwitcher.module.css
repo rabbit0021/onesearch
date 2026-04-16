@@ -3,7 +3,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  border: 1px solid #d4d4d4;
+  border: 1px solid var(--border-mid);
   border-top: 2px solid var(--color-primary);
   border-radius: 8px;
   padding: 6px 10px;
@@ -11,6 +11,25 @@
   opacity: 1;
   pointer-events: auto;
   transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.darkToggle {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.08em;
+  padding: 1px 5px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+  margin-right: 2px;
+}
+
+.darkToggle:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
 }
 
 .switcher::before {

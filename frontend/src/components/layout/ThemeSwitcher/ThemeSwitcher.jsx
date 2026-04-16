@@ -2,10 +2,19 @@ import { THEMES, useTheme } from '../../../context/ThemeContext'
 import styles from './ThemeSwitcher.module.css'
 
 export default function ThemeSwitcher() {
-  const { themeKey, setThemeKey } = useTheme()
+  const { themeKey, setThemeKey, darkMode, toggleDarkMode } = useTheme()
 
   return (
     <div className={styles.switcher}>
+      <button
+        className={styles.darkToggle}
+        onClick={toggleDarkMode}
+        title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+        aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+        aria-pressed={darkMode}
+      >
+        {darkMode ? 'light' : 'dark'}
+      </button>
       {Object.entries(THEMES).map(([key, theme]) => (
         <button
           key={key}
