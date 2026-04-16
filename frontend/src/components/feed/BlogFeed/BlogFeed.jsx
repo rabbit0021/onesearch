@@ -125,6 +125,7 @@ export default function BlogFeed({ formRef }) {
 
   const [search, setSearch] = useState('')
   const [publisher, setPublisher] = useState('')
+  const [topic, setTopic] = useState('')
   const [activeTags, setActiveTags] = useState([])
   const [dateDays, setDateDays] = useState(null)
   const [tagSearch, setTagSearch] = useState('')
@@ -195,6 +196,7 @@ export default function BlogFeed({ formRef }) {
     return p => {
       if (q && !p.title.toLowerCase().includes(q)) return false
       if (publisher && p.publisher !== publisher) return false
+      if (topic && p.topic !== topic) return false
       if (cutoff && new Date(p.published_at).getTime() < cutoff) return false
       if (activeTags.length > 0) {
         const postTags = p.tags ? p.tags.split(',').map(t => t.trim()) : []
@@ -202,7 +204,7 @@ export default function BlogFeed({ formRef }) {
       }
       return true
     }
-  }, [search, publisher, dateDays, activeTags])
+  }, [search, publisher, topic, dateDays, activeTags])
 
   const filtered = useMemo(() => posts.filter(filterPredicate), [posts, filterPredicate])
   const filteredMostLiked = useMemo(() => mostLiked.filter(filterPredicate), [mostLiked, filterPredicate])
@@ -213,7 +215,7 @@ export default function BlogFeed({ formRef }) {
     )
   }
 
-  const hasFilters = search || publisher || dateDays || activeTags.length > 0
+  const hasFilters = search || publisher || topic || dateDays || activeTags.length > 0
 
   const grouped = useMemo(() => {
     const groups = {}
@@ -243,7 +245,9 @@ export default function BlogFeed({ formRef }) {
     <div className={styles.wrapper}>
 
       <div className={`${styles.filterBar} ${filterClosed ? styles.filterBarHidden : ''}`}>
-        <div className={styles.toolbar}>
+
+        {/* Row 1: search + close */}
+        <div className={styles.searchRow}>
           <div className={styles.searchWrap}>
             <span className={styles.searchPrompt}>▸</span>
             <input
@@ -263,9 +267,12 @@ export default function BlogFeed({ formRef }) {
             title="hide filters"
             tabIndex={hasScrolled ? 0 : -1}
           >✕</button>
-          <div className={styles.toolbarBreak} />
+        </div>
+
+        {/* Row 2: publisher, date, topic */}
+        <div className={styles.filterRow}>
           <select
-            className={styles.filterSelect}
+            className={`${styles.filterSelect} ${publisher ? styles.filterSelectActive : ''}`}
             value={publisher}
             onChange={e => setPublisher(e.target.value)}
           >
@@ -273,7 +280,7 @@ export default function BlogFeed({ formRef }) {
             {publishers.map(p => <option key={p} value={p}>{p}</option>)}
           </select>
           <select
-            className={styles.filterSelect}
+            className={`${styles.filterSelect} ${dateDays ? styles.filterSelectActive : ''}`}
             value={dateDays ?? ''}
             onChange={e => setDateDays(e.target.value ? Number(e.target.value) : null)}
           >
@@ -281,8 +288,19 @@ export default function BlogFeed({ formRef }) {
               <option key={o.label} value={o.days ?? ''}>{o.label}</option>
             ))}
           </select>
+          <select
+            className={`${styles.filterSelect} ${topic ? styles.filterSelectActive : ''}`}
+            value={topic}
+            onChange={e => setTopic(e.target.value)}
+          >
+            <option value="">All Fields</option>
+            {Object.keys(TOPIC_COLORS).map(t => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </select>
         </div>
 
+        {/* Row 3: tags */}
         {allTags.length > 0 && (
           <div className={styles.tagFilter}>
             <span className={styles.tagLabel}>tags//</span>
@@ -313,7 +331,7 @@ export default function BlogFeed({ formRef }) {
             {hasFilters && (
               <button
                 className={styles.resetAll}
-                onClick={() => { setSearch(''); setPublisher(''); setDateDays(null); setActiveTags([]); setTagSearch('') }}
+                onClick={() => { setSearch(''); setPublisher(''); setTopic(''); setDateDays(null); setActiveTags([]); setTagSearch('') }}
               >
                 reset
               </button>
