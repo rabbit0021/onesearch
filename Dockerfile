@@ -16,4 +16,4 @@ USER appuser
 
 ENV FLASK_ENV=production
 ENV PORT=8000
-CMD ["gunicorn", "-b", "0.0.0.0:8000", "app:app"]
+CMD ["gunicorn", "-b", "0.0.0.0:8000", "--worker-tmp-dir", "/app/tmp", "app:app"]
