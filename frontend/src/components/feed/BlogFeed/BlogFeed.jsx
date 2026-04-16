@@ -368,7 +368,7 @@ export default function BlogFeed() {
                 </div>
                 <div className={styles.lockedOverlay}>
                   <span className={styles.lockIcon}>⬡</span>
-                  <p className={styles.lockedMsg}>&gt;_ connect jira to see most liked posts recently</p>
+                  <p className={styles.lockedMsg}>&gt;_ connect jira to see trending blog posts</p>
                 </div>
               </div>
             ) : null}
