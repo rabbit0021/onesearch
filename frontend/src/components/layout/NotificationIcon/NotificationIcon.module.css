@@ -11,6 +11,7 @@
   align-items: center;
   transition: color 0.15s, background 0.15s;
   position: relative;
+  z-index: 4;
 }
 
 .wrapper:hover {

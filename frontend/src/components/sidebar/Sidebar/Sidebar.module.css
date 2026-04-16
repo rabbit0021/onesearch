@@ -8,7 +8,7 @@
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-left: 2px solid rgba(200, 200, 200, 0.4);
-  z-index: 1000;
+  z-index: 3;
   transition: right 0.4s ease;
   display: flex;
   flex-direction: column;

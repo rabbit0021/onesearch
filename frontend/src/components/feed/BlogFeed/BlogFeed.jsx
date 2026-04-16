@@ -166,10 +166,11 @@ export default function BlogFeed({ formRef }) {
       if (isMobile && formRef?.current) {
         const formBottom = formRef.current.getBoundingClientRect().bottom
         setHasScrolled(formBottom < 0)
+        if (formBottom >= 0) setFilterClosed(false)
       } else {
         setHasScrolled(window.scrollY > 80)
+        if (window.scrollY < 5) setFilterClosed(false)
       }
-      if (window.scrollY < 5) setFilterClosed(false)
     }
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
@@ -241,7 +242,7 @@ export default function BlogFeed({ formRef }) {
   return (
     <div className={styles.wrapper}>
 
-      {!filterClosed && <div className={styles.filterBar}>
+      <div className={`${styles.filterBar} ${filterClosed ? styles.filterBarHidden : ''}`}>
         <div className={styles.toolbar}>
           <div className={styles.searchWrap}>
             <span className={styles.searchPrompt}>▸</span>
@@ -256,9 +257,12 @@ export default function BlogFeed({ formRef }) {
               <button className={styles.searchClear} onClick={() => setSearch('')}>×</button>
             )}
           </div>
-          {hasScrolled && (
-            <button className={styles.filterCloseBtn} onClick={() => setFilterClosed(true)} title="hide filters">✕</button>
-          )}
+          <button
+            className={`${styles.filterCloseBtn} ${hasScrolled ? styles.filterCloseBtnVisible : styles.filterCloseBtnHidden}`}
+            onClick={() => hasScrolled && setFilterClosed(true)}
+            title="hide filters"
+            tabIndex={hasScrolled ? 0 : -1}
+          >✕</button>
           <div className={styles.toolbarBreak} />
           <select
             className={styles.filterSelect}
@@ -316,7 +320,7 @@ export default function BlogFeed({ formRef }) {
             )}
           </div>
         )}
-      </div>}
+      </div>
 
       {/* ── Section order:
             Jira connected + matches → [Posts for You (grouped)] → [Most Liked] → [Other Posts]

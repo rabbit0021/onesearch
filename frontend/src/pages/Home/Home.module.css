@@ -2,7 +2,7 @@
   position: fixed;
   top: 20px;
   right: 20px;
-  z-index: 1100;
+  z-index: 1;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -147,7 +147,6 @@
     position: static;
     top: auto;
     right: auto;
-    z-index: auto;
     display: contents;
   }
 
