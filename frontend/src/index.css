@@ -37,6 +37,7 @@
   --card-shadow-hover: rgba(0, 0, 0, 0.12);
   --card-title: #111827;
   --card-publisher: #6b7280;
+  --card-hint: var(--color-primary-tint);
 
   --arcade-highlight: #fdfdfd;  
   --arcade-shadow-mid: #b5b5b5;    
@@ -78,6 +79,8 @@
   --card-shadow-hover: rgba(0, 0, 0, 0.6);
   --card-title: #f0ece4;
   --card-publisher: #a0a09a;
+  --card-hint: var(--bg-surface);
+
 
   --arcade-highlight: #333333;     
   --arcade-shadow-mid: #000000;     

@@ -370,8 +370,8 @@ def like_post(post_id):
         return jsonify({"error": "Not authenticated with Jira"}), 401
     conn = app.db.get_connection()
     try:
-        count = app.db.like_post(conn, post_id, jira_account_id)
-        return jsonify({"count": count})
+        count, is_new = app.db.like_post(conn, post_id, jira_account_id)
+        return jsonify({"count": count, "is_new": is_new})
     finally:
         conn.close()
 

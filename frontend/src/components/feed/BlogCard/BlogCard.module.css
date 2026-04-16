@@ -1,0 +1,279 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--card-bg);
+  box-shadow: 0 1px 4px var(--card-shadow);
+  text-decoration: none;
+  color: inherit;
+  transition: box-shadow 0.18s, transform 0.18s;
+}
+
+.card:hover {
+  box-shadow: 0 4px 16px var(--card-shadow-hover);
+  transform: translateY(-2px);
+}
+
+/* ── Thumbnail ── */
+.thumbnail {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.favicon {
+  width: 44px;
+  height: 44px;
+  border-radius: 4px;
+  object-fit: contain;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 4px;
+}
+
+.topicLabel {
+  position: absolute;
+  bottom: 6px;
+  left: 7px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(0, 0, 0, 0.35);
+  padding: 2px 5px;
+  border-radius: 0;
+}
+
+/* ── Like button ── */
+.likeBtn {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  margin-right: -10px;
+  gap: 2px;
+  /* background: rgba(189, 189, 189, 0.2); */
+  /* border: 1px solid rgba(255, 255, 255, 0.1); */
+  border-radius: 3px;
+  user-select: none;
+  transition: background 0.15s;
+  /* background-color: green;
+  padding: 25px; */
+}
+
+.likeBtn:hover {
+  /* background: rgba(189, 189, 189, .1); */
+}
+
+/* ♥ glyph */
+.heart {
+  font-size: 20px;
+  line-height: 1;
+  transition: color 0.15s, transform 0.15s;
+  flex-shrink: 0;
+  margin-top: -4px;
+}
+
+/* Always red when Jira connected */
+.heartActive {
+  color: rgb(255, 96, 96);
+  fill: currentColor;
+}
+
+.heartZero {
+  fill: transparent !important; 
+  stroke: var(--text-base); 
+  stroke-width: 1px; 
+  color: transparent; 
+}
+
+.likeBtn:hover .heartActive {
+  transform: scale(1.1);
+}
+
+/* Locked — no Jira */
+.likeBtnLocked {
+  cursor:not-allowed;
+}
+
+.likeBtnLocked::after {
+  content: 'connect jira to like';
+  position: absolute;
+  top: calc(-10%);
+  right: 120%;
+  background: rgba(167, 166, 166, 0.5);
+  color: var(--text-base);
+  font-size: 0.6rem;
+  font-family: 'Courier New', monospace;
+  white-space: nowrap;
+  padding: 3px 6px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+
+.likeBtnLocked:hover::after {
+  opacity: 1;
+}
+
+/* ── Like count ticker ── */
+.likeCounter {
+  position: relative;
+  display: inline-block;
+  width: 2ch;
+  height: 0.9rem;     /* must match font-size below so overflow clips cleanly */
+  overflow: hidden;
+  vertical-align: middle;
+}
+
+.countStatic {
+  position: absolute;
+  top: 0; left: 0;
+  font-size: 0.8rem;
+  color: var(--text-base);
+  line-height: 0.9rem;
+  white-space: nowrap;
+}
+
+@keyframes tickOut {
+  from { transform: translateY(0);      opacity: 1; }
+  to   { transform: translateY(-0.9rem); opacity: 0; }
+}
+
+@keyframes tickIn {
+  from { transform: translateY(0.9rem);  opacity: 0; }
+  to   { transform: translateY(0);       opacity: 1; }
+}
+
+.tickOut {
+  position: absolute;
+  top: 0; left: 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 0.9rem;
+  white-space: nowrap;
+  animation: tickOut .5s ease forwards;
+}
+
+.tickIn {
+  position: absolute;
+  top: 0; left: 0;
+  font-size: 0.8rem;
+  color: var(--text-base);
+  line-height: 0.9rem;
+  white-space: nowrap;
+  animation: tickIn .5s ease forwards;
+}
+
+/* ── Card body ── */
+.body {
+  padding: 0.6rem 0.75rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+}
+
+.meta {
+  display: flex;
+  flex-direction: row;
+  justify-content: stretch;
+  align-items: center;
+  gap: 0.5rem;
+  height: 30px;
+}
+
+.metadesc{
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  align-items: center;
+  flex: 1;
+}
+
+.publisher {
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.03em;
+  color: var(--card-publisher);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 70%;
+}
+
+.date {
+  font-size: 0.7rem;
+  font-family: 'Courier New', monospace;
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: 0.92rem;
+  color: var(--card-title);
+  margin: 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-top: 0.1rem;
+}
+
+.tag {
+  font-size: 0.58rem;
+  font-family: 'Courier New', monospace;
+  background-color: var(--card-hint);
+  color: var(--text-base);
+  padding: 1px 5px;
+  border-radius: 0;
+}
+
+/* ── Jira match tip ── */
+.matchTip {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-top: 0.4rem;
+  padding-top: 0.35rem;
+  border-top: .1px solid var(--border);
+  overflow: hidden;
+}
+
+.matchPrompt {
+  font-size: 0.85rem;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.matchKey {
+  font-size: 0.65rem;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.matchSummary {
+  font-size: 0.65rem;
+  font-family: 'Courier New', monospace;
+  color: var(--text-base);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

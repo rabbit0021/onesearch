@@ -479,8 +479,9 @@ class SQLiteDatabase:
             (post_id, jira_account_id)
         )
         conn.commit()
+        is_new = c.rowcount == 1
         c.execute("SELECT COUNT(*) FROM post_likes WHERE post_id = ?", (post_id,))
-        return c.fetchone()[0]
+        return c.fetchone()[0], is_new
 
     def get_most_liked_this_month(self, conn, limit=5):
         c = conn.cursor()

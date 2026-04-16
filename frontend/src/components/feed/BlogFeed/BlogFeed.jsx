@@ -1,23 +1,8 @@
 import { useState, useEffect, useMemo } from 'react'
-import { getFeed, getSuggestedFeed, getMostLikedFeed, likePost } from '../../../api'
+import { getFeed, getSuggestedFeed, getMostLikedFeed } from '../../../api'
 import { getJiraStatus, getJiraIssues } from '../../../api/jira'
+import BlogCard, { TOPIC_COLORS } from '../BlogCard/BlogCard'
 import styles from './BlogFeed.module.css'
-
-const TOPIC_COLORS = {
-  'Software Engineering': '#FF5555', // CGA bright red
-  'Frontend Engineering': '#55FFFF', // CGA bright cyan
-  'Backend Engineering': '#5555FF', // CGA bright blue
-  'Mobile Engineering': '#FF55FF', // CGA bright magenta
-  'Platform & Infrastructure': '#FFAA55', // CGA orange
-  'Data Engineering': '#55AAFF', // light blue
-  'Data Science': '#AA55FF', // purple
-  'Machine Learning & AI': '#FF55AA', // hot pink
-  'Data Analytics': '#55FFAA', // mint green
-  'Security Engineering': '#FF2222', // danger red
-  'QA & Testing': '#55FF55', // phosphor green
-  'Product Management': '#FFFF55', // CGA bright yellow
-  'General': '#AAAAAA', // grey
-}
 
 const DATE_OPTIONS = [
   { label: 'Any time', days: null },
@@ -25,96 +10,6 @@ const DATE_OPTIONS = [
   { label: 'This week', days: 7 },
   { label: 'This month', days: 30 },
 ]
-
-function faviconUrl(postUrl) {
-  try {
-    const { origin } = new URL(postUrl)
-    return `https://www.google.com/s2/favicons?domain=${origin}&sz=64`
-  } catch {
-    return null
-  }
-}
-
-function timeAgo(iso) {
-  const diff = Date.now() - new Date(iso).getTime()
-  const days = Math.floor(diff / 86400000)
-  if (days === 0) return 'Today'
-  if (days === 1) return 'Yesterday'
-  if (days < 30) return `${days}d ago`
-  const months = Math.floor(days / 30)
-  return `${months}mo ago`
-}
-
-function BlogCard({ post, jiraConnected }) {
-  const color = TOPIC_COLORS[post.topic] || TOPIC_COLORS['General']
-  const favicon = faviconUrl(post.url)
-  const tags = post.tags ? post.tags.split(',').map(t => t.trim()).filter(Boolean) : []
-  const match = post.matched_issue
-  const [likeCount, setLikeCount] = useState(post.like_count || 0)
-
-  async function handleLike(e) {
-    e.preventDefault()
-    e.stopPropagation()
-    if (!jiraConnected) return
-    try {
-      const data = await likePost(post.id)
-      setLikeCount(data.count)
-    } catch { /* silently fail */ }
-  }
-
-  return (
-    <a
-      href={post.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={`${styles.card} ${match ? styles.cardMatched : ''}`}
-    >
-      <div className={styles.thumbnail} style={{ background: color }}>
-        {favicon && (
-          <img
-            src={favicon}
-            alt=""
-            className={styles.favicon}
-            onError={e => { e.currentTarget.style.display = 'none' }}
-          />
-        )}
-        <span className={styles.topicLabel}>{post.topic}</span>
-        <div
-          className={`${styles.likeBtn} ${!jiraConnected ? styles.likeBtnLocked : ''}`}
-          role="button"
-          tabIndex={0}
-          onClick={handleLike}
-        >
-          {jiraConnected
-            ? <><i className="fas fa-heart" /><span className={styles.likeCount}>{likeCount}</span></>
-            : <><i className="fas fa-heart" /><span className={styles.likeCount}>–</span></>
-          }
-        </div>
-      </div>
-      <div className={styles.body}>
-        <div className={styles.meta}>
-          <span className={styles.publisher}>{post.publisher}</span>
-          <span className={styles.date}>{timeAgo(post.published_at)}</span>
-        </div>
-        <p className={styles.title}>{post.title}</p>
-        {tags.length > 0 && (
-          <div className={styles.tags}>
-            {tags.slice(0, 3).map(tag => (
-              <span key={tag} className={styles.tag}>{tag}</span>
-            ))}
-          </div>
-        )}
-        {match && (
-          <div className={styles.matchTip}>
-            <span className={styles.matchPrompt}>▸</span>
-            <span className={styles.matchKey}>{match.key}</span>
-            <span className={styles.matchSummary}>{match.summary}</span>
-          </div>
-        )}
-      </div>
-    </a>
-  )
-}
 
 export default function BlogFeed({ formRef }) {
   const [posts, setPosts] = useState([])
