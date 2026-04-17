@@ -5,6 +5,18 @@ import styles from './JiraHeaderButton.module.css'
 function ConnectButton() {
   const [pending, setPending] = useState(false)
 
+  useEffect(() => {
+    if (!pending) return
+    const reset = () => setPending(false)
+    const handleVisibility = () => { if (!document.hidden) reset() }
+    window.addEventListener('focus', reset)
+    document.addEventListener('visibilitychange', handleVisibility)
+    return () => {
+      window.removeEventListener('focus', reset)
+      document.removeEventListener('visibilitychange', handleVisibility)
+    }
+  }, [pending])
+
   function handleClick() {
     setPending(true)
   }

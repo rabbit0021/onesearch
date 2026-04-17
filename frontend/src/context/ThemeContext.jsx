@@ -54,11 +54,11 @@ function applyTheme(theme) {
 
 export function ThemeProvider({ children }) {
   const [themeKey, setThemeKey] = useState(
-    () => localStorage.getItem('theme5') || 'rose'
+    () => localStorage.getItem('theme5') || 'claude'
   )
 
   const [darkMode, setDarkMode] = useState(
-    () => localStorage.getItem('darkMode') === 'true'
+    () => localStorage.getItem('darkMode') === 'claude'
   )
 
   useEffect(() => {
