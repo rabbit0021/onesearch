@@ -12,6 +12,8 @@ RUN adduser --disabled-password --gecos "" appuser
 
 WORKDIR /app
 COPY requirements.txt .
+# Install CPU-only torch first to avoid downloading 3GB+ of NVIDIA CUDA packages
+RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 

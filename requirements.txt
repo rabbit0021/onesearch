@@ -72,7 +72,6 @@ tensorboard-data-server==0.7.2
 termcolor==3.1.0
 threadpoolctl==3.6.0
 tokenizers==0.21.4
-torch==2.8.0
 tqdm==4.67.1
 transformers==4.55.2
 typing-inspection==0.4.1
