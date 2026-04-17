@@ -6,7 +6,7 @@ import pickle
 from logger_config import get_logger
 
 env = os.getenv('FLASK_ENV', 'development')
-MODEL_PATH = os.getenv("MODEL_PATH") if env == 'production' else 'data/dev/trained_classifier.pkl'
+MODEL_PATH = os.getenv("MODEL_PATH", "data/trained_classifier.pkl") if env == 'production' else 'data/dev/trained_classifier.pkl'
 CONFIDENCE_THRESHOLD = 0.7
 
 logger = get_logger("classifier")
