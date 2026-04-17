@@ -25,7 +25,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Run tests
-        run: docker run --rm -e MODEL_PATH=data/trained_classifier.pkl -e DB_TYPE=sqlite -e DB_PATH=data/tests.db onesearch:test pytest -s -m "not real"
+        run: docker run --rm --entrypoint pytest -e MODEL_PATH=data/trained_classifier.pkl -e DB_TYPE=sqlite -e DB_PATH=data/tests.db onesearch:test -s -m "not real"
 
   deploy:
     needs: build-and-test
