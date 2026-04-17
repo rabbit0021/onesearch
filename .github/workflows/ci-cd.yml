@@ -38,7 +38,7 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: root
           key: ${{ secrets.VPS_SSH_KEY }}
-          port: 443   # SSH runs on 443 to work through corporate firewalls
+          port: 22
           envs: FLASK_ENV,DB_TYPE,DB_PATH,MODEL_PATH,POSTS_SECRET_KEY,SMTP_USERNAME,SMTP_PASSWORD,SECRET_KEY,JIRA_CLIENT_ID,JIRA_CLIENT_SECRET,JIRA_REDIRECT_URI,FRONTEND_URL
           script: |
             cd /app
