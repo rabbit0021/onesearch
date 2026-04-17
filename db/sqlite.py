@@ -392,12 +392,12 @@ class SQLiteDatabase:
         rows = c.fetchall()
         return [dict(row) for row in rows]
 
-    def add_publisher(self, conn, publisher_name, publisher_type,):
+    def add_publisher(self, conn, publisher_name, publisher_type):
         logger.info(f"Adding publisher: {publisher_name}, type: {publisher_type}")
         c = conn.cursor()
         c.execute("""
-            INSERT INTO publishers (publisher_name, publisher_type)
-            VALUES (?, ?)
+            INSERT INTO publishers (publisher_name, publisher_type, last_scraped_at)
+            VALUES (?, ?, datetime('now', '-7 days'))
         """, (publisher_name, publisher_type))
         logger.info(f"Publisher {publisher_name} added successfully")
         return c.lastrowid
