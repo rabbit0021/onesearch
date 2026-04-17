@@ -14,10 +14,13 @@ services:
     pids_limit: 100
     mem_limit: 512m
     cpus: "0.5"
+    environment:
+      HF_HOME: /app/hf_cache
     volumes:
       - ./logs:/app/logs
       - ./data:/app/data
       - ./static:/app/static
+      - hf_cache:/app/hf_cache
     tmpfs:
       - /tmp
       - /var/tmp
@@ -52,6 +55,7 @@ services:
 volumes:
   certbot-certs:   # stores SSL certificates, persisted across restarts
   certbot-www:     # used by certbot for domain verification challenge files
+  hf_cache:        # HuggingFace model cache — downloaded once, reused across restarts
 
 networks:
   appnet:

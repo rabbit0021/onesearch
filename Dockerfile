@@ -9,7 +9,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Create writable dirs and set ownership before switching user
-RUN mkdir -p /app/logs /app/tmp && chown -R appuser:appuser /app
+RUN mkdir -p /app/logs /app/tmp /app/hf_cache && chown -R appuser:appuser /app
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
