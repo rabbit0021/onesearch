@@ -14,6 +14,7 @@ npm run build        # build to frontend/dist/ (Flask serves this in production)
 # --- Backend (Flask) ---
 FLASK_ENV=development python app.py   # API server on :5000
 
+
 # Run both in separate terminals for local development
 
 # Run background jobs
