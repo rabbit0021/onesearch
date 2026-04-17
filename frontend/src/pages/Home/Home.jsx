@@ -108,7 +108,7 @@ export default function Home() {
           <Header />
           <div className={styles.topRight}>
             <div className={`${styles.topRightHideable} ${atTop && !sidebarOpen ? '' : styles.topRightHidden}`}>
-              <JiraHeaderButton />
+              {/* <JiraHeaderButton /> */}
               <ThemeSwitcher />
             </div>
             <div className={styles.notifBtn}>
