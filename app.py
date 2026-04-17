@@ -47,7 +47,7 @@ def _get_issue_embeddings(cloud_id, issues):
     return embeddings
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
-app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'dev-secret-change-in-production')
+app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-change-in-production')
 
 # React build directory — used in production to serve the SPA
 REACT_BUILD_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "frontend", "dist")
