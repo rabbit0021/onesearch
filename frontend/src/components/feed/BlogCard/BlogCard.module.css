@@ -76,6 +76,7 @@
   transition: color 0.15s, transform 0.15s;
   flex-shrink: 0;
   margin-top: -4px;
+  color: rgb(246, 175, 175);
 }
 
 /* Always red when Jira connected */

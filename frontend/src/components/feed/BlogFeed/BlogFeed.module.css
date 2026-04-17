@@ -119,7 +119,7 @@
 .filterBar {
   background: var(--filter-bg);
   border: 1px solid var(--filter-border);
-  border-bottom: 5px solid var(--color-primary);
+  border-bottom: 2px solid var(--color-primary);
   border-radius: 5px;
   padding: 0.5rem 0.85rem 0.8rem;
   display: flex;

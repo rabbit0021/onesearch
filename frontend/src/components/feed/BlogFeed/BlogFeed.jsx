@@ -321,7 +321,7 @@ export default function BlogFeed({ formRef }) {
                 </div>
                 <div className={styles.lockedOverlay}>
                   <span className={styles.lockIcon}>⬡</span>
-                  <p className={styles.lockedMsg}>&gt;_ connect jira to see trending blog posts</p>
+                  <p className={styles.lockedMsg}>&gt;_ connect jira to view trending blog posts</p>
                 </div>
               </div>
             ) : null}
