@@ -18,6 +18,9 @@ services:
       - ./logs:/app/logs
       - ./data:/app/data
       - ./static:/app/static
+    tmpfs:
+      - /tmp
+      - /var/tmp
     networks:
       - appnet
     container_name: onesearch_app
