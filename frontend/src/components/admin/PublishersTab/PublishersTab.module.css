@@ -1,0 +1,166 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+}
+
+.cardTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 1rem;
+}
+
+/* ── Add form ── */
+.form {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.input {
+  flex: 1;
+  min-width: 180px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 7px 10px;
+  font-size: 0.88rem;
+  outline: none;
+}
+
+.input:focus {
+  border-color: var(--color-primary);
+}
+
+.select {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 7px 10px;
+  font-size: 0.88rem;
+  background: #fff;
+  cursor: pointer;
+}
+
+.addBtn {
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 18px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.addBtn:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.addBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.addError {
+  color: #c0392b;
+  font-size: 0.82rem;
+  margin-top: 8px;
+}
+
+/* ── List ── */
+.listHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.listHeader .cardTitle {
+  margin: 0;
+}
+
+.search {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 0.82rem;
+  outline: none;
+  width: 180px;
+}
+
+.search:focus {
+  border-color: var(--color-primary);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.table th {
+  text-align: left;
+  padding: 6px 10px;
+  border-bottom: 2px solid #eee;
+  color: #555;
+  font-weight: 600;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #f0f0f0;
+  color: #333;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.idCell {
+  color: #aaa;
+  width: 48px;
+}
+
+.muted {
+  color: #999;
+  font-size: 0.8rem;
+}
+
+.hint {
+  text-align: center;
+  color: #aaa;
+  padding: 1rem;
+  font-size: 0.85rem;
+}
+
+.errorMsg {
+  color: #c0392b;
+  font-size: 0.85rem;
+}
+
+/* ── Type badges ── */
+.badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.techteam   { background: #e8f4fd; color: #2980b9; }
+.individual { background: #eafaf1; color: #27ae60; }
+.community  { background: #fdf2e9; color: #e67e22; }

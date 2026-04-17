@@ -254,6 +254,42 @@ def get_feed():
     finally:
         conn.close()
 
+@app.route("/publishers", methods=["GET"])
+@require_secret_key
+def get_publishers():
+    conn = app.db.get_connection()
+    try:
+        publishers = app.db.get_publishers(conn)
+        return jsonify([{
+            "id": p["id"],
+            "publisher_name": p["publisher_name"],
+            "publisher_type": p["publisher_type"],
+            "last_scraped_at": p["last_scraped_at"],
+        } for p in publishers])
+    finally:
+        conn.close()
+
+
+@app.route("/publishers", methods=["POST"])
+@require_secret_key
+def add_publisher():
+    data = request.get_json()
+    name = (data.get("publisher_name") or "").strip()
+    ptype = (data.get("publisher_type") or "").strip()
+    if not name or ptype not in ("techteam", "individual", "community"):
+        return jsonify({"status": "error", "message": "Invalid publisher_name or publisher_type"}), 400
+    conn = app.db.get_connection()
+    try:
+        pub_id = app.db.add_publisher(conn, name, ptype)
+        conn.commit()
+        return jsonify({"status": "success", "id": pub_id})
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"status": "error", "message": str(e)}), 409
+    finally:
+        conn.close()
+
+
 @app.route("/posts", methods=["GET"])
 def get_posts():
     conn = app.db.get_connection()

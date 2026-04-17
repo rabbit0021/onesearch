@@ -2,13 +2,17 @@ import { useState, useCallback } from 'react'
 import { getPosts } from '../../api'
 import SecretKeyModal from '../../components/admin/SecretKeyModal/SecretKeyModal'
 import PostsTable from '../../components/admin/PostsTable/PostsTable'
+import PublishersTab from '../../components/admin/PublishersTab/PublishersTab'
 import styles from './AdminPosts.module.css'
+
+const TABS = ['Posts', 'Publishers']
 
 export default function AdminPosts() {
   const [secretKey, setSecretKey] = useState('')
-  const [posts, setPosts] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [posts, setPosts]         = useState([])
+  const [loading, setLoading]     = useState(false)
+  const [error, setError]         = useState('')
+  const [tab, setTab]             = useState('Posts')
 
   async function handleKeySubmit(key) {
     setSecretKey(key)
@@ -41,29 +45,44 @@ export default function AdminPosts() {
   return (
     <div className={styles.page}>
       <div className={styles.header}>
-        <h1 className={styles.title}>Posts Admin</h1>
+        <h1 className={styles.title}>Admin</h1>
         <div className={styles.actions}>
-          <button className={styles.reloadBtn} onClick={reload} disabled={loading}>
-            {loading ? 'Loading…' : '↻ Refresh'}
-          </button>
+          {tab === 'Posts' && (
+            <button className={styles.reloadBtn} onClick={reload} disabled={loading}>
+              {loading ? 'Loading…' : '↻ Refresh'}
+            </button>
+          )}
           <button
             className={styles.logoutBtn}
-            onClick={() => {
-              setSecretKey('')
-              setPosts([])
-            }}
+            onClick={() => { setSecretKey(''); setPosts([]) }}
           >
             Logout
           </button>
         </div>
       </div>
 
+      <div className={styles.tabs}>
+        {TABS.map(t => (
+          <button
+            key={t}
+            className={`${styles.tab} ${tab === t ? styles.tabActive : ''}`}
+            onClick={() => setTab(t)}
+          >
+            {t}
+          </button>
+        ))}
+      </div>
+
       {error && <p className={styles.error}>{error}</p>}
 
-      {loading ? (
-        <p className={styles.loading}>Loading posts…</p>
-      ) : (
-        <PostsTable posts={posts} secretKey={secretKey} onUpdated={reload} />
+      {tab === 'Posts' && (
+        loading
+          ? <p className={styles.loading}>Loading posts…</p>
+          : <PostsTable posts={posts} secretKey={secretKey} onUpdated={reload} />
+      )}
+
+      {tab === 'Publishers' && (
+        <PublishersTab secretKey={secretKey} />
       )}
     </div>
   )

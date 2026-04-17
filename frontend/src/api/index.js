@@ -81,6 +81,26 @@ export async function getMostLikedFeed(limit = 50) {
   return res.json()
 }
 
+export async function getPublishers(secretKey) {
+  const res = await fetch('/publishers', {
+    headers: { 'X-SECRET-KEY': secretKey },
+  })
+  if (res.status === 401) throw new Error('Unauthorized')
+  return res.json()
+}
+
+export async function addPublisher(name, type, secretKey) {
+  const res = await fetch('/publishers', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-SECRET-KEY': secretKey,
+    },
+    body: JSON.stringify({ publisher_name: name, publisher_type: type }),
+  })
+  return res.json()
+}
+
 export async function updatePost(id, topic, tags, secretKey) {
   const res = await fetch(`/posts/${id}`, {
     method: 'PATCH',
