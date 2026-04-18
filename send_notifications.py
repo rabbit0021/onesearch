@@ -161,6 +161,8 @@ def process_notifications(db, conn, target_email=None, cancel_event=None):
             raise JobCancelledError()
         subject = get_random_subject()
 
+        MONO = "Courier New, Courier, monospace"
+
         category_sections = ""
         for heading, notifications_for_email in heading_map.items():
             category = heading
@@ -170,6 +172,17 @@ def process_notifications(db, conn, target_email=None, cancel_event=None):
                 notification['post_title'] = notification['post_title'][0].upper() + notification['post_title'][1:]
                 notification['publisher'] = notification['publisher'][0].upper() + notification['publisher'][1:]
 
+            def favicon_td(n):
+                url = favicon_url(n["post_url"])
+                if url:
+                    return f'<td style="vertical-align:middle; padding-right:6px;"><img src="{url}" width="13" height="13" alt="" style="display:block; border-radius:2px; opacity:0.85;"></td>'
+                return ''
+
+            def likes_td(n):
+                count = n.get("like_count", 0)
+                if count > 0:
+                    return f'<td style="font-size:11px; color:#444440; font-family:{MONO};">// &#9829; {count}</td>'
+                return ''
 
             blog_items = "".join([
                 f"""
@@ -183,10 +196,10 @@ def process_notifications(db, conn, target_email=None, cancel_event=None):
                       <table cellpadding="0" cellspacing="0" border="0" style="margin-bottom:6px;">
                         <tr>
                           <td style="vertical-align:middle; padding-right:5px; font-size:11px; color:#555550;">@</td>
-                          {'<td style="vertical-align:middle; padding-right:6px;"><img src="' + favicon_url(notification["post_url"]) + '" width="13" height="13" alt="" style="display:block; border-radius:2px; opacity:0.85;"></td>' if favicon_url(notification["post_url"]) else ''}
+                          {favicon_td(notification)}
                           <td style="vertical-align:middle;">
                             <span style="font-size:11px; font-weight:700; color:{PRIMARY_COLOR};
-                                         text-transform:uppercase; letter-spacing:0.08em; font-family:\'Courier New\', monospace;">
+                                         text-transform:uppercase; letter-spacing:0.08em; font-family:{MONO};">
                               {notification['publisher']}
                             </span>
                           </td>
@@ -196,7 +209,7 @@ def process_notifications(db, conn, target_email=None, cancel_event=None):
                       <a href="{notification['post_url']}"
                          style="font-size:14px; font-weight:700; color:#e8e5e0;
                                 text-decoration:none; line-height:1.45; display:block;
-                                font-family:\'Courier New\', monospace; letter-spacing:-0.01em;">
+                                font-family:{MONO}; letter-spacing:-0.01em;">
                         {notification['post_title']}
                       </a>
                       <table cellpadding="0" cellspacing="0" border="0" style="margin-top:10px;">
@@ -204,12 +217,12 @@ def process_notifications(db, conn, target_email=None, cancel_event=None):
                           <td style="padding-right:16px;">
                             <a href="{notification['post_url']}"
                                style="font-size:11px; color:{PRIMARY_COLOR}; font-weight:700;
-                                      text-decoration:none; font-family:\'Courier New\', monospace;
+                                      text-decoration:none; font-family:{MONO};
                                       letter-spacing:0.03em;">
-                              $ open post →
+                              $ open post &#8594;
                             </a>
                           </td>
-                          {'<td style="font-size:11px; color:#444440; font-family:\'Courier New\', monospace;">// ♥ ' + str(notification["like_count"]) + '</td>' if notification.get("like_count", 0) > 0 else ''}
+                          {likes_td(notification)}
                         </tr>
                       </table>
                     </td>
@@ -224,11 +237,11 @@ def process_notifications(db, conn, target_email=None, cancel_event=None):
                        style="margin-bottom:26px;">
                   <tr>
                     <td style="padding-bottom:10px;">
-                      <p style="margin:0 0 2px; font-size:10px; color:#333330; font-family:\'Courier New\', monospace; letter-spacing:0.05em;">
+                      <p style="margin:0 0 2px; font-size:10px; color:#333330; font-family:{MONO}; letter-spacing:0.05em;">
                         // category
                       </p>
                       <h2 style="margin:0; font-size:12px; font-weight:700; color:{PRIMARY_COLOR};
-                                 text-transform:uppercase; letter-spacing:0.1em; font-family:\'Courier New\', monospace;
+                                 text-transform:uppercase; letter-spacing:0.1em; font-family:{MONO};
                                  border-bottom:1px dashed #2a2a26; padding-bottom:8px;">
                         {category}
                       </h2>
