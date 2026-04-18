@@ -5,13 +5,13 @@
 }
 
 .label {
-  font-size: 0.9rem;
+  font-size:1rem;
   font-weight: 600;
   color: var(--text-secondary);
 }
 
 .hint {
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   color: var(--text-dim);
 }
 
@@ -31,7 +31,7 @@
 
 .output {
   min-width: 90px;
-  font-size: 0.85rem;
+  font-size: 1rem;
   color: var(--text-dim);
   text-align: right;
 }

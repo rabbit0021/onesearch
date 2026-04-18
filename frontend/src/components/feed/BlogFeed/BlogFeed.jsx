@@ -25,8 +25,7 @@ export default function BlogFeed({ formRef }) {
   const [dateDays, setDateDays] = useState(null)
   const [tagSearch, setTagSearch] = useState('')
 
-  const [filterClosed, setFilterClosed] = useState(false)
-  const [hasScrolled, setHasScrolled] = useState(false)
+  const [filterClosed, setFilterClosed] = useState(true)
 
   useEffect(() => {
     getMostLikedFeed(5).then(setMostLiked).catch(() => { })
@@ -57,17 +56,7 @@ export default function BlogFeed({ formRef }) {
   }, [])
 
   useEffect(() => {
-    const handleScroll = () => {
-      const isMobile = window.innerWidth <= 768
-      if (isMobile && formRef?.current) {
-        const formBottom = formRef.current.getBoundingClientRect().bottom
-        setHasScrolled(formBottom < 0)
-        if (formBottom >= 0) setFilterClosed(false)
-      } else {
-        setHasScrolled(window.scrollY > 80)
-        if (window.scrollY < 5) setFilterClosed(false)
-      }
-    }
+    const handleScroll = () => {}
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [formRef])
@@ -139,9 +128,19 @@ export default function BlogFeed({ formRef }) {
   return (
     <div className={styles.wrapper}>
 
-      <div className={`${styles.filterBar} ${filterClosed ? styles.filterBarHidden : ''}`}>
+      <div className={styles.filterBar}>
 
-        {/* Row 1: search + close */}
+        <button
+          className={styles.filterToggle}
+          onClick={() => setFilterClosed(prev => !prev)}
+          title={filterClosed ? 'expand filters' : 'collapse filters'}
+        >
+          {filterClosed ? '[+]' : '[-]'}
+        </button>
+
+        <div className={`${styles.filterBody} ${filterClosed ? styles.filterBodyCollapsed : ''}`}>
+
+        {/* Row 1: search */}
         <div className={styles.searchRow}>
           <div className={styles.searchWrap}>
             <span className={styles.searchPrompt}>▸</span>
@@ -156,12 +155,6 @@ export default function BlogFeed({ formRef }) {
               <button className={styles.searchClear} onClick={() => setSearch('')}>×</button>
             )}
           </div>
-          <button
-            className={`${styles.filterCloseBtn} ${hasScrolled ? styles.filterCloseBtnVisible : styles.filterCloseBtnHidden}`}
-            onClick={() => hasScrolled && setFilterClosed(true)}
-            title="hide filters"
-            tabIndex={hasScrolled ? 0 : -1}
-          >✕</button>
         </div>
 
         {/* Row 2: publisher, date, topic */}
@@ -242,6 +235,8 @@ export default function BlogFeed({ formRef }) {
             )}
           </div>
         )}
+
+        </div>{/* end filterBody */}
       </div>
 
       {/* ── Section order:

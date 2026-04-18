@@ -3,7 +3,7 @@
   align-items: center;
   gap: 7px;
   background: var(--color-primary);
-  color: var(--bg-page);
+  color: var(--color-primary-tint);
   border-radius: 5px;
   padding: 7px 14px;
   font-size: 0.82rem;

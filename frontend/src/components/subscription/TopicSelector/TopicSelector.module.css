@@ -5,7 +5,7 @@
 }
 
 .label {
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--text-secondary);
 }
@@ -18,7 +18,7 @@
   width: 100%;
   padding: 0.75rem;
   border: .1px solid var(--border);
-  font-size: 0.95rem;
+  font-size: 1rem;
   outline: none;
   transition: border-color 0.2s;
   background: var(--bg-input);

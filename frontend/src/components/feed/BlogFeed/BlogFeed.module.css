@@ -34,6 +34,20 @@
     width: auto;
     min-width: 80px;
   }
+
+  .lockedContainer {
+    min-height: unset;
+  }
+
+  .ghostGrid {
+    grid-template-columns: 1fr;
+    max-height: 120px;
+    overflow: hidden;
+  }
+
+  .ghostCard {
+    height: 120px;
+  }
 }
 
 .heading {
@@ -69,7 +83,7 @@
 }
 
 .hint {
-  font-size: 0.8rem;
+  font-size: 1rem;
   color: var(--text-muted);
   margin: 0;
   padding: 0.7rem 0.85rem;
@@ -124,15 +138,10 @@
   padding: 0.5rem 0.85rem 0.8rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
   font-family: 'Courier New', monospace;
-  position: sticky;
-  top: 0px;
+  position: relative;
   z-index: 2;
   max-width: 100%;
-  overflow: hidden;
-  transform: translateY(0);
-  transition: max-height 0.3s ease, opacity 0.25s ease, transform 0.25s ease, padding 0.3s ease;
 }
 
 .filterBar::before {
@@ -142,57 +151,46 @@
   font-family: 'Courier New', monospace;
   color: var(--color-primary);
   letter-spacing: 0.14em;
-  opacity: 1;
   font-weight: 600;
-  margin-bottom: 0.1rem;
+  line-height: 1.4;
 }
 
-.filterBarHidden {
-  max-height: 0;
-  opacity: 0;
-  transform: translateY(-6px);
-  padding-top: 0;
-  padding-bottom: 0;
-  pointer-events: none;
-}
-
-@keyframes spinIn {
-  from {
-    opacity: 0;
-    transform: rotate(-180deg) scale(0.4);
-  }
-  to {
-    opacity: 1;
-    transform: rotate(0deg) scale(1);
-  }
-}
-
-.filterCloseBtn {
+.filterToggle {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.85rem;
   background: none;
   border: none;
-  color: var(--filter-ghost);
-  font-size: 1.5rem;
-  line-height: 1;
   cursor: pointer;
-  padding: 5px;
-  transition: color 0.12s, transform 0.15s;
-  animation: spinIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-  margin-top: -50px;
-}
-
-.filterCloseBtn:hover {
   color: var(--color-primary);
-  transform: rotate(90deg);
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  padding: 0;
+  line-height: 1.4;
+  transition: opacity 0.15s;
 }
 
-.filterCloseBtnHidden {
+.filterToggle:hover {
+  opacity: 0.7;
+}
+
+.filterBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  overflow: hidden;
+  max-height: 600px;
+  opacity: 1;
+  margin-top: 0.4rem;
+  transition: max-height 0.3s ease, opacity 0.25s ease, margin-top 0.3s ease;
+}
+
+.filterBodyCollapsed {
+  max-height: 0;
   opacity: 0;
-  pointer-events: none;
-  animation: none;
-}
-
-.filterCloseBtnVisible {
-  animation: spinIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  margin-top: 0;
 }
 
 /* Row 1: search input + close button */
@@ -230,7 +228,7 @@
 }
 
 .filterPrefix {
-  font-size: 0.68rem;
+  font-size: 0.78rem;
   font-family: 'Courier New', monospace;
   color: var(--filter-prefix-color);
   letter-spacing: 0.04em;
@@ -260,7 +258,7 @@
   position: absolute;
   left: 10px;
   color: var(--color-primary);
-  font-size: 0.8rem;
+  font-size: 1rem;
   pointer-events: none;
   line-height: 1;
 }
@@ -272,7 +270,7 @@
   border: none;
   border-bottom: 1px solid var(--filter-line);
   border-radius: 0;
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-family: 'Courier New', monospace;
   outline: none;
   color: var(--filter-text);
@@ -310,7 +308,7 @@
   padding: 0 16px 0 2px;
   border: none;
   border-radius: 0;
-  font-size: 0.75rem;
+  font-size: .8rem;
   font-family: 'Courier New', monospace;
   outline: none;
   background: transparent;
@@ -339,7 +337,7 @@
 }
 
 .tagLabel {
-  font-size: 0.72rem;
+  font-size: 0.82rem;
   color: var(--filter-prefix-color);
   letter-spacing: 0.05em;
   margin-right: 2px;
@@ -351,7 +349,7 @@
   border-radius: 0;
   padding: 0 6px;
   background: transparent;
-  font-size: 0.72rem;
+  font-size: 0.82rem;
   font-family: 'Courier New', monospace;
   color: var(--filter-text);
   outline: none;
@@ -366,7 +364,7 @@
 .tagSearch:focus { border-bottom-color: var(--color-primary); }
 
 .moreTags {
-  font-size: 0.68rem;
+  font-size: 0.78rem;
   color: var(--filter-text);
   padding: 0 4px;
   flex-shrink: 0;
@@ -378,7 +376,7 @@
   padding: 0 8px;
   border-radius: 0;
   background: transparent;
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   font-family: 'Courier New', monospace;
   color: var(--text-dim);
   cursor: pointer;
@@ -413,7 +411,7 @@
   border-radius: 0;
   border: 1px solid var(--color-primary);
   background: transparent;
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   font-family: 'Courier New', monospace;
   color: var(--filter-text);
   cursor: pointer;
@@ -551,7 +549,7 @@
 }
 
 .issuePrompt {
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   color: var(--color-primary);
   flex-shrink: 0;
   margin-left: 12px;
@@ -559,7 +557,7 @@
 }
 
 .issueKey {
-  font-size: .9rem;
+  font-size: 1rem;
   font-weight: 700;
   color: #126add;
   letter-spacing: 0.06em;
@@ -568,7 +566,7 @@
 }
 
 .issueSummary {
-  font-size: .8rem;
+  font-size: .9rem;
   color: var(--text-base);
   text-decoration: underline;
   white-space: nowrap;

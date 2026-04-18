@@ -38,7 +38,7 @@
   position: absolute;
   bottom: 6px;
   left: 7px;
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   font-weight: 700;
   font-family: 'Courier New', monospace;
   letter-spacing: 0.06em;
@@ -197,7 +197,7 @@
 }
 
 .publisher {
-  font-size: 0.78rem;
+  font-size: 0.90rem;
   font-weight: 700;
   font-family: 'Courier New', monospace;
   letter-spacing: 0.03em;
@@ -217,7 +217,7 @@
 }
 
 .title {
-  font-size: 0.92rem;
+  font-size: 1rem;
   color: var(--card-title);
   margin: 0;
   line-height: 1.4;
@@ -236,7 +236,7 @@
 }
 
 .tag {
-  font-size: 0.58rem;
+  font-size: 0.68rem;
   font-family: 'Courier New', monospace;
   background-color: var(--card-hint);
   color: var(--text-base);
@@ -256,13 +256,13 @@
 }
 
 .matchPrompt {
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   color: var(--color-primary);
   flex-shrink: 0;
 }
 
 .matchKey {
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   font-weight: 700;
   font-family: 'Courier New', monospace;
   color: var(--text-secondary);
@@ -271,7 +271,7 @@
 }
 
 .matchSummary {
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   font-family: 'Courier New', monospace;
   color: var(--text-base);
   white-space: nowrap;

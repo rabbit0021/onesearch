@@ -5,7 +5,7 @@
 }
 
 .label {
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--text-secondary);
 }
@@ -27,7 +27,7 @@
   border: .1px solid var(--border);
   border-radius: 6px;
   padding: 6px 14px;
-  font-size: 0.9rem;
+  font-size: 1rem;
   cursor: pointer;
   user-select: none;
   transition: background 0.15s, border-color 0.15s;
@@ -65,7 +65,7 @@
   transform: translateX(-50%);
   background: var(--bg-card);
   color: var(--text-secondary);
-  font-size: 0.72rem;
+  font-size: 0.82rem;
   border-radius: 4px;
   padding: 3px 8px;
   white-space: nowrap;
@@ -83,6 +83,6 @@
 
   .chip {
     padding: 5px 10px;
-    font-size: 0.85rem;
+    font-size: 1rem;
   }
 }
