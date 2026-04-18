@@ -140,6 +140,18 @@ class SQLiteDatabase:
         except Exception as e:
             logger.warning(f"Topic category migration failed: {e}")
 
+        c.execute("""
+        CREATE TABLE IF NOT EXISTS job_runs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            job_id TEXT NOT NULL UNIQUE,
+            job_name TEXT NOT NULL,
+            status TEXT NOT NULL,
+            logs TEXT NOT NULL DEFAULT '[]',
+            started_at DATETIME NOT NULL,
+            finished_at DATETIME DEFAULT NULL
+        )
+        """)
+
         logger.info(f"SQLite database initialized Successfully")
         conn.commit()
         conn.close()
@@ -154,6 +166,42 @@ class SQLiteDatabase:
         logger.info("New SQLite connection created")
         return conn
     
+    def save_job_run(self, conn, job_id, job_name, status, logs, started_at, finished_at):
+        import json
+        c = conn.cursor()
+        c.execute("""
+            INSERT INTO job_runs (job_id, job_name, status, logs, started_at, finished_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+            ON CONFLICT(job_id) DO UPDATE SET status=excluded.status, logs=excluded.logs, finished_at=excluded.finished_at
+        """, (job_id, job_name, status, json.dumps(logs), started_at, finished_at))
+        # Keep last 10 runs per job_name in DB, but clear logs beyond the 2 most recent
+        c.execute("""
+            DELETE FROM job_runs WHERE job_name = ? AND id NOT IN (
+                SELECT id FROM job_runs WHERE job_name = ? ORDER BY started_at DESC LIMIT 10
+            )
+        """, (job_name, job_name))
+        c.execute("""
+            UPDATE job_runs SET logs = '[]' WHERE job_name = ? AND id NOT IN (
+                SELECT id FROM job_runs WHERE job_name = ? ORDER BY started_at DESC LIMIT 2
+            )
+        """, (job_name, job_name))
+        conn.commit()
+
+    def get_job_runs(self, conn, job_name=None):
+        import json
+        c = conn.cursor()
+        if job_name:
+            c.execute("SELECT * FROM job_runs WHERE job_name = ? ORDER BY started_at DESC LIMIT 10", (job_name,))
+        else:
+            c.execute("SELECT * FROM job_runs ORDER BY started_at DESC")
+        rows = c.fetchall()
+        result = []
+        for row in rows:
+            r = dict(row)
+            r['logs'] = json.loads(r['logs'])
+            result.append(r)
+        return result
+
     def get_subscriptions(self, conn):
         c = conn.cursor()
         c.execute("""

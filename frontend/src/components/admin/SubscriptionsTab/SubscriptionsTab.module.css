@@ -31,12 +31,112 @@
   font-family: 'Courier New', monospace;
 }
 
+.statCardAlert {
+  border-color: var(--color-primary);
+}
+
 .statLabel {
   font-size: var(--fs-xs);
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   font-weight: 600;
+}
+
+/* ── Pending banner ── */
+.pendingBanner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  background: var(--bg-surface);
+  border: 1px solid var(--color-primary);
+  border-radius: 8px;
+  padding: 0.85rem 1.25rem;
+}
+
+.pendingMsg {
+  font-size: var(--fs-sm);
+  color: var(--text-base);
+  flex: 1;
+}
+
+.sendBtn {
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 18px;
+  font-size: var(--fs-base);
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  transition: background 0.2s, opacity 0.2s;
+}
+
+.sendBtn:hover:not(:disabled) { background: var(--color-primary-hover); }
+.sendBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.sendOk  { font-size: var(--fs-sm); font-weight: 600; color: #16a34a; }
+.sendErr { font-size: var(--fs-sm); font-weight: 600; color: #dc2626; }
+
+/* ── Per-row pending ── */
+.pendingCell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pendingCount {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  color: var(--color-primary);
+  min-width: 16px;
+}
+
+.sendRowBtn {
+  background: none;
+  border: 1px solid var(--color-primary);
+  border-radius: 4px;
+  color: var(--color-primary);
+  font-size: var(--fs-xs);
+  padding: 1px 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: background 0.15s, color 0.15s;
+}
+
+.sendRowBtn:hover:not(:disabled) {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.sendRowBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.spinnerSm {
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--color-primary);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
 }
 
 /* ── Table card ── */

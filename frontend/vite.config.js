@@ -16,6 +16,8 @@ export default defineConfig({
       '/posts': FLASK,
       '/publishers': FLASK,
       '/subscriptions': FLASK,
+      '/admin/jobs': { target: FLASK, changeOrigin: false },
+      '/admin/notifications': FLASK,
       '/interested': FLASK,
       '/feedback': FLASK,
       '/static': FLASK,

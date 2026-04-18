@@ -20,7 +20,7 @@ def parse_datetime(dt_str):
 # Load subscribers
 logger = get_logger("notify_worker")
 
-def scrape_pubs(db, conn, target_publishers=None):
+def scrape_pubs(db, conn, target_publishers=None, cancel_event=None):
     subscriptions = db.get_subscriptions(conn)  
 
     publishers = {}
@@ -43,6 +43,9 @@ def scrape_pubs(db, conn, target_publishers=None):
 
                        
     for publisher_id in publishers:
+        if cancel_event and cancel_event.is_set():
+            from app import JobCancelledError
+            raise JobCancelledError()
         publisher = publishers[publisher_id]
         
         last_scraped_at =  parse_datetime(publisher.get("last_scraped_at"))

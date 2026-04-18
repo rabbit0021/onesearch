@@ -4,9 +4,11 @@ import SecretKeyModal from '../../components/admin/SecretKeyModal/SecretKeyModal
 import PostsTable from '../../components/admin/PostsTable/PostsTable'
 import PublishersTab from '../../components/admin/PublishersTab/PublishersTab'
 import SubscriptionsTab from '../../components/admin/SubscriptionsTab/SubscriptionsTab'
+import JobsTab from '../../components/admin/JobsTab/JobsTab'
+import NotificationsTab from '../../components/admin/NotificationsTab/NotificationsTab'
 import styles from './AdminPosts.module.css'
 
-const TABS = ['Posts', 'Publishers', 'Subscriptions']
+const TABS = ['Posts', 'Publishers', 'Subscriptions', 'Notifications', 'Jobs']
 
 export default function AdminPosts() {
   const [secretKey, setSecretKey] = useState('')
@@ -86,6 +88,14 @@ export default function AdminPosts() {
 
       {tab === 'Subscriptions' && (
         <SubscriptionsTab secretKey={secretKey} />
+      )}
+
+      {tab === 'Notifications' && (
+        <NotificationsTab secretKey={secretKey} />
+      )}
+
+      {tab === 'Jobs' && (
+        <JobsTab secretKey={secretKey} />
       )}
     </div>
   )

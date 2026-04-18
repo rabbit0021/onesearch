@@ -4,13 +4,16 @@ from datetime import timedelta, datetime
 
 logger = get_logger("notify_worker")
 
-def notify(db, conn):
+def notify(db, conn, cancel_event=None):
     
     subscriptions = db.get_subscriptions(conn)    
 
     postcache = {}    
 
     for subscriber in subscriptions:
+        if cancel_event and cancel_event.is_set():
+            from app import JobCancelledError
+            raise JobCancelledError()
         email = subscriber['email']
         pub_id = subscriber['publisher']['id']
         pub_name = subscriber['publisher']['publisher_name']

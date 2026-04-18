@@ -3,10 +3,10 @@ import { getAdminSubscriptions } from '../../../api'
 import styles from './SubscriptionsTab.module.css'
 
 export default function SubscriptionsTab({ secretKey }) {
-  const [subs, setSubs]     = useState([])
+  const [subs, setSubs]       = useState([])
   const [loading, setLoading] = useState(true)
-  const [error, setError]   = useState('')
-  const [search, setSearch] = useState('')
+  const [error, setError]     = useState('')
+  const [search, setSearch]   = useState('')
 
   useEffect(() => {
     getAdminSubscriptions(secretKey)
@@ -28,7 +28,6 @@ export default function SubscriptionsTab({ secretKey }) {
 
   return (
     <div className={styles.wrap}>
-
       <div className={styles.statsRow}>
         <div className={styles.statCard}>
           <span className={styles.statNum}>{unique.length}</span>

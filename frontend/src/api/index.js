@@ -81,6 +81,45 @@ export async function getMostLikedFeed(limit = 50) {
   return res.json()
 }
 
+export async function getPendingNotifications(secretKey) {
+  const res = await fetch('/admin/notifications/pending', {
+    headers: { 'X-SECRET-KEY': secretKey },
+  })
+  if (res.status === 401) throw new Error('Unauthorized')
+  return res.json()
+}
+
+export async function startJob(job, secretKey, email = null) {
+  const res = await fetch(`/admin/jobs/${job}/run`, {
+    method: 'POST',
+    headers: { 'X-SECRET-KEY': secretKey, 'Content-Type': 'application/json' },
+    body: JSON.stringify(email ? { email } : {}),
+  })
+  return res.json()
+}
+
+export async function cancelJob(jobId, secretKey) {
+  const res = await fetch(`/admin/jobs/${jobId}/cancel`, {
+    method: 'POST',
+    headers: { 'X-SECRET-KEY': secretKey },
+  })
+  return res.json()
+}
+
+export async function getJob(jobId, secretKey) {
+  const res = await fetch(`/admin/jobs/${jobId}`, {
+    headers: { 'X-SECRET-KEY': secretKey },
+  })
+  return res.json()
+}
+
+export async function getJobHistory(jobName, secretKey) {
+  const res = await fetch(`/admin/jobs/history/${jobName}`, {
+    headers: { 'X-SECRET-KEY': secretKey },
+  })
+  return res.json()
+}
+
 export async function getAdminSubscriptions(secretKey) {
   const res = await fetch('/subscriptions', {
     headers: { 'X-SECRET-KEY': secretKey },

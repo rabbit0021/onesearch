@@ -1,9 +1,12 @@
 from dotenv import load_dotenv
 load_dotenv()
 
-from flask import Flask, send_from_directory, jsonify, request, render_template, session
+from flask import Flask, send_from_directory, jsonify, request, render_template, session, Response, stream_with_context
 import json
 import os
+import uuid
+import threading
+import logging
 from handlers import ScraperFactory
 from datetime import datetime
 from middleware import register_middlewares
@@ -17,6 +20,12 @@ from classifier import get_embedding
 import numpy as np
 import pickle
 import hashlib
+
+# In-memory job store: job_id -> {status, logs, job, cancel_event}
+_jobs = {}
+
+class JobCancelledError(Exception):
+    pass
 
 # In-memory cache for Jira issue embeddings: { cache_key -> { embeddings, expires_at } }
 _issue_embedding_cache = {}
@@ -297,6 +306,170 @@ def get_subscriptions():
     try:
         subs = app.db.get_subscriptions(conn)
         return jsonify(subs)
+    finally:
+        conn.close()
+
+
+@app.route("/admin/notifications/pending", methods=["GET"])
+@require_secret_key
+def get_pending_notifications():
+    conn = app.db.get_connection()
+    try:
+        notifications = app.db.get_active_notifications(conn)
+        return jsonify({"count": len(notifications), "notifications": notifications})
+    finally:
+        conn.close()
+
+
+_EXCLUDED_LOGGERS = {'werkzeug', 'app', 'DATABASE'}
+
+class _JobLogHandler(logging.Handler):
+    def __init__(self, job_id):
+        super().__init__()
+        self.job_id = job_id
+
+    def emit(self, record):
+        if record.name in _EXCLUDED_LOGGERS:
+            return
+        if self.job_id in _jobs:
+            _jobs[self.job_id]["logs"].append(self.format(record))
+
+
+def _run_job_thread(job_id, job_name, target_email=None):
+    from datetime import datetime, timezone
+    started_at = datetime.now(timezone.utc).isoformat()
+    handler = _JobLogHandler(job_id)
+    handler.setFormatter(logging.Formatter('%(levelname)s %(message)s'))
+    logging.root.addHandler(handler)
+    conn = app.db.get_connection()
+    cancel_event = _jobs[job_id]["cancel_event"]
+    try:
+        if job_name == 'scrape':
+            from scrape_pubs import scrape_pubs as _fn
+            _fn(app.db, conn, cancel_event=cancel_event)
+        elif job_name == 'notify':
+            from notify import notify as _fn
+            _fn(app.db, conn, cancel_event=cancel_event)
+        elif job_name == 'send':
+            from send_notifications import process_notifications as _fn
+            _fn(app.db, conn, target_email=target_email, cancel_event=cancel_event)
+        _jobs[job_id]["status"] = "done"
+    except JobCancelledError:
+        _jobs[job_id]["logs"].append("INFO Job cancelled by user")
+        _jobs[job_id]["status"] = "cancelled"
+    except Exception as e:
+        _jobs[job_id]["logs"].append(f"ERROR {e}")
+        _jobs[job_id]["status"] = "error"
+    finally:
+        logging.root.removeHandler(handler)
+        finished_at = datetime.now(timezone.utc).isoformat()
+        try:
+            db_conn = app.db.get_connection()
+            app.db.save_job_run(db_conn, job_id, job_name, _jobs[job_id]["status"],
+                                _jobs[job_id]["logs"], started_at, finished_at)
+            db_conn.close()
+        except Exception:
+            pass
+        conn.close()
+
+
+@app.route("/admin/jobs/<job_name>/run", methods=["POST"])
+@require_secret_key
+def start_job(job_name):
+    if job_name not in ('scrape', 'notify', 'send'):
+        return jsonify({"error": "Unknown job"}), 400
+    data = request.get_json(silent=True) or {}
+    target_email = data.get("email")
+    job_id = uuid.uuid4().hex[:10]
+    _jobs[job_id] = {"status": "running", "logs": [], "job": job_name, "cancel_event": threading.Event()}
+    t = threading.Thread(target=_run_job_thread, args=(job_id, job_name, target_email), daemon=True)
+    t.start()
+    return jsonify({"job_id": job_id})
+
+
+@app.route("/admin/jobs/<job_id>/cancel", methods=["POST"])
+def cancel_job(job_id):
+    key = request.headers.get('X-SECRET-KEY', '')
+    if key != SECRET_KEY:
+        return jsonify({"error": "Unauthorized"}), 401
+    job = _jobs.get(job_id)
+    if not job:
+        return jsonify({"error": "Job not found"}), 404
+    if job["status"] != "running":
+        return jsonify({"error": "Job is not running"}), 400
+    job["cancel_event"].set()
+    return jsonify({"ok": True})
+
+
+@app.route("/admin/jobs/<job_id>/stream")
+def stream_job(job_id):
+    key = request.args.get('key', '')
+    if key != SECRET_KEY:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    def generate():
+        last_idx = 0
+        while True:
+            job = _jobs.get(job_id)
+            if not job:
+                yield f"data: {json.dumps({'error': 'Job not found'})}\n\n"
+                break
+            new_logs = job["logs"][last_idx:]
+            for log in new_logs:
+                yield f"data: {json.dumps({'log': log})}\n\n"
+                yield ": " + " " * 8192 + "\n\n"  # force buffer flush
+            last_idx += len(new_logs)
+            if job["status"] != "running":
+                yield f"data: {json.dumps({'done': True, 'status': job['status']})}\n\n"
+                yield ": " + " " * 8192 + "\n\n"
+                break
+            # keep-alive ping every 0.3s
+            yield ": ping\n\n"
+            time.sleep(0.3)
+
+    return Response(
+        stream_with_context(generate()),
+        content_type='text/event-stream',
+        headers={'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no', 'Connection': 'keep-alive'}
+    )
+
+
+@app.route("/admin/jobs/<job_id>")
+def get_job_status(job_id):
+    key = request.headers.get('X-SECRET-KEY', '')
+    if key != SECRET_KEY:
+        return jsonify({"error": "Unauthorized"}), 401
+    # check memory first, then DB
+    job = _jobs.get(job_id)
+    if job:
+        return jsonify({k: v for k, v in job.items() if k != 'cancel_event'})
+    conn = app.db.get_connection()
+    try:
+        runs = app.db.get_job_runs(conn)
+        for r in runs:
+            if r['job_id'] == job_id:
+                return jsonify(r)
+        return jsonify({"error": "Job not found"}), 404
+    finally:
+        conn.close()
+
+
+@app.route("/admin/jobs/history/<job_name>")
+def get_job_history(job_name):
+    key = request.headers.get('X-SECRET-KEY', '')
+    if key != SECRET_KEY:
+        return jsonify({"error": "Unauthorized"}), 401
+    if job_name not in ('scrape', 'notify', 'send'):
+        return jsonify({"error": "Unknown job"}), 400
+    conn = app.db.get_connection()
+    try:
+        runs = app.db.get_job_runs(conn, job_name)
+        # overlay in-memory logs (available since last restart) over DB entries
+        for run in runs:
+            mem = _jobs.get(run['job_id'])
+            if mem and mem.get('logs'):
+                run['logs'] = mem['logs']
+        return jsonify(runs)
     finally:
         conn.close()
 

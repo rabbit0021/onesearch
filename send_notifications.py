@@ -21,6 +21,7 @@ SMTP_SERVER = "smtp.zoho.in"
 SMTP_PORT = 587
 SMTP_USERNAME = os.getenv('SMTP_USERNAME', 'xxxx@onesearch.blog')
 SMTP_PASSWORD = os.getenv('SMTP_PASSWORD', 'xxxx')
+print(f"SMTP_USERNAME: {SMTP_USERNAME}, SMTP_PASSWORD: {'*' * len(SMTP_PASSWORD)}")
 
 logger = get_logger("send_notification_worker")
 
@@ -105,8 +106,11 @@ def leave_unmature_notifications(notifications):
             
     return matured
 
-def process_notifications(db, conn):
+def process_notifications(db, conn, target_email=None, cancel_event=None):
     notifications = db.get_active_notifications(conn)
+    if target_email:
+        notifications = [n for n in notifications if n["email"].lower() == target_email.lower()]
+        logger.info(f"filtering for {target_email}: {len(notifications)} notifications")
     logger.info(f"found {len(notifications)} notifications to be processed")
 
     notifications = deduplicate_notifications(notifications)
@@ -133,13 +137,18 @@ def process_notifications(db, conn):
     with open("static/email_template.html", "r") as f:
         html_template = Template(f.read())
 
+    failed_emails = []
+
     for email, heading_map in organised_by_heading.items():
+        if cancel_event and cancel_event.is_set():
+            from app import JobCancelledError
+            raise JobCancelledError()
         subject = get_random_subject()
-        
+
         category_sections = ""
         for heading, notifications_for_email in heading_map.items():
             category = heading
-            
+
             #formatting before sending mail
             for notification in notifications_for_email:
                 notification['post_title'] = notification['post_title'][0].upper() + notification['post_title'][1:]
@@ -174,8 +183,7 @@ def process_notifications(db, conn):
 
         # Render template with dynamic sections
         html_body = html_template.render(category_sections=category_sections)
-        
-        # print(html_body)
+
         BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
         logo_file = os.path.join(BASE_DIR, "static", "nosearch_logo.jpeg")
@@ -183,19 +191,24 @@ def process_notifications(db, conn):
 
         try:
             send_email(email, subject, html_body, logo_path=logo_file, header_path=header_file)
-            logger.info(f"Email sent successfully: {email}")
+            logger.info(f"✅ Email sent successfully: {email}")
         except Exception as e:
             logger.error(f"❌ Failed to send to {email}: {e}")
+            failed_emails.append((email, e))
             continue
-        
-        for notification in notifications_for_email:   
+
+        for notification in notifications_for_email:
             logger.info(f"Deleting notification for email: {email} and post url: {notification['post_url']}")
-        
-        for notification in notifications_for_email:             
+
+        for notification in notifications_for_email:
             db.delete_notification(conn, email, notification['post_url'])
             conn.commit()
-        
+
         db.update_subscription_last_notified(conn, email)
+
+    if failed_emails:
+        summary = ", ".join(f"{e}" for _, e in failed_emails)
+        raise RuntimeError(f"Failed to send to {len(failed_emails)} recipient(s): {summary}")
             
 if __name__ == "__main__":
     db = get_database()
