@@ -1,4 +1,4 @@
-# OneSearch – Engineering Blog Alerts
+# Onesearch – Code, read & repeat
 
 [🌐 Visit Live App](https://onesearch.blog) | [📂 GitHub Repo](https://github.com/rabbit0021/onesearch)
 
