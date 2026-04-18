@@ -9,24 +9,25 @@
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
+  align-items: stretch;
 }
 
 .statCard {
-  background: var(--bg-card);
-  border: 1px solid var(--border-mid);
-  border-radius: 8px;
-  padding: 1.25rem 2rem;
+  background: var(--color-primary);
+  border: none;
+  border-radius: 10px;
+  padding: 1.25rem 2.25rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   min-width: 160px;
 }
 
 .statNum {
   font-size: 3rem;
   font-weight: 700;
-  color: var(--color-primary);
+  color: #fff;
   line-height: 1;
   font-family: 'Courier New', monospace;
 }
@@ -37,7 +38,38 @@
 
 .statLabel {
   font-size: var(--fs-xs);
-  color: var(--text-secondary);
+  color: rgba(255,255,255,0.75);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+
+/* ── Timer card ── */
+.timerCard {
+  margin-left: auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border-mid);
+  border-radius: 10px;
+  padding: 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  min-width: 130px;
+}
+
+.timerNum {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: var(--text-strong);
+  line-height: 1;
+  font-family: 'Courier New', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.timerLabel {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   font-weight: 600;
@@ -162,6 +194,25 @@
   color: var(--text-strong);
   margin: 0;
 }
+
+.refreshNowBtn {
+  background: none;
+  border: 1px solid var(--border-mid);
+  border-radius: 5px;
+  color: var(--text-secondary);
+  font-size: var(--fs-xs);
+  padding: 2px 8px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  margin-top: 2px;
+}
+
+.refreshNowBtn:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.refreshNowBtn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .search {
   border: 1px solid var(--border-mid);

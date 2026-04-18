@@ -1,19 +1,38 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { getAdminSubscriptions } from '../../../api'
 import styles from './SubscriptionsTab.module.css'
 
-export default function SubscriptionsTab({ secretKey }) {
-  const [subs, setSubs]       = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError]     = useState('')
-  const [search, setSearch]   = useState('')
+const REFRESH_SEC = 120
 
-  useEffect(() => {
+export default function SubscriptionsTab({ secretKey }) {
+  const [subs, setSubs]         = useState([])
+  const [loading, setLoading]   = useState(true)
+  const [error, setError]       = useState('')
+  const [search, setSearch]     = useState('')
+  const [countdown, setCountdown] = useState(REFRESH_SEC)
+  const countdownRef = useRef(REFRESH_SEC)
+  const timerRef     = useRef(null)
+
+  const fetchSubs = useCallback(() => {
+    setLoading(true)
     getAdminSubscriptions(secretKey)
       .then(setSubs)
       .catch(e => setError(e.message))
       .finally(() => setLoading(false))
+    countdownRef.current = REFRESH_SEC
+    setCountdown(REFRESH_SEC)
   }, [secretKey])
+
+  // Initial fetch + auto-refresh every 2 min
+  useEffect(() => {
+    fetchSubs()
+    timerRef.current = setInterval(() => {
+      countdownRef.current -= 1
+      setCountdown(countdownRef.current)
+      if (countdownRef.current <= 0) fetchSubs()
+    }, 1000)
+    return () => clearInterval(timerRef.current)
+  }, [fetchSubs])
 
   const unique = [...new Set(subs.map(s => s.email))]
 
@@ -23,19 +42,27 @@ export default function SubscriptionsTab({ secretKey }) {
     s.topic?.toLowerCase().includes(search.toLowerCase())
   )
 
-  if (loading) return <p className={styles.hint}>Loading…</p>
-  if (error)   return <p className={styles.errorMsg}>{error}</p>
+  if (error) return <p className={styles.errorMsg}>{error}</p>
 
   return (
     <div className={styles.wrap}>
       <div className={styles.statsRow}>
         <div className={styles.statCard}>
-          <span className={styles.statNum}>{unique.length}</span>
-          <span className={styles.statLabel}>Total Subscribers</span>
+          <span className={styles.statNum}>{loading ? '—' : unique.length}</span>
+          <span className={styles.statLabel}>Unique Subscribers</span>
         </div>
         <div className={styles.statCard}>
-          <span className={styles.statNum}>{subs.length}</span>
+          <span className={styles.statNum}>{loading ? '—' : subs.length}</span>
           <span className={styles.statLabel}>Total Subscriptions</span>
+        </div>
+        <div className={styles.timerCard}>
+          <span className={styles.timerNum}>
+            {loading ? '…' : `${Math.floor(countdown / 60)}:${String(countdown % 60).padStart(2, '0')}`}
+          </span>
+          <span className={styles.timerLabel}>{loading ? 'refreshing' : 'next refresh'}</span>
+          <button className={styles.refreshNowBtn} onClick={fetchSubs} disabled={loading}>
+            ↻ now
+          </button>
         </div>
       </div>
 
