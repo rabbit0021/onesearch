@@ -3,11 +3,11 @@ import { getPendingNotifications, startJob, getJob } from '../../../api'
 import styles from './NotificationsTab.module.css'
 
 export default function NotificationsTab({ secretKey }) {
-  const [pending, setPending]       = useState(null)
-  const [loading, setLoading]       = useState(true)
-  const [error, setError]           = useState('')
-  const [sending, setSending]       = useState(null) // null | 'all' | email
-  const [sendResults, setSendResults] = useState({}) // email -> 'ok'|'error'
+  const [pending, setPending]         = useState(null)
+  const [loading, setLoading]         = useState(true)
+  const [error, setError]             = useState('')
+  const [sending, setSending]         = useState(null)
+  const [sendResults, setSendResults] = useState({})
 
   useEffect(() => {
     getPendingNotifications(secretKey)
@@ -16,7 +16,7 @@ export default function NotificationsTab({ secretKey }) {
       .finally(() => setLoading(false))
   }, [secretKey])
 
-  // group notifications by email
+  // group by email
   const byEmail = useMemo(() => {
     const map = {}
     if (pending?.notifications) {
@@ -46,7 +46,7 @@ export default function NotificationsTab({ secretKey }) {
       setSendResults(prev => ({ ...prev, [key]: result.status === 'done' ? 'ok' : 'error' }))
       const p = await getPendingNotifications(secretKey)
       setPending(p)
-    } catch (e) {
+    } catch {
       setSendResults(prev => ({ ...prev, [key]: 'error' }))
     } finally {
       setSending(null)
@@ -57,6 +57,7 @@ export default function NotificationsTab({ secretKey }) {
   if (error)   return <p className={styles.errorMsg}>{error}</p>
 
   const emailList = Object.keys(byEmail)
+  const totalMatured = pending?.matured_count ?? 0
 
   return (
     <div className={styles.wrap}>
@@ -64,13 +65,17 @@ export default function NotificationsTab({ secretKey }) {
       <div className={styles.topRow}>
         <div className={styles.statCard}>
           <span className={styles.statNum}>{pending?.count ?? 0}</span>
-          <span className={styles.statLabel}>Total Pending</span>
+          <span className={styles.statLabel}>Total Queued</span>
+        </div>
+        <div className={styles.statCard}>
+          <span className={styles.statNum}>{totalMatured}</span>
+          <span className={styles.statLabel}>Ready to Send</span>
         </div>
         <div className={styles.statCard}>
           <span className={styles.statNum}>{emailList.length}</span>
-          <span className={styles.statLabel}>Subscribers with Pending</span>
+          <span className={styles.statLabel}>Subscribers</span>
         </div>
-        {pending?.count > 0 && (
+        {totalMatured > 0 && (
           <button className={styles.sendAllBtn} onClick={() => handleSend()} disabled={!!sending}>
             {sending === 'all' ? <><span className={styles.spinner} /> Sending all…</> : '✉ Send All'}
           </button>
@@ -86,6 +91,8 @@ export default function NotificationsTab({ secretKey }) {
         ? <p className={styles.empty}>No pending notifications. All caught up.</p>
         : emailList.map(email => {
           const notifs = byEmail[email]
+          const matured = notifs.filter(n => n.is_matured)
+          const queued  = notifs.filter(n => !n.is_matured)
           const isSending = sending === email
           const result = sendResults[email]
           return (
@@ -93,7 +100,12 @@ export default function NotificationsTab({ secretKey }) {
               <div className={styles.subscriberHeader}>
                 <div className={styles.subscriberInfo}>
                   <span className={styles.email}>{email}</span>
-                  <span className={styles.count}>{notifs.length} pending</span>
+                  {matured.length > 0 && (
+                    <span className={styles.countReady}>{matured.length} ready</span>
+                  )}
+                  {queued.length > 0 && (
+                    <span className={styles.countQueued}>{queued.length} queued</span>
+                  )}
                 </div>
                 <div className={styles.actions}>
                   {result === 'ok'    && <span className={styles.ok}>✓ Sent</span>}
@@ -101,34 +113,74 @@ export default function NotificationsTab({ secretKey }) {
                   <button
                     className={styles.sendBtn}
                     onClick={() => handleSend(email)}
-                    disabled={!!sending}
+                    disabled={!!sending || matured.length === 0}
+                    title={matured.length === 0 ? 'No matured notifications to send' : undefined}
                   >
                     {isSending ? <><span className={styles.spinner} /> Sending…</> : '✉ Send'}
                   </button>
                 </div>
               </div>
-              <table className={styles.table}>
-                <thead>
-                  <tr>
-                    <th>Post</th>
-                    <th>Maturity Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {notifs.map((n, i) => (
-                    <tr key={i}>
-                      <td>
-                        <a href={n.post_url} target="_blank" rel="noreferrer" className={styles.postLink}>
-                          {n.post_title}
-                        </a>
-                      </td>
-                      <td className={styles.muted}>
-                        {n.maturity_date ? new Date(n.maturity_date).toLocaleDateString() : '—'}
-                      </td>
+
+              {matured.length > 0 && (
+                <table className={styles.table}>
+                  <thead>
+                    <tr>
+                      <th>Post</th>
+                      <th>Maturity Date</th>
+                      <th>Status</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {matured.map((n, i) => (
+                      <tr key={i}>
+                        <td>
+                          <a href={n.post_url} target="_blank" rel="noreferrer" className={styles.postLink}>
+                            {n.post_title}
+                          </a>
+                        </td>
+                        <td className={styles.muted}>{n.maturity_date ? new Date(n.maturity_date).toLocaleDateString() : '—'}</td>
+                        <td><span className={styles.badgeReady}>Ready</span></td>
+                      </tr>
+                    ))}
+                    {queued.map((n, i) => (
+                      <tr key={`q${i}`} className={styles.rowQueued}>
+                        <td>
+                          <a href={n.post_url} target="_blank" rel="noreferrer" className={styles.postLink}>
+                            {n.post_title}
+                          </a>
+                        </td>
+                        <td className={styles.muted}>{n.maturity_date ? new Date(n.maturity_date).toLocaleDateString() : '—'}</td>
+                        <td><span className={styles.badgeQueued}>Queued</span></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+
+              {matured.length === 0 && queued.length > 0 && (
+                <table className={styles.table}>
+                  <thead>
+                    <tr>
+                      <th>Post</th>
+                      <th>Sends After</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {queued.map((n, i) => (
+                      <tr key={i} className={styles.rowQueued}>
+                        <td>
+                          <a href={n.post_url} target="_blank" rel="noreferrer" className={styles.postLink}>
+                            {n.post_title}
+                          </a>
+                        </td>
+                        <td className={styles.muted}>{n.maturity_date ? new Date(n.maturity_date).toLocaleDateString() : '—'}</td>
+                        <td><span className={styles.badgeQueued}>Queued</span></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           )
         })

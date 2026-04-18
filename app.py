@@ -313,10 +313,14 @@ def get_subscriptions():
 @app.route("/admin/notifications/pending", methods=["GET"])
 @require_secret_key
 def get_pending_notifications():
+    from send_notifications import leave_unmature_notifications
     conn = app.db.get_connection()
     try:
         notifications = app.db.get_active_notifications(conn)
-        return jsonify({"count": len(notifications), "notifications": notifications})
+        matured_ids = {n['id'] for n in leave_unmature_notifications(notifications)}
+        for n in notifications:
+            n['is_matured'] = n['id'] in matured_ids
+        return jsonify({"count": len(notifications), "matured_count": len(matured_ids), "notifications": notifications})
     finally:
         conn.close()
 

@@ -99,13 +99,44 @@
   color: var(--text-strong);
 }
 
-.count {
+.countReady {
   font-size: var(--fs-xs);
-  background: var(--color-primary);
+  background: #16a34a;
   color: #fff;
   border-radius: 20px;
   padding: 2px 8px;
   font-weight: 600;
+}
+
+.countQueued {
+  font-size: var(--fs-xs);
+  background: var(--text-muted);
+  color: #fff;
+  border-radius: 20px;
+  padding: 2px 8px;
+  font-weight: 600;
+}
+
+.badgeReady {
+  font-size: var(--fs-xs);
+  background: #dcfce7;
+  color: #16a34a;
+  border-radius: 4px;
+  padding: 2px 7px;
+  font-weight: 600;
+}
+
+.badgeQueued {
+  font-size: var(--fs-xs);
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  border-radius: 4px;
+  padding: 2px 7px;
+  font-weight: 600;
+}
+
+.rowQueued td {
+  opacity: 0.55;
 }
 
 .actions {

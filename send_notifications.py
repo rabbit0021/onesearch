@@ -93,7 +93,7 @@ def deduplicate_notifications(notifications):
     return deduped
 
 def leave_unmature_notifications(notifications):
-    """Remove duplicates based on (email, heading, post_url)."""
+    """Remove unmatured based on timing of the subscriber. if subcriber frequency is diff, the notification stays in the queue"""
     matured = []
     for row in notifications:
         maturity_dt = datetime.fromisoformat(row['maturity_date'])        
