@@ -1,33 +1,76 @@
 <!DOCTYPE html>
-<html>
-  <body style="font-family:'Segoe UI', Arial, sans-serif; color:#333; margin:0; padding:0; background-color:#f3f4f6;">
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OneSearch Digest</title>
+</head>
+<body style="margin:0; padding:0; background-color:#f0f0ee; font-family:'Segoe UI', Arial, sans-serif;">
 
-    <!-- Header image -->
-    <div style="width:100%; height:150px; overflow:hidden; border-bottom:4px solid #41a0f2;">
-      <img src="cid:header" alt="OneSearch header"
-           style="width:100%; height:150px; object-fit:cover; display:block;">
-    </div>
+  <!-- Outer wrapper -->
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f0f0ee; padding:16px 0;">
+    <tr>
+      <td align="center">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:700px;">
 
-    <!-- Main content -->
-    <div style="padding:32px; background-color:#fff; border-radius:12px;
-                border:1px solid #e5e7eb; margin:32px auto; max-width:640px;
-                box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+          <!-- Banner image -->
+          <tr>
+            <td style="border-radius:12px 12px 0 0; overflow:hidden; line-height:0;">
+              <img src="cid:header" alt="OneSearch"
+                   style="width:100%; max-width:700px; height:auto; display:block; border-radius:12px 12px 0 0;">
+            </td>
+          </tr>
 
-      <h1 style="font-size:26px; margin:0 0 24px 0; color:#2563eb; text-align:center;">
-        ✨ Your OneSearch Blog Digest
-      </h1>
+          <!-- Main card -->
+          <tr>
+            <td style="background:#ffffff; padding:28px 24px 20px; border-left:1px solid #e0e0de; border-right:1px solid #e0e0de;">
 
-      {{ category_sections | safe }}
-    </div>
+              <!-- Title -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:28px;">
+                <tr>
+                  <td style="border-left:4px solid #d97757; padding-left:14px;">
+                    <p style="margin:0; font-size:12px; font-weight:600; color:#d97757; text-transform:uppercase; letter-spacing:0.08em;">Your Digest</p>
+                    <h1 style="margin:4px 0 0; font-size:22px; font-weight:700; color:#111111; line-height:1.3;">What top engineers shipped recently</h1>
+                  </td>
+                </tr>
+              </table>
 
-    <div style="padding:20px; border-top:1px solid #e5e7eb; display:flex; align-items:center;
-                    background-color:#f9fafb; font-size:12px; color:#6b7280; justify-content:center;">
-      <!-- <img src="cid:logo" alt="OneSearch logo" style="width:50px; height:auto; margin-right:5px;"> -->
-      <div>
-    
-        <a href="https://onesearch.blog" target="_blank" rel="noopener noreferrer"><strong>OneSearch Blog</strong></a>
-        <div style="color:#6b7280;">One place for all engineering blogs</div>
-      </div>
-    </div>
-  </body>
+              <!-- Dynamic category sections injected here -->
+              {{ category_sections | safe }}
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background:#f7f7f5; border:1px solid #e0e0de; border-top:none; border-radius:0 0 12px 12px; padding:16px 24px;">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="vertical-align:middle; padding-right:14px; width:1%;">
+                    <a href="https://onesearch.blog" target="_blank" rel="noopener noreferrer">
+                      <img src="https://onesearch.blog/static/logo.png" alt="OneSearch"
+                           width="36" height="36"
+                           style="display:block; border-radius:6px;">
+                    </a>
+                  </td>
+                  <td style="vertical-align:middle;">
+                    <a href="https://onesearch.blog" target="_blank" rel="noopener noreferrer"
+                       style="font-size:14px; font-weight:700; color:#d97757; text-decoration:none;">OneSearch</a>
+                    <p style="margin:2px 0 0; font-size:12px; color:#888884; line-height:1.5;">
+                      One place for all engineering blogs — curated for you.<br>
+                      <a href="https://onesearch.blog" target="_blank" rel="noopener noreferrer"
+                         style="color:#888884; text-decoration:underline;">Visit onesearch.blog</a>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+
+</body>
 </html>

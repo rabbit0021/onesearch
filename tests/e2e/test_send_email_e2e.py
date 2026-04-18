@@ -142,11 +142,11 @@ def test_send_email_real(db):
         {
             "heading": "Google, Software Engineering",
             "post_title": "Announcing Android 15: What's New",
-            "post_url": "https://android-developers.googleblog.com/2025/08/android-15-whats-new.html"
+            "post_url": "https://developers.googleblog.com/get-ready-for-google-io-livestream-schedule-revealed/"
         },
         {
             "heading": "Facebook, Software Engineering",
-            "post_title": "Scaling GraphQL at Meta",
+            "post_title": "Scaling GraphQL at Meta And a whole lot in the AI world",
             "post_url": "https://engineering.fb.com/2025/08/16/scaling-graphql/"
         },
         {

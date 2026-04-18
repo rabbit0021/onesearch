@@ -12,7 +12,8 @@ from logger_config import get_logger
 from collections import defaultdict
 import random
 from jinja2 import Template
-from dotenv import load_dotenv                                                                                 
+from dotenv import load_dotenv
+from urllib.parse import urlparse                                                                                 
 
 load_dotenv()   
 
@@ -21,9 +22,18 @@ SMTP_SERVER = "smtp.zoho.in"
 SMTP_PORT = 587
 SMTP_USERNAME = os.getenv('SMTP_USERNAME', 'xxxx@onesearch.blog')
 SMTP_PASSWORD = os.getenv('SMTP_PASSWORD', 'xxxx')
+PRIMARY_COLOR = '#d97757'  # Claude theme
 print(f"SMTP_USERNAME: {SMTP_USERNAME}, SMTP_PASSWORD: {'*' * len(SMTP_PASSWORD)}")
 
 logger = get_logger("send_notification_worker")
+
+
+def favicon_url(post_url):
+    try:
+        domain = urlparse(post_url).netloc
+        return f"https://www.google.com/s2/favicons?domain={domain}&sz=32"
+    except Exception:
+        return None
 
 # === EMAIL TEMPLATE ===
 
@@ -119,6 +129,12 @@ def process_notifications(db, conn, target_email=None, cancel_event=None):
     notifications = leave_unmature_notifications(notifications)
     logger.info(f"After leaving unmatured, found {len(notifications)} notifications to be processed")
 
+    # fetch like counts for all posts in one query
+    urls = [n['post_url'] for n in notifications]
+    like_counts = db.get_like_counts_by_urls(conn, urls)
+    for n in notifications:
+        n['like_count'] = like_counts.get(n['post_url'], 0)
+
     notifications_by_email = defaultdict(list)
     for row in notifications:
         notifications_by_email[row["email"]].append(row)
@@ -157,40 +173,78 @@ def process_notifications(db, conn, target_email=None, cancel_event=None):
 
             blog_items = "".join([
                 f"""
-                <div style="padding:14px; margin-bottom:12px; border-radius:10px;
-                            background:#f9fafb; border:1px solid #e5e7eb;">
-                    <div style="font-size:15px; color:#374151; margin-bottom:6px;">
-                        <strong style="color:#111827;">{notification['publisher']}</strong>
-                    </div>
-                    <a href="{notification['post_url']}" style="font-size:16px; font-weight:500;
-                            color:#2563eb; text-decoration:none;">
+                <table width="100%" cellpadding="0" cellspacing="0" border="0"
+                       style="margin-bottom:10px; background:#f7f7f5; border-radius:8px;
+                              border:1px solid #e8e8e6;">
+                  <tr>
+                    <td style="padding:14px 16px;">
+                      <!-- Publisher row with favicon -->
+                      <table cellpadding="0" cellspacing="0" border="0" style="margin-bottom:7px;">
+                        <tr>
+                          <td style="vertical-align:middle; padding-right:6px;">
+                            {'<img src="' + favicon_url(notification["post_url"]) + '" width="14" height="14" alt="" style="display:block; border-radius:2px;">' if favicon_url(notification["post_url"]) else ''}
+                          </td>
+                          <td style="vertical-align:middle;">
+                            <span style="font-size:11px; font-weight:700; color:{PRIMARY_COLOR};
+                                         text-transform:uppercase; letter-spacing:0.06em;">
+                              {notification['publisher']}
+                            </span>
+                          </td>
+                        </tr>
+                      </table>
+                      <!-- Post title -->
+                      <a href="{notification['post_url']}"
+                         style="font-size:15px; font-weight:600; color:#111111;
+                                text-decoration:none; line-height:1.4; display:block;">
                         {notification['post_title']}
-                    </a>
-                </div>
+                      </a>
+                      <table cellpadding="0" cellspacing="0" border="0" style="margin-top:8px;">
+                        <tr>
+                          <td style="padding-right:14px;">
+                            <a href="{notification['post_url']}"
+                               style="font-size:12px; color:{PRIMARY_COLOR}; font-weight:600;
+                                      text-decoration:none;">
+                              Read post →
+                            </a>
+                          </td>
+                          {'<td style="font-size:11px; color:#888884;">♥ ' + str(notification["like_count"]) + ' likes</td>' if notification.get("like_count", 0) > 0 else ''}
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
                 """
                 for notification in notifications_for_email
             ])
 
             category_sections += f"""
-                <div style="margin-bottom:32px;">
-                    <h2 style="font-size:20px; color:#111827; margin:0 0 16px 0;
-                               border-left:4px solid #2563eb; padding-left:8px;">
-                        📂 {category}
-                    </h2>
-                    {blog_items}
-                </div>
+                <table width="100%" cellpadding="0" cellspacing="0" border="0"
+                       style="margin-bottom:28px;">
+                  <tr>
+                    <td style="padding-bottom:12px; border-bottom:2px solid {PRIMARY_COLOR};">
+                      <h2 style="margin:0; font-size:13px; font-weight:700; color:#555552;
+                                 text-transform:uppercase; letter-spacing:0.07em;">
+                        {category}
+                      </h2>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding-top:14px;">
+                      {blog_items}
+                    </td>
+                  </tr>
+                </table>
             """
 
         # Render template with dynamic sections
-        html_body = html_template.render(category_sections=category_sections)
+        html_body = html_template.render(category_sections=category_sections, primary_color=PRIMARY_COLOR)
 
         BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-        logo_file = os.path.join(BASE_DIR, "static", "nosearch_logo.jpeg")
-        header_file = os.path.join(BASE_DIR, "static", "header2.png")
+        header_file = os.path.join(BASE_DIR, "static", "og-preview.png")
 
         try:
-            send_email(email, subject, html_body, logo_path=logo_file, header_path=header_file)
+            send_email(email, subject, html_body, header_path=header_file)
             logger.info(f"✅ Email sent successfully: {email}")
         except Exception as e:
             logger.error(f"❌ Failed to send to {email}: {e}")

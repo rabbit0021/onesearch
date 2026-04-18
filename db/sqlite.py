@@ -520,6 +520,21 @@ class SQLiteDatabase:
         rows = c.fetchall()
         return [dict(row) for row in rows]
 
+    def get_like_counts_by_urls(self, conn, urls):
+        """Returns {url: like_count} for the given list of post URLs."""
+        if not urls:
+            return {}
+        placeholders = ','.join('?' * len(urls))
+        c = conn.cursor()
+        c.execute(f"""
+            SELECT po.url, COALESCE(COUNT(pl.post_id), 0) AS like_count
+            FROM posts po
+            LEFT JOIN post_likes pl ON pl.post_id = po.id
+            WHERE po.url IN ({placeholders})
+            GROUP BY po.url
+        """, urls)
+        return {row['url']: row['like_count'] for row in c.fetchall()}
+
     def like_post(self, conn, post_id, jira_account_id):
         c = conn.cursor()
         c.execute(
