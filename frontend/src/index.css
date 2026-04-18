@@ -10,10 +10,10 @@
   --bg-wizard: rgb(238, 238, 235);
   --bg-wizard-option: rgb(220, 220, 217);
 
-  --text-base: #333333;
-  --text-strong: #111827;
-  --text-secondary: #6b7280;
-  --text-muted: #9ca3af;
+  --text-base: #131313;
+  --text-strong: #000000;
+  --text-secondary: #6b7280; /* headings */
+  --text-muted: #767b85;
   --text-dim: #404040;
 
   --border: #adadad;
