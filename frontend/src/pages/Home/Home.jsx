@@ -83,7 +83,7 @@ export default function Home() {
     try {
       const res = await subscribe({ email, techteams: companies, topic, frequency })
       if (res.status === 'success') {
-        showToast('Subscribed! Check your inbox.')
+        showToast('Subscribed!')
         setTopic('')
         setCompanies([])
         setFrequency(2)
