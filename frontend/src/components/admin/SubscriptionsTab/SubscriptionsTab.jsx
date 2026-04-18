@@ -47,14 +47,17 @@ export default function SubscriptionsTab({ secretKey }) {
   return (
     <div className={styles.wrap}>
       <div className={styles.statsRow}>
-        <div className={styles.statCard}>
-          <span className={styles.statNum}>{loading ? '—' : unique.length}</span>
-          <span className={styles.statLabel}>Unique Subscribers</span>
+        <div className={styles.heroCard}>
+          <span className={styles.heroLabel}>Unique Subscribers</span>
+          <span className={styles.heroNum}>{loading ? '—' : unique.length}</span>
+          <span className={styles.heroSub}>people receiving your digest</span>
         </div>
+
         <div className={styles.statCard}>
           <span className={styles.statNum}>{loading ? '—' : subs.length}</span>
           <span className={styles.statLabel}>Total Subscriptions</span>
         </div>
+
         <div className={styles.timerCard}>
           <span className={styles.timerNum}>
             {loading ? '…' : `${Math.floor(countdown / 60)}:${String(countdown % 60).padStart(2, '0')}`}

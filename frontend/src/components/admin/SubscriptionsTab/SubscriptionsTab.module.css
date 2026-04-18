@@ -12,22 +12,59 @@
   align-items: stretch;
 }
 
+/* Hero card — unique subscribers */
+.heroCard {
+  background: linear-gradient(135deg, var(--color-primary) 0%, #c4623d 100%);
+  border-radius: 12px;
+  padding: 1.5rem 2.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  width: fit-content;
+  box-shadow: 0 4px 20px rgba(217, 119, 87, 0.3);
+}
+
+.heroLabel {
+  font-size: var(--fs-xs);
+  color: rgba(255,255,255,0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+}
+
+.heroNum {
+  font-size: 5rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+  font-family: 'Courier New', monospace;
+  letter-spacing: -0.02em;
+}
+
+.heroSub {
+  font-size: var(--fs-sm);
+  color: rgba(255,255,255,0.55);
+  font-style: italic;
+}
+
+
 .statCard {
-  background: var(--color-primary);
-  border: none;
+  background: var(--bg-card);
+  border: 1px solid var(--border-mid);
   border-radius: 10px;
-  padding: 1.25rem 2.25rem;
+  padding: 1rem 1.75rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   min-width: 160px;
 }
 
 .statNum {
-  font-size: 3rem;
+  font-size: 2.25rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--color-primary);
   line-height: 1;
   font-family: 'Courier New', monospace;
 }
@@ -38,7 +75,7 @@
 
 .statLabel {
   font-size: var(--fs-xs);
-  color: rgba(255,255,255,0.75);
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   font-weight: 600;
@@ -55,7 +92,7 @@
   flex-direction: column;
   align-items: center;
   gap: 5px;
-  min-width: 130px;
+  width: fit-content;
 }
 
 .timerNum {
