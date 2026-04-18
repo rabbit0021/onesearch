@@ -3,17 +3,52 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Stay up to date with the latest posts from top engineering blogs. Subscribe to curated alerts by topic and publisher." />
-    <meta property="og:title" content="OneSearch: Subscribe to Engineering Blogs" />
-    <meta property="og:description" content="Curated engineering blog alerts from top tech companies." />
+
+    <title>OneSearch — Engineering Blogs from Top Tech Companies, All in One Place</title>
+
+    <meta name="description" content="OneSearch aggregates engineering blog posts from top tech companies like AWS, Google, Netflix, Stripe and more. Subscribe by topic or publisher, follow trending posts other engineers are reading, connect Jira to surface relevant posts for your tasks, and like or discuss what matters to you." />
+    <meta name="keywords" content="engineering blog, tech blog, software engineering articles, AWS blog, Google engineering, Netflix tech blog, developer news, programming articles, subscribe to tech blogs, trending engineering posts, Jira integration, software engineering newsletter, data science blog, engineering digest" />
+    <link rel="canonical" href="https://onesearch.blog/" />
+
+    <!-- Open Graph -->
     <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary" />
-    <title>OneSearch: Engineering Blog Alerts</title>
+    <meta property="og:url" content="https://onesearch.blog/" />
+    <meta property="og:title" content="OneSearch — Engineering Blogs from Top Tech Companies, All in One Place" />
+    <meta property="og:description" content="Follow engineering blogs from AWS, Google, Netflix, Stripe and dozens more. Subscribe by topic, discover trending posts, connect Jira, and discuss what the engineering community is reading." />
+    <meta property="og:image" content="https://onesearch.blog/static/og-preview.png" />
+    <meta property="og:site_name" content="OneSearch" />
+    <meta name="twitter:image" content="https://onesearch.blog/static/og-preview.png" />                                  
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="OneSearch — Engineering Blogs from Top Tech Companies" />
+    <meta name="twitter:description" content="Subscribe to curated engineering posts from AWS, Google, Netflix, Stripe and more. Follow trending articles, connect Jira, like and discuss posts." />
+
     <link rel="icon" type="image/png" href="/static/nosearch_logo.jpeg" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+
+    <!-- Structured data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "OneSearch",
+      "url": "https://onesearch.blog",
+      "description": "Aggregate and subscribe to engineering blog posts from top tech companies, individuals and communities. Follow trending posts, connect Jira to surface task-relevant articles, and like or discuss what the engineering world is reading.",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+    </script>
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script> 
+    <div id="root">
+      <!-- OneSearch aggregates engineering blog posts from top tech companies including AWS, Google, Netflix, Stripe, Cloudflare, Uber, Airbnb and more. Subscribe to curated digests by topic — Software Engineering, Data Science, Product Management, QA and more — delivered at your preferred frequency. Discover trending posts other engineers are reading, connect your Jira account to find articles relevant to your current tasks, and like or discuss posts with the engineering community. -->
+    </div>
+    <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
