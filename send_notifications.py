@@ -150,7 +150,7 @@ def process_notifications(db, conn, target_email=None, cancel_event=None):
         organised_by_heading[email] = heading_map
     
     # Load static template once
-    with open("static/email_template.html", "r") as f:
+    with open("static/email_template_v2.html", "r") as f:
         html_template = Template(f.read())
 
     failed_emails = []
@@ -174,19 +174,19 @@ def process_notifications(db, conn, target_email=None, cancel_event=None):
             blog_items = "".join([
                 f"""
                 <table width="100%" cellpadding="0" cellspacing="0" border="0"
-                       style="margin-bottom:10px; background:#f7f7f5; border-radius:8px;
-                              border:1px solid #e8e8e6;">
+                       style="margin-bottom:8px; background:#161614; border-radius:6px;
+                              border:1px solid #252522;">
                   <tr>
-                    <td style="padding:14px 16px;">
+                    <td style="padding:2px 14px 2px 0; width:3px; background:{PRIMARY_COLOR}; border-radius:6px 0 0 6px; font-size:0; line-height:0;">&#8203;</td>
+                    <td style="padding:13px 16px;">
                       <!-- Publisher row with favicon -->
-                      <table cellpadding="0" cellspacing="0" border="0" style="margin-bottom:7px;">
+                      <table cellpadding="0" cellspacing="0" border="0" style="margin-bottom:6px;">
                         <tr>
-                          <td style="vertical-align:middle; padding-right:6px;">
-                            {'<img src="' + favicon_url(notification["post_url"]) + '" width="14" height="14" alt="" style="display:block; border-radius:2px;">' if favicon_url(notification["post_url"]) else ''}
-                          </td>
+                          <td style="vertical-align:middle; padding-right:5px; font-size:11px; color:#555550;">@</td>
+                          {'<td style="vertical-align:middle; padding-right:6px;"><img src="' + favicon_url(notification["post_url"]) + '" width="13" height="13" alt="" style="display:block; border-radius:2px; opacity:0.85;"></td>' if favicon_url(notification["post_url"]) else ''}
                           <td style="vertical-align:middle;">
                             <span style="font-size:11px; font-weight:700; color:{PRIMARY_COLOR};
-                                         text-transform:uppercase; letter-spacing:0.06em;">
+                                         text-transform:uppercase; letter-spacing:0.08em; font-family:\'Courier New\', monospace;">
                               {notification['publisher']}
                             </span>
                           </td>
@@ -194,20 +194,22 @@ def process_notifications(db, conn, target_email=None, cancel_event=None):
                       </table>
                       <!-- Post title -->
                       <a href="{notification['post_url']}"
-                         style="font-size:15px; font-weight:600; color:#111111;
-                                text-decoration:none; line-height:1.4; display:block;">
+                         style="font-size:14px; font-weight:700; color:#e8e5e0;
+                                text-decoration:none; line-height:1.45; display:block;
+                                font-family:\'Courier New\', monospace; letter-spacing:-0.01em;">
                         {notification['post_title']}
                       </a>
-                      <table cellpadding="0" cellspacing="0" border="0" style="margin-top:8px;">
+                      <table cellpadding="0" cellspacing="0" border="0" style="margin-top:10px;">
                         <tr>
-                          <td style="padding-right:14px;">
+                          <td style="padding-right:16px;">
                             <a href="{notification['post_url']}"
-                               style="font-size:12px; color:{PRIMARY_COLOR}; font-weight:600;
-                                      text-decoration:none;">
-                              Read post →
+                               style="font-size:11px; color:{PRIMARY_COLOR}; font-weight:700;
+                                      text-decoration:none; font-family:\'Courier New\', monospace;
+                                      letter-spacing:0.03em;">
+                              $ open post →
                             </a>
                           </td>
-                          {'<td style="font-size:11px; color:#888884;">♥ ' + str(notification["like_count"]) + ' likes</td>' if notification.get("like_count", 0) > 0 else ''}
+                          {'<td style="font-size:11px; color:#444440; font-family:\'Courier New\', monospace;">// ♥ ' + str(notification["like_count"]) + '</td>' if notification.get("like_count", 0) > 0 else ''}
                         </tr>
                       </table>
                     </td>
@@ -219,17 +221,21 @@ def process_notifications(db, conn, target_email=None, cancel_event=None):
 
             category_sections += f"""
                 <table width="100%" cellpadding="0" cellspacing="0" border="0"
-                       style="margin-bottom:28px;">
+                       style="margin-bottom:26px;">
                   <tr>
-                    <td style="padding-bottom:12px; border-bottom:2px solid {PRIMARY_COLOR};">
-                      <h2 style="margin:0; font-size:13px; font-weight:700; color:#555552;
-                                 text-transform:uppercase; letter-spacing:0.07em;">
+                    <td style="padding-bottom:10px;">
+                      <p style="margin:0 0 2px; font-size:10px; color:#333330; font-family:\'Courier New\', monospace; letter-spacing:0.05em;">
+                        // category
+                      </p>
+                      <h2 style="margin:0; font-size:12px; font-weight:700; color:{PRIMARY_COLOR};
+                                 text-transform:uppercase; letter-spacing:0.1em; font-family:\'Courier New\', monospace;
+                                 border-bottom:1px dashed #2a2a26; padding-bottom:8px;">
                         {category}
                       </h2>
                     </td>
                   </tr>
                   <tr>
-                    <td style="padding-top:14px;">
+                    <td>
                       {blog_items}
                     </td>
                   </tr>
