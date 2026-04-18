@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { getPosts } from '../../api'
 import SecretKeyModal from '../../components/admin/SecretKeyModal/SecretKeyModal'
 import PostsTable from '../../components/admin/PostsTable/PostsTable'
@@ -9,6 +9,26 @@ import NotificationsTab from '../../components/admin/NotificationsTab/Notificati
 import styles from './AdminPosts.module.css'
 
 const TABS = ['Posts', 'Publishers', 'Subscriptions', 'Notifications', 'Jobs']
+const STORAGE_KEY = 'admin_secret_key'
+const TTL_MS = 3 * 24 * 60 * 60 * 1000 // 3 days
+
+function saveKey(key) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ key, expires: Date.now() + TTL_MS }))
+}
+
+function loadKey() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (!raw) return null
+    const { key, expires } = JSON.parse(raw)
+    if (Date.now() > expires) { localStorage.removeItem(STORAGE_KEY); return null }
+    return key
+  } catch { return null }
+}
+
+function clearKey() {
+  localStorage.removeItem(STORAGE_KEY)
+}
 
 export default function AdminPosts() {
   const [secretKey, setSecretKey] = useState('')
@@ -16,6 +36,12 @@ export default function AdminPosts() {
   const [loading, setLoading]     = useState(false)
   const [error, setError]         = useState('')
   const [tab, setTab]             = useState('Posts')
+
+  // Auto-login on mount if a valid saved key exists
+  useEffect(() => {
+    const saved = loadKey()
+    if (saved) handleKeySubmit(saved)
+  }, [])
 
   async function handleKeySubmit(key) {
     setError('')
@@ -25,11 +51,14 @@ export default function AdminPosts() {
       if (Array.isArray(data)) {
         setSecretKey(key)
         setPosts(data)
+        saveKey(key)
       } else {
         setError('Unauthorized or invalid key.')
+        clearKey()
       }
     } catch (err) {
       setError(err.message || 'Failed to load posts.')
+      clearKey()
     } finally {
       setLoading(false)
     }
@@ -39,7 +68,7 @@ export default function AdminPosts() {
     if (secretKey) handleKeySubmit(secretKey)
   }, [secretKey])
 
-  if (!secretKey) {
+  if (!secretKey && !loading) {
     return <SecretKeyModal onSubmit={handleKeySubmit} error={error} loading={loading} />
   }
 
@@ -55,7 +84,7 @@ export default function AdminPosts() {
           )}
           <button
             className={styles.logoutBtn}
-            onClick={() => { setSecretKey(''); setPosts([]) }}
+            onClick={() => { setSecretKey(''); setPosts([]); clearKey() }}
           >
             Logout
           </button>
