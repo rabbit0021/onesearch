@@ -10,7 +10,7 @@
 }
 
 .heading {
-  font-size: 0.8rem;
+  font-size: var(--fs-sm);
   font-weight: 700;
   color: #d97757;
   text-transform: uppercase;
@@ -44,14 +44,14 @@
 }
 
 .key {
-  font-size: 0.75rem;
+  font-size: var(--fs-xs);
   font-weight: 700;
   color: #d97757;
   font-family: monospace;
 }
 
 .status {
-  font-size: 0.7rem;
+  font-size: var(--fs-2xs);
   background: #fdf0eb;
   color: #7a3520;
   border-radius: 4px;
@@ -60,13 +60,13 @@
 }
 
 .summary {
-  font-size: 0.88rem;
+  font-size: var(--fs-base);
   font-weight: 600;
   color: #222;
 }
 
 .description {
-  font-size: 0.78rem;
+  font-size: var(--fs-xs);
   color: #888;
   line-height: 1.4;
   display: -webkit-box;

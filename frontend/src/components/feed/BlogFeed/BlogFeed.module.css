@@ -51,7 +51,7 @@
 }
 
 .heading {
-  font-size: 1rem;
+  font-size: var(--fs-std);
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -83,7 +83,7 @@
 }
 
 .hint {
-  font-size: 1rem;
+  font-size: var(--fs-std);
   color: var(--text-muted);
   margin: 0;
   padding: 0.7rem 0.85rem;
@@ -115,7 +115,7 @@
 }
 
 .loadingText {
-  font-size: 1rem;
+  font-size: var(--fs-std);
   color: var(--color-primary);
   letter-spacing: 0.1em;
 }
@@ -147,7 +147,7 @@
 .filterBar::before {
   content: '>_ filters';
   display: block;
-  font-size: .8rem;
+  font-size: var(--fs-sm);
   font-family: 'Courier New', monospace;
   color: var(--color-primary);
   letter-spacing: 0.14em;
@@ -164,7 +164,7 @@
   cursor: pointer;
   color: var(--color-primary);
   font-family: 'Courier New', monospace;
-  font-size: 0.85rem;
+  font-size: var(--fs-base);
   font-weight: 600;
   letter-spacing: 0.05em;
   padding: 0;
@@ -184,7 +184,7 @@
 }
 
 .filterActiveCount {
-  font-size: 0.75rem;
+  font-size: var(--fs-xs);
   font-family: 'Courier New', monospace;
   color: var(--color-primary);
   letter-spacing: 0.05em;
@@ -194,7 +194,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 0.75rem;
+  font-size: var(--fs-xs);
   font-family: 'Courier New', monospace;
   color: var(--filter-ghost);
   padding: 0;
@@ -258,7 +258,7 @@
 }
 
 .filterPrefix {
-  font-size: 0.78rem;
+  font-size: var(--fs-xs);
   font-family: 'Courier New', monospace;
   color: var(--filter-prefix-color);
   letter-spacing: 0.04em;
@@ -288,7 +288,7 @@
   position: absolute;
   left: 10px;
   color: var(--color-primary);
-  font-size: 1rem;
+  font-size: var(--fs-std);
   pointer-events: none;
   line-height: 1;
 }
@@ -300,7 +300,7 @@
   border: none;
   border-bottom: 1px solid var(--filter-line);
   border-radius: 0;
-  font-size: 1rem;
+  font-size: var(--fs-std);
   font-family: 'Courier New', monospace;
   outline: none;
   color: var(--filter-text);
@@ -323,7 +323,7 @@
   background: none;
   border: none;
   color: var(--color-primary);
-  font-size: 1.5rem;
+  font-size: var(--fs-2xl);
   line-height: 1;
   padding: 0;
   cursor: pointer;
@@ -338,7 +338,7 @@
   padding: 0 16px 0 2px;
   border: none;
   border-radius: 0;
-  font-size: .8rem;
+  font-size: var(--fs-sm);
   font-family: 'Courier New', monospace;
   outline: none;
   background: transparent;
@@ -367,7 +367,7 @@
 }
 
 .tagLabel {
-  font-size: 0.82rem;
+  font-size: var(--fs-sm);
   color: var(--filter-prefix-color);
   letter-spacing: 0.05em;
   margin-right: 2px;
@@ -379,7 +379,7 @@
   border-radius: 0;
   padding: 0 6px;
   background: transparent;
-  font-size: 0.82rem;
+  font-size: var(--fs-sm);
   font-family: 'Courier New', monospace;
   color: var(--filter-text);
   outline: none;
@@ -394,7 +394,7 @@
 .tagSearch:focus { border-bottom-color: var(--color-primary); }
 
 .moreTags {
-  font-size: 0.78rem;
+  font-size: var(--fs-xs);
   color: var(--filter-text);
   padding: 0 4px;
   flex-shrink: 0;
@@ -406,7 +406,7 @@
   padding: 0 8px;
   border-radius: 0;
   background: transparent;
-  font-size: 0.8rem;
+  font-size: var(--fs-sm);
   font-family: 'Courier New', monospace;
   color: var(--text-dim);
   cursor: pointer;
@@ -441,7 +441,7 @@
   border-radius: 0;
   border: 1px solid var(--color-primary);
   background: transparent;
-  font-size: 0.8rem;
+  font-size: var(--fs-sm);
   font-family: 'Courier New', monospace;
   color: var(--filter-text);
   cursor: pointer;
@@ -524,13 +524,13 @@
 }
 
 .lockIcon {
-  font-size: 2rem;
+  font-size: var(--fs-3xl);
   color: var(--color-primary);
   line-height: 1;
 }
 
 .lockedMsg {
-  font-size: 0.82rem;
+  font-size: var(--fs-sm);
   color: var(--color-primary-hover);
   font-family: 'Courier New', monospace;
   letter-spacing: 0.04em;
@@ -544,7 +544,7 @@
   border: 1px solid var(--color-primary);
   border-radius: 4px;
   padding: 0.35rem 1rem;
-  font-size: 0.8rem;
+  font-size: var(--fs-sm);
   font-family: 'Courier New', monospace;
   font-weight: 600;
   text-decoration: none;
@@ -579,7 +579,7 @@
 }
 
 .issuePrompt {
-  font-size: 0.8rem;
+  font-size: var(--fs-sm);
   color: var(--color-primary);
   flex-shrink: 0;
   margin-left: 12px;
@@ -587,7 +587,7 @@
 }
 
 .issueKey {
-  font-size: 1rem;
+  font-size: var(--fs-std);
   font-weight: 700;
   color: #126add;
   letter-spacing: 0.06em;
@@ -596,7 +596,7 @@
 }
 
 .issueSummary {
-  font-size: .9rem;
+  font-size: var(--fs-md);
   color: var(--text-base);
   text-decoration: underline;
   white-space: nowrap;

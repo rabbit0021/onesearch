@@ -6,7 +6,7 @@
   color: var(--color-primary-tint);
   border-radius: 5px;
   padding: 7px 14px;
-  font-size: 0.82rem;
+  font-size: var(--fs-sm);
   font-weight: 600;
   text-decoration: none;
   transition: background 0.2s;
@@ -48,14 +48,14 @@
   color: var(--text-base);
   border-radius: 8px;
   padding: 6px 12px;
-  font-size: 0.82rem;
+  font-size: var(--fs-sm);
   font-weight: 600;
   white-space: nowrap;
 }
 
 .check {
   color: var(--color-primary);
-  font-size: 0.9rem;
+  font-size: var(--fs-md);
   font-weight: 700;
 }
 

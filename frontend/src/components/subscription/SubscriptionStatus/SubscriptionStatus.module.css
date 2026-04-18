@@ -2,7 +2,7 @@
   border-left: 3px solid var(--color-primary);
   border-radius: 6px;
   padding: 10px 14px;
-  font-size: 0.85rem;
+  font-size: var(--fs-base);
   display: flex;
   flex-direction: column;
   gap: 4px;

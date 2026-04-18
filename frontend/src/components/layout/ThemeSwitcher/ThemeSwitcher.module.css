@@ -17,7 +17,7 @@
   background: none;
   border: none;
   color: var(--text-secondary);
-  font-size: 1rem;
+  font-size: var(--fs-std);
   font-family: 'Courier New', monospace;
   letter-spacing: 0.08em;
   padding: 1px 5px;
@@ -34,7 +34,7 @@
 
 .switcher::before {
   content: '◈';
-  font-size: 0.7rem;
+  font-size: var(--fs-2xs);
   color: var(--color-primary);
   margin-right: 2px;
   flex-shrink: 0;

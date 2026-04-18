@@ -8,13 +8,13 @@
   width: 100%;
   border-collapse: collapse;
   background: #fff;
-  font-size: 0.88rem;
+  font-size: var(--fs-base);
 }
 
 .th {
   text-align: left;
   padding: 10px 10px;
-  font-size: 0.8rem;
+  font-size: var(--fs-sm);
   font-weight: 700;
   color: #555;
   background: #f4f6f9;

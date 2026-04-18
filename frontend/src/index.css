@@ -39,9 +39,21 @@
   --card-publisher: #6b7280;
   --card-hint: var(--color-primary-tint);
 
-  --arcade-highlight: #fdfdfd;  
-  --arcade-shadow-mid: #b5b5b5;    
-  --arcade-shadow-deep: #8d8d8d;    
+  --arcade-highlight: #fdfdfd;
+  --arcade-shadow-mid: #b5b5b5;
+  --arcade-shadow-deep: #8d8d8d;
+
+  /* ── Font scale ── */
+  --fs-2xs:  0.7rem;    /* tiny labels, badge counters */                                                               
+  --fs-xs:   0.75rem;   /* extra small: tags, meta */                                                                   
+  --fs-sm:   0.82rem;   /* small: filters, secondary text */                                                            
+  --fs-base: 0.88rem;   /* base: most UI elements */                                                                    
+  --fs-md:   0.92rem;   /* medium: body copy */                                                                         
+  --fs-std:  .95rem;      /* standard: inputs, headings */                                                                
+  --fs-lg:   1.2rem;    /* large: section headings */                                                                   
+  --fs-xl:   1.4rem;    /* xl: page titles */                                                                           
+  --fs-2xl:  1.5rem;    /* icon sizes */                                                                                
+  --fs-3xl:  2rem;      /* display / hero */ 
 }
 
 [data-theme="dark"] {

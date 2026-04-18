@@ -8,12 +8,12 @@
 }
 
 .title {
-  font-size: 0.88rem;
+  font-size: var(--fs-base);
   font-weight: 600;
   color: #444;
 }
 
 .body {
-  font-size: 0.82rem;
+  font-size: var(--fs-sm);
   color: #666;
 }

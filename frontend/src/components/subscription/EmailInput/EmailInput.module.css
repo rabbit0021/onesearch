@@ -5,7 +5,7 @@
 }
 
 .label {
-  font-size: 1rem;
+  font-size: var(--fs-std);
   font-weight: 600;
   color: var(--text-secondary);
 }
@@ -13,7 +13,7 @@
 .input {
   padding: 0.75rem;
   border: .1px solid var(--border);
-  font-size: 1rem;
+  font-size: var(--fs-std);
   transition: border-color 0.2s;
   outline: none;
   width: 100%;

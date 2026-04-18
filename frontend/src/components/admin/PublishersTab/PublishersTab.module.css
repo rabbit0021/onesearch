@@ -12,7 +12,7 @@
 }
 
 .cardTitle {
-  font-size: 1rem;
+  font-size: var(--fs-std);
   font-weight: 700;
   color: #333;
   margin: 0 0 1rem;
@@ -31,7 +31,7 @@
   border: 1px solid #ddd;
   border-radius: 6px;
   padding: 7px 10px;
-  font-size: 0.88rem;
+  font-size: var(--fs-base);
   outline: none;
 }
 
@@ -43,7 +43,7 @@
   border: 1px solid #ddd;
   border-radius: 6px;
   padding: 7px 10px;
-  font-size: 0.88rem;
+  font-size: var(--fs-base);
   background: #fff;
   cursor: pointer;
 }
@@ -54,7 +54,7 @@
   border: none;
   border-radius: 6px;
   padding: 7px 18px;
-  font-size: 0.88rem;
+  font-size: var(--fs-base);
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;
@@ -71,7 +71,7 @@
 
 .addError {
   color: #c0392b;
-  font-size: 0.82rem;
+  font-size: var(--fs-sm);
   margin-top: 8px;
 }
 
@@ -93,7 +93,7 @@
   border: 1px solid #ddd;
   border-radius: 6px;
   padding: 5px 10px;
-  font-size: 0.82rem;
+  font-size: var(--fs-sm);
   outline: none;
   width: 180px;
 }
@@ -105,7 +105,7 @@
 .table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.85rem;
+  font-size: var(--fs-base);
 }
 
 .table th {
@@ -114,7 +114,7 @@
   border-bottom: 2px solid #eee;
   color: #555;
   font-weight: 600;
-  font-size: 0.78rem;
+  font-size: var(--fs-xs);
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -136,24 +136,24 @@
 
 .muted {
   color: #999;
-  font-size: 0.8rem;
+  font-size: var(--fs-sm);
 }
 
 .hint {
   text-align: center;
   color: #aaa;
   padding: 1rem;
-  font-size: 0.85rem;
+  font-size: var(--fs-base);
 }
 
 .errorMsg {
   color: #c0392b;
-  font-size: 0.85rem;
+  font-size: var(--fs-base);
 }
 
 /* ── Type badges ── */
 .badge {
-  font-size: 0.72rem;
+  font-size: var(--fs-2xs);
   font-weight: 600;
   padding: 2px 8px;
   border-radius: 20px;

@@ -7,7 +7,7 @@
 }
 
 .seo {
-  font-size: 0.78rem;
+  font-size: var(--fs-xs);
   color: #aaa;
   max-width: 580px;
   margin: 0 auto 8px;
@@ -15,6 +15,6 @@
 }
 
 .copy {
-  font-size: 0.8rem;
+  font-size: var(--fs-sm);
   color: #828282;
 }
