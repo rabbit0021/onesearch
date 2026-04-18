@@ -176,6 +176,36 @@
   opacity: 0.7;
 }
 
+.filterActiveMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.filterActiveCount {
+  font-size: 0.75rem;
+  font-family: 'Courier New', monospace;
+  color: var(--color-primary);
+  letter-spacing: 0.05em;
+}
+
+.filterActiveClear {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-family: 'Courier New', monospace;
+  color: var(--filter-ghost);
+  padding: 0;
+  letter-spacing: 0.04em;
+  transition: color 0.12s;
+}
+
+.filterActiveClear:hover {
+  color: var(--color-primary);
+}
+
 .filterBody {
   display: flex;
   flex-direction: column;

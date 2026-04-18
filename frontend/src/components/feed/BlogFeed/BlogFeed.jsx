@@ -100,6 +100,8 @@ export default function BlogFeed({ formRef }) {
   }
 
   const hasFilters = search || publisher || topic || dateDays || activeTags.length > 0
+  const activeFilterCount = [search, publisher, topic, dateDays].filter(Boolean).length + activeTags.length
+  function clearAllFilters() { setSearch(''); setPublisher(''); setTopic(''); setDateDays(null); setActiveTags([]); setTagSearch('') }
 
   const grouped = useMemo(() => {
     const groups = {}
@@ -137,6 +139,13 @@ export default function BlogFeed({ formRef }) {
         >
           {filterClosed ? '[+]' : '[-]'}
         </button>
+
+        {filterClosed && hasFilters && (
+          <div className={styles.filterActiveMeta}>
+            <span className={styles.filterActiveCount}>{activeFilterCount} filter{activeFilterCount !== 1 ? 's' : ''} active</span>
+            <button className={styles.filterActiveClear} onClick={clearAllFilters}>clear</button>
+          </div>
+        )}
 
         <div className={`${styles.filterBody} ${filterClosed ? styles.filterBodyCollapsed : ''}`}>
 
@@ -228,7 +237,7 @@ export default function BlogFeed({ formRef }) {
             {hasFilters && (
               <button
                 className={styles.resetAll}
-                onClick={() => { setSearch(''); setPublisher(''); setTopic(''); setDateDays(null); setActiveTags([]); setTagSearch('') }}
+                onClick={clearAllFilters}
               >
                 reset
               </button>
