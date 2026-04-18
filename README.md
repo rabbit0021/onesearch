@@ -16,4 +16,3 @@
   - Upcoming support for communities and individual authors
   - comments & threads on the blogs
 ---
----
