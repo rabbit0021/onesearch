@@ -3,9 +3,10 @@ import { getPosts } from '../../api'
 import SecretKeyModal from '../../components/admin/SecretKeyModal/SecretKeyModal'
 import PostsTable from '../../components/admin/PostsTable/PostsTable'
 import PublishersTab from '../../components/admin/PublishersTab/PublishersTab'
+import SubscriptionsTab from '../../components/admin/SubscriptionsTab/SubscriptionsTab'
 import styles from './AdminPosts.module.css'
 
-const TABS = ['Posts', 'Publishers']
+const TABS = ['Posts', 'Publishers', 'Subscriptions']
 
 export default function AdminPosts() {
   const [secretKey, setSecretKey] = useState('')
@@ -15,20 +16,18 @@ export default function AdminPosts() {
   const [tab, setTab]             = useState('Posts')
 
   async function handleKeySubmit(key) {
-    setSecretKey(key)
     setError('')
     setLoading(true)
     try {
       const data = await getPosts(key)
       if (Array.isArray(data)) {
+        setSecretKey(key)
         setPosts(data)
       } else {
         setError('Unauthorized or invalid key.')
-        setSecretKey('')
       }
     } catch (err) {
       setError(err.message || 'Failed to load posts.')
-      setSecretKey('')
     } finally {
       setLoading(false)
     }
@@ -39,7 +38,7 @@ export default function AdminPosts() {
   }, [secretKey])
 
   if (!secretKey) {
-    return <SecretKeyModal onSubmit={handleKeySubmit} />
+    return <SecretKeyModal onSubmit={handleKeySubmit} error={error} loading={loading} />
   }
 
   return (
@@ -83,6 +82,10 @@ export default function AdminPosts() {
 
       {tab === 'Publishers' && (
         <PublishersTab secretKey={secretKey} />
+      )}
+
+      {tab === 'Subscriptions' && (
+        <SubscriptionsTab secretKey={secretKey} />
       )}
     </div>
   )

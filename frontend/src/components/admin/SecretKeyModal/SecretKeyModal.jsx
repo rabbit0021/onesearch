@@ -5,7 +5,7 @@ import styles from './SecretKeyModal.module.css'
  * Props:
  *   onSubmit  – (key: string) => void
  */
-export default function SecretKeyModal({ onSubmit }) {
+export default function SecretKeyModal({ onSubmit, error, loading }) {
   const [key, setKey] = useState('')
 
   function handleSubmit(e) {
@@ -27,10 +27,11 @@ export default function SecretKeyModal({ onSubmit }) {
             onChange={(e) => setKey(e.target.value)}
             autoFocus
           />
-          <button type="submit" className={styles.btn} disabled={!key.trim()}>
-            Enter
+          <button type="submit" className={styles.btn} disabled={!key.trim() || loading}>
+            {loading ? 'Verifying…' : 'Enter'}
           </button>
         </form>
+        {error && <p className={styles.error}>{error}</p>}
       </div>
     </div>
   )

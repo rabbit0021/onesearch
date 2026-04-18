@@ -290,7 +290,19 @@ def add_publisher():
         conn.close()
 
 
+@app.route("/subscriptions", methods=["GET"])
+@require_secret_key
+def get_subscriptions():
+    conn = app.db.get_connection()
+    try:
+        subs = app.db.get_subscriptions(conn)
+        return jsonify(subs)
+    finally:
+        conn.close()
+
+
 @app.route("/posts", methods=["GET"])
+@require_secret_key
 def get_posts():
     conn = app.db.get_connection()
     try:

@@ -1,0 +1,134 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ── Stats row ── */
+.statsRow {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.statCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border-mid);
+  border-radius: 8px;
+  padding: 1.25rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 160px;
+}
+
+.statNum {
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  line-height: 1;
+  font-family: 'Courier New', monospace;
+}
+
+.statLabel {
+  font-size: var(--fs-xs);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+
+/* ── Table card ── */
+.card {
+  background: var(--bg-card);
+  border-radius: 8px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+}
+
+.listHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.cardTitle {
+  font-size: var(--fs-std);
+  font-weight: 700;
+  color: var(--text-strong);
+  margin: 0;
+}
+
+.search {
+  border: 1px solid var(--border-mid);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: var(--fs-sm);
+  outline: none;
+  width: 220px;
+  background: var(--bg-input);
+  color: var(--text-base);
+}
+
+.search:focus {
+  border-color: var(--color-primary);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-base);
+}
+
+.table th {
+  text-align: left;
+  padding: 6px 10px;
+  border-bottom: 2px solid var(--border-mid);
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border-mid);
+  color: var(--text-base);
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.topic {
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: var(--bg-surface);
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.muted {
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+}
+
+.hint {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 1rem;
+  font-size: var(--fs-base);
+}
+
+.errorMsg {
+  color: #c0392b;
+  font-size: var(--fs-base);
+}

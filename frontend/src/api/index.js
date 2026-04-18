@@ -81,6 +81,14 @@ export async function getMostLikedFeed(limit = 50) {
   return res.json()
 }
 
+export async function getAdminSubscriptions(secretKey) {
+  const res = await fetch('/subscriptions', {
+    headers: { 'X-SECRET-KEY': secretKey },
+  })
+  if (res.status === 401) throw new Error('Unauthorized')
+  return res.json()
+}
+
 export async function getPublishers(secretKey) {
   const res = await fetch('/publishers', {
     headers: { 'X-SECRET-KEY': secretKey },

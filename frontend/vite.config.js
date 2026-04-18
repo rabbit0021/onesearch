@@ -14,6 +14,8 @@ export default defineConfig({
       '/techteams': FLASK,
       '/subscriptions_for_email': FLASK,
       '/posts': FLASK,
+      '/publishers': FLASK,
+      '/subscriptions': FLASK,
       '/interested': FLASK,
       '/feedback': FLASK,
       '/static': FLASK,
