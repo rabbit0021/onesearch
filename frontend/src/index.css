@@ -49,7 +49,7 @@
   --fs-sm:   0.82rem;   /* small: filters, secondary text */                                                            
   --fs-base: 0.85rem;   /* base: most UI elements */                                                                    
   --fs-md:   0.92rem;   /* medium: body copy */                                                                         
-  --fs-std:  .9rem;      /* standard: inputs, headings */                                                                
+  --fs-std:  0.97rem;      /* standard: inputs, headings */                                                                
   --fs-lg:   1.2rem;    /* large: section headings */                                                                   
   --fs-xl:   1.4rem;    /* xl: page titles */                                                                           
   --fs-2xl:  1.5rem;    /* icon sizes */                                                                                
