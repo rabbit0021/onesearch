@@ -7,8 +7,13 @@ import os
 import uuid
 import threading
 import logging
+import random
+import re
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from handlers import ScraperFactory
-from datetime import datetime
+from datetime import datetime, timedelta
 from middleware import register_middlewares
 from logger_config import get_logger
 from datetime import timezone
@@ -20,6 +25,15 @@ from classifier import get_embedding
 import numpy as np
 import pickle
 import hashlib
+
+SMTP_SERVER   = "smtp.zoho.in"
+SMTP_PORT     = 587
+SMTP_USERNAME = os.getenv('SMTP_USERNAME', '')
+SMTP_PASSWORD = os.getenv('SMTP_PASSWORD', '')
+
+# In-memory OTP store: { email: { otp, expires_at, verified } }
+_otp_store = {}
+_otp_lock  = threading.Lock()
 
 # In-memory job store: job_id -> {status, logs, job, cancel_event}
 _jobs = {}
@@ -65,8 +79,9 @@ SECRET_KEY = os.getenv("POSTS_SECRET_KEY", "123")
 
 app.register_blueprint(jira_bp)
 
-# Logging    
+# Logging
 app.logger = get_logger("app")
+logger = get_logger("app")
 
 if os.getenv("FLASK_ENV") == "production":
     tempdata_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "tempData.json")
@@ -604,12 +619,80 @@ def suggested_feed():
     return jsonify(result)
 
 
+@app.route("/verify-email/send", methods=["POST"])
+def verify_email_send():
+    data = request.get_json(silent=True) or {}
+    email = data.get('email', '').strip().lower()
+    if not email or not re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', email):
+        return jsonify({"error": "Invalid email address"}), 400
+
+    with _otp_lock:
+        record = _otp_store.get(email)
+        # Rate limit: block resend within 60 seconds (5s in dev)
+        rate_limit = 5 if os.getenv('FLASK_ENV') == 'development' else 60
+        if record and not record['verified']:
+            elapsed = (datetime.now(timezone.utc) - record['sent_at']).total_seconds()
+            if elapsed < rate_limit:
+                return jsonify({"error": f"Please wait {rate_limit}s before requesting another code", "wait": int(rate_limit - elapsed)}), 429
+
+        otp = str(random.randint(100000, 999999))
+        _otp_store[email] = {
+            'otp': otp,
+            'expires_at': datetime.now(timezone.utc) + timedelta(minutes=10),
+            'sent_at': datetime.now(timezone.utc),
+            'verified': False,
+        }
+
+    if os.getenv('FLASK_ENV') == 'development':
+        logger.info(f"[DEV] OTP for {email}: {otp}")
+    else:
+        try:
+            msg = MIMEMultipart()
+            msg['From'] = SMTP_USERNAME
+            msg['To'] = email
+            msg['Subject'] = 'Your onesearch verification code'
+            body = render_template('otp_email.html', otp=otp)
+            msg.attach(MIMEText(body, 'html'))
+            with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+                server.starttls()
+                server.login(SMTP_USERNAME, SMTP_PASSWORD)
+                server.sendmail(SMTP_USERNAME, email, msg.as_string())
+        except Exception as e:
+            logger.error(f"OTP send failed for {email}: {e}")
+            return jsonify({"error": "Failed to send code, please try again"}), 500
+
+    return jsonify({"ok": True})
+
+
+@app.route("/verify-email/confirm", methods=["POST"])
+def verify_email_confirm():
+    data = request.get_json(silent=True) or {}
+    email = data.get('email', '').strip().lower()
+    otp   = data.get('otp', '').strip()
+
+    with _otp_lock:
+        record = _otp_store.get(email)
+        if not record:
+            return jsonify({"error": "No code found, please request a new one"}), 400
+        if record['verified']:
+            return jsonify({"ok": True})
+        if datetime.now(timezone.utc) > record['expires_at']:
+            del _otp_store[email]
+            return jsonify({"error": "Code expired, please request a new one"}), 400
+        if record['otp'] != otp:
+            return jsonify({"error": "Incorrect code"}), 400
+        _otp_store[email]['verified'] = True
+
+    return jsonify({"ok": True})
+
+
 @app.route("/posts/<int:post_id>/like", methods=["POST"])
 def like_post(post_id):
     data = request.get_json(silent=True) or {}
     user_email = data.get('email', '').strip().lower()
-    if not user_email or '@' not in user_email:
+    if not user_email or not re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', user_email):
         return jsonify({"error": "Valid email required to like posts"}), 400
+
     conn = app.db.get_connection()
     try:
         count, is_new = app.db.like_post(conn, post_id, user_email)

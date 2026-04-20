@@ -52,6 +52,7 @@ export default function BlogCard({ post }) {
   async function submitLike(email) {
     try {
       const data = await likePost(post.id, email)
+      if (!data.count && data.count !== 0) return
       setPendingCount(data.count)
       setTicking(true)
       setTimeout(() => {
@@ -59,7 +60,7 @@ export default function BlogCard({ post }) {
         setPendingCount(null)
         setTicking(false)
       }, 340)
-    } catch { /* silently fail */ }
+    } catch { /* network error, silently ignore */ }
   }
 
   function handleLike(e) {

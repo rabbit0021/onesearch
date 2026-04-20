@@ -39,7 +39,17 @@
   border-radius: 6px;
   padding: 10px 13px;
   min-width: 250px;
+  max-width: calc(100vw - 16px);
   z-index: 3;
+}
+
+@media (max-width: 480px) {
+  .infoPanel {
+    right: auto;
+    left: 0;
+    min-width: unset;
+    width: calc(100vw - 46px);
+  }
 }
 
 .infoTitle {

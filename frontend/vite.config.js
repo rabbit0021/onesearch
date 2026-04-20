@@ -21,6 +21,7 @@ export default defineConfig({
       '/admin/tempdata': FLASK,
       '/interested': FLASK,
       '/feedback': FLASK,
+      '/verify-email': FLASK,
       '/static': FLASK,
       '/auth': {
         target: FLASK,

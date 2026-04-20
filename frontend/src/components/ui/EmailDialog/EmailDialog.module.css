@@ -178,3 +178,108 @@
   color: var(--color-primary);
   border-color: var(--color-primary);
 }
+
+.btnResend {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  border: none;
+  cursor: pointer;
+  padding: 6px 10px;
+  background: transparent;
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.btnResend:hover {
+  color: var(--color-primary);
+}
+
+.resendWait {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-family: 'Courier New', Courier, monospace;
+  align-self: center;
+}
+
+.otpInput {
+  font-size: 1.1rem;
+  letter-spacing: 0.25em;
+}
+
+.btnConfirm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Success state ── */
+.successWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 0 16px;
+  gap: 14px;
+}
+
+.successCircle {
+  width: 72px;
+  height: 72px;
+}
+
+@keyframes ringDraw {
+  from { stroke-dashoffset: 150; }
+  to   { stroke-dashoffset: 0; }
+}
+
+@keyframes checkDraw {
+  from { stroke-dashoffset: 50; }
+  to   { stroke-dashoffset: 0; }
+}
+
+@keyframes popIn {
+  0%   { transform: scale(0.6); opacity: 0; }
+  70%  { transform: scale(1.1); }
+  100% { transform: scale(1);   opacity: 1; }
+}
+
+.successTick {
+  width: 72px;
+  height: 72px;
+  animation: popIn 0.4s ease forwards;
+}
+
+.successRing {
+  fill: none;
+  stroke: #1fa810;
+  stroke-width: 2.5;
+  stroke-dasharray: 150;
+  stroke-dashoffset: 150;
+  animation: ringDraw 0.5s ease forwards 0.1s;
+}
+
+.successCheck {
+  fill: none;
+  stroke: #1fa810;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 50;
+  stroke-dashoffset: 50;
+  animation: checkDraw 0.35s ease forwards 0.5s;
+}
+
+.successMsg {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-strong);
+  letter-spacing: 0.15em;
+}
+
+.successSub {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+}
