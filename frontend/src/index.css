@@ -12,7 +12,7 @@
 
   --text-base: #131313;
   --text-strong: #000000;
-  --text-secondary: #575e6a; /* headings */
+  --text-secondary: #737985; /* headings */
   --text-muted: #606369;
   --text-dim: #272727;
 
@@ -47,11 +47,11 @@
   --fs-2xs:  0.7rem;    /* tiny labels, badge counters */                                                               
   --fs-xs:   0.75rem;   /* extra small: tags, meta */                                                                   
   --fs-sm:   0.82rem;   /* small: filters, secondary text */                                                            
-  --fs-base: 0.85rem;   /* base: most UI elements */                                                                    
+  --fs-base: 0.87rem;   /* base: most UI elements */                                                                    
   --fs-md:   0.92rem;   /* medium: body copy */                                                                         
-  --fs-std:  0.97rem;      /* standard: inputs, headings */                                                                
+  --fs-std:  .95rem;      /* standard: inputs, headings */                                                                
   --fs-lg:   1.2rem;    /* large: section headings */                                                                   
-  --fs-xl:   1.4rem;    /* xl: page titles */                                                                           
+  --fs-xl:   1.3rem;    /* xl: page titles */                                                                           
   --fs-2xl:  1.5rem;    /* icon sizes */                                                                                
   --fs-3xl:  2rem;      /* display / hero */ 
 }

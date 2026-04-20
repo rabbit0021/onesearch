@@ -3,10 +3,9 @@
   font-size: var(--fs-lg);
   color: var(--text-secondary);
   background: var(--bg-card);
-  border: none;
-  border-radius: 8px;
+  border: solid .1px var(--border);
+  border-radius: 4px;
   padding: 7px 11px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
   display: flex;
   align-items: center;
   transition: color 0.15s, background 0.15s;

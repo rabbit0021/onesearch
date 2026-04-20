@@ -120,9 +120,10 @@ export default function Home() {
         <div className={styles.layout}>
           <form ref={formRef} className={styles.form} onSubmit={handleSubmit} noValidate>
             <div className={styles.text}>
-              <h1 className={styles.title}>Subscribe to Engineering Blogs</h1>
+              <h1 className={styles.title}>Subscribe to what you need</h1>
               <p className={styles.intro}>
-                Stay up to date with the latest posts from top engineering blogs. Select your topic and favorite publisher, and we will send you curated alerts.
+                OneSearch aggregates insights from top tech publishers — so you always know what the industry is building, breaking,
+   and shipping.
               </p>
             </div>
             <EmailInput

@@ -13,6 +13,8 @@
   resize: vertical;
   outline: none;
   font-family: inherit;
+  background-color: var(--bg-card);
+  color: var(--text-base);
 }
 
 .textarea:focus {

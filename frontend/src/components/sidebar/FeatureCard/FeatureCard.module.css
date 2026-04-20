@@ -1,5 +1,5 @@
 .card {
-  background: rgba(255, 255, 255, 0.7);
+  background: var(--bg-card);
   border-radius: 10px;
   padding: 12px 14px;
   display: flex;
@@ -10,10 +10,10 @@
 .title {
   font-size: var(--fs-base);
   font-weight: 600;
-  color: #444;
+  color: var(--text-secondary);
 }
 
 .body {
   font-size: var(--fs-sm);
-  color: #666;
+  color: var(--text-secondary);
 }

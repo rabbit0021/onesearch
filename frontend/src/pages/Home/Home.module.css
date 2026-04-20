@@ -119,7 +119,7 @@
 
 .title {
   font-size: var(--fs-xl);
-  font-weight: 700;
+  font-weight: 600;
   color: var(--text-secondary);
   line-height: 1.3;
 }

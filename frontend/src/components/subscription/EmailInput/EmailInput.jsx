@@ -10,7 +10,7 @@ export default function EmailInput({ value, onChange, onBlur }) {
   return (
     <div className={styles.group}>
       <label className={styles.label} htmlFor="email">
-        Email address
+        Your email address
       </label>
       <input
         id="email"

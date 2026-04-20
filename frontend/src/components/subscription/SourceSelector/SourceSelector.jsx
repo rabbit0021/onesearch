@@ -14,7 +14,7 @@ const SOURCES = [
 export default function SourceSelector({ selected, onChange }) {
   return (
     <div className={styles.group}>
-      <label className={styles.label}>Notification source</label>
+      <label className={styles.label}>Publisher type</label>
       <div className={styles.row}>
         {SOURCES.map(({ id, label, enabled, soon }) => (
           <div key={id} className={styles.chipWrapper}>

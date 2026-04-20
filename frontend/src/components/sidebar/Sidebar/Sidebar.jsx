@@ -2,7 +2,6 @@ import { useEffect, useRef } from 'react'
 import { postInterested } from '../../../api'
 import { useToast } from '../../../context/ToastContext'
 import FeatureCard from '../FeatureCard/FeatureCard'
-import FeedbackForm from '../FeedbackForm/FeedbackForm'
 import ChatWidget from '../ChatWidget/ChatWidget'
 import styles from './Sidebar.module.css'
 
@@ -61,10 +60,6 @@ export default function Sidebar({ open, onClose, toggleRef }) {
         </FeatureCard>
 
         <ChatWidget />
-
-        <FeatureCard title="Send Feedback ✉️">
-          <FeedbackForm />
-        </FeatureCard>
       </div>
     </aside>
   )

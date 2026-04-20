@@ -43,7 +43,7 @@ export default function TopicSelector({ value, onChange }) {
   return (
     <div className={styles.group}>
       <label className={styles.label}>
-        Field
+        What are you interested in?
       </label>
       <div className={styles.relative}>
         <input
