@@ -18,8 +18,8 @@
 }
 
 .active {
-  color: #333;
-  background: rgba(255, 255, 255, 0.95);
+  color: var(--text-secondary);
+  background: var(--bg-card);
 }
 
 @keyframes spinIn {
