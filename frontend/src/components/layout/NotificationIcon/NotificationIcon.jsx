@@ -19,7 +19,10 @@ export default function NotificationIcon({ open, hasDot, onClick, btnRef }) {
       aria-label={open ? 'Close menu' : 'Open menu'}
       aria-expanded={open}
     >
-      <i className={open ? 'fas fa-times' : 'fas fa-bars'} />
+      {open
+        ? <i key="close" className={`fas fa-times ${styles.closeIcon}`} />
+        : <i key="open" className="fas fa-bars" />
+      }
       {!open && hasDot && <span className={styles.dot} />}
     </button>
   )

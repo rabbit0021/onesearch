@@ -22,6 +22,16 @@
   background: rgba(255, 255, 255, 0.95);
 }
 
+@keyframes spinIn {
+  from { transform: rotate(-90deg); opacity: 0; }
+  to   { transform: rotate(0deg);   opacity: 1; }
+}
+
+.closeIcon {
+  display: inline-block;
+  animation: spinIn 0.25s ease forwards;
+}
+
 .dot {
   position: absolute;
   top: -2px;
