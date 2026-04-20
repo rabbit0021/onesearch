@@ -44,18 +44,18 @@ export default function Sidebar({ open, onClose, toggleRef }) {
   return (
     <aside ref={ref} className={`${styles.sidebar} ${open ? styles.open : ''}`}>
       <div className={styles.content}>
-        <FeatureCard title="New Feature in Beta 🚀">
-          <p>Publisher recommendations based on your reading patterns.</p>
+        <FeatureCard title="Feature Poll 🚀">
+          <p>Recommendations based on your reading patterns</p>
+          <br />
           <button className={styles.actionBtn} onClick={handleInterested}>
             I&apos;m interested!
           </button>
         </FeatureCard>
 
-        <FeatureCard title="Upcoming Improvements 🔧">
+        <FeatureCard title="Upcoming Features 🔧">
           <ul className={styles.list}>
-            <li>Individual blogger subscriptions</li>
-            <li>Community digest support</li>
-            <li>Personalised feed ranking</li>
+            <li>Top individual blogger subscriptions</li>
+            <li>Commenting 🤩</li>
           </ul>
         </FeatureCard>
 

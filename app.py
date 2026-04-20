@@ -227,6 +227,17 @@ def feedback():
 
     return jsonify({"status": "success", "message": "Feedback submitted successfully."})
 
+@app.route("/admin/tempdata", methods=["GET"])
+@require_secret_key
+def admin_tempdata():
+    if not os.path.exists(tempdata_path):
+        return jsonify({"interested-count": 0, "feedbacks": []})
+    with open(tempdata_path, 'r') as f:
+        data = json.load(f)
+    feedbacks = data.get("feedbacks", [])
+    feedbacks_sorted = sorted(feedbacks, key=lambda x: x.get("timestamp", ""), reverse=True)
+    return jsonify({"interested-count": data.get("interested-count", 0), "feedbacks": feedbacks_sorted})
+
 @app.route("/robots.txt")
 def robots_txt():
     return send_from_directory(app.static_folder, "robots.txt")

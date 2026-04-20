@@ -6,9 +6,10 @@ import PublishersTab from '../../components/admin/PublishersTab/PublishersTab'
 import SubscriptionsTab from '../../components/admin/SubscriptionsTab/SubscriptionsTab'
 import JobsTab from '../../components/admin/JobsTab/JobsTab'
 import NotificationsTab from '../../components/admin/NotificationsTab/NotificationsTab'
+import FeedbackTab from '../../components/admin/FeedbackTab/FeedbackTab'
 import styles from './AdminPosts.module.css'
 
-const TABS = ['Posts', 'Publishers', 'Subscriptions', 'Notifications', 'Jobs']
+const TABS = ['Posts', 'Publishers', 'Subscriptions', 'Notifications', 'Jobs', 'Feedback']
 const STORAGE_KEY = 'admin_secret_key'
 const TTL_MS = 3 * 24 * 60 * 60 * 1000 // 3 days
 
@@ -125,6 +126,10 @@ export default function AdminPosts() {
 
       {tab === 'Jobs' && (
         <JobsTab secretKey={secretKey} />
+      )}
+
+      {tab === 'Feedback' && (
+        <FeedbackTab secretKey={secretKey} />
       )}
     </div>
   )
