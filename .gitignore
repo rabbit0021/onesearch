@@ -27,3 +27,12 @@ tmp/
 .github/instructions/snyk_rules.instructions.md
 
 frontend/node_modules/*
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Python version management (specific to your machine)
+.python-version

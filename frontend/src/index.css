@@ -12,9 +12,9 @@
 
   --text-base: #131313;
   --text-strong: #000000;
-  --text-secondary: #6b7280; /* headings */
-  --text-muted: #767b85;
-  --text-dim: #404040;
+  --text-secondary: #575e6a; /* headings */
+  --text-muted: #606369;
+  --text-dim: #272727;
 
   --border: #adadad;
   --border-mid: #d0d0d0;
@@ -35,7 +35,7 @@
   --card-bg: #ffffff;
   --card-shadow: rgba(0, 0, 0, 0.07);
   --card-shadow-hover: rgba(0, 0, 0, 0.12);
-  --card-title: #111827;
+  --card-title: #05060a;
   --card-publisher: #6b7280;
   --card-hint: var(--color-primary-tint);
 
