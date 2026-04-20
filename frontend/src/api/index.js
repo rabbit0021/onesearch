@@ -69,8 +69,12 @@ export async function getSuggestedFeed(issues, limit = 100) {
   return res.json()
 }
 
-export async function likePost(id) {
-  const res = await fetch(`/posts/${id}/like`, { method: 'POST' })
+export async function likePost(id, email) {
+  const res = await fetch(`/posts/${id}/like`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  })
   if (!res.ok) throw new Error('Failed to like post')
   return res.json()
 }

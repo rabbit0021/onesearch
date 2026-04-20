@@ -68,12 +68,19 @@ class SQLiteDatabase:
         c.execute("""
         CREATE TABLE IF NOT EXISTS post_likes (
             post_id INTEGER NOT NULL,
-            jira_account_id TEXT NOT NULL,
+            user_email TEXT NOT NULL,
             liked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY (post_id, jira_account_id),
+            PRIMARY KEY (post_id, user_email),
             FOREIGN KEY (post_id) REFERENCES posts(id)
         )
         """)
+
+        # Migration: rename jira_account_id to user_email in post_likes
+        try:
+            c.execute("ALTER TABLE post_likes RENAME COLUMN jira_account_id TO user_email")
+            logger.info("Migration: renamed jira_account_id to user_email in post_likes")
+        except Exception:
+            pass  # column already renamed or doesn't exist
 
         # Migration: add embedding column if it doesn't exist yet
         try:
@@ -535,11 +542,11 @@ class SQLiteDatabase:
         """, urls)
         return {row['url']: row['like_count'] for row in c.fetchall()}
 
-    def like_post(self, conn, post_id, jira_account_id):
+    def like_post(self, conn, post_id, user_email):
         c = conn.cursor()
         c.execute(
-            "INSERT OR IGNORE INTO post_likes (post_id, jira_account_id) VALUES (?, ?)",
-            (post_id, jira_account_id)
+            "INSERT OR IGNORE INTO post_likes (post_id, user_email) VALUES (?, ?)",
+            (post_id, user_email)
         )
         conn.commit()
         is_new = c.rowcount == 1
@@ -552,7 +559,7 @@ class SQLiteDatabase:
             SELECT po.id, po.url, po.title, po.tags, po.published_at,
                    po.modified_at, po.labelled, po.topic,
                    p.id AS publisher_id, p.publisher_name, p.publisher_type,
-                   COUNT(pl.jira_account_id) AS like_count
+                   COUNT(pl.user_email) AS like_count
             FROM post_likes pl
             JOIN posts po ON pl.post_id = po.id
             JOIN publishers p ON po.publisher_id = p.id

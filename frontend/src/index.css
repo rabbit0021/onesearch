@@ -54,6 +54,8 @@
   --fs-xl:   1.3rem;    /* xl: page titles */                                                                           
   --fs-2xl:  1.5rem;    /* icon sizes */                                                                                
   --fs-3xl:  2rem;      /* display / hero */ 
+
+  --overlay: rgba(0, 0, 0, 0.53);
 }
 
 [data-theme="dark"] {

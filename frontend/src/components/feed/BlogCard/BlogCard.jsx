@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { likePost } from '../../../api'
+import EmailDialog, { getSavedEmail } from '../../ui/EmailDialog/EmailDialog'
 import styles from './BlogCard.module.css'
 
 export const TOPIC_COLORS = {
@@ -37,7 +38,7 @@ export function timeAgo(iso) {
   return `${months}mo ago`
 }
 
-export default function BlogCard({ post, jiraConnected }) {
+export default function BlogCard({ post }) {
   const color = TOPIC_COLORS[post.topic] || TOPIC_COLORS['General']
   const favicon = faviconUrl(post.url)
   const tags = post.tags ? post.tags.split(',').map(t => t.trim()).filter(Boolean) : []
@@ -46,13 +47,11 @@ export default function BlogCard({ post, jiraConnected }) {
   const [displayCount, setDisplayCount] = useState(post.like_count || 0)
   const [pendingCount, setPendingCount] = useState(null)
   const [ticking, setTicking] = useState(false)
+  const [showEmailDialog, setShowEmailDialog] = useState(false)
 
-  async function handleLike(e) {
-    e.preventDefault()
-    e.stopPropagation()
-    if (!jiraConnected || ticking) return
+  async function submitLike(email) {
     try {
-      const data = await likePost(post.id)
+      const data = await likePost(post.id, email)
       setPendingCount(data.count)
       setTicking(true)
       setTimeout(() => {
@@ -63,7 +62,26 @@ export default function BlogCard({ post, jiraConnected }) {
     } catch { /* silently fail */ }
   }
 
+  function handleLike(e) {
+    e.preventDefault()
+    e.stopPropagation()
+    if (ticking) return
+    const email = getSavedEmail()
+    if (email) {
+      submitLike(email)
+    } else {
+      setShowEmailDialog(true)
+    }
+  }
+
   return (
+    <>
+    {showEmailDialog && (
+      <EmailDialog
+        onConfirm={email => { setShowEmailDialog(false); submitLike(email) }}
+        onCancel={() => setShowEmailDialog(false)}
+      />
+    )}
     <a
       href={post.url}
       target="_blank"
@@ -91,17 +109,13 @@ export default function BlogCard({ post, jiraConnected }) {
             <span className={styles.date}>{timeAgo(post.published_at)}</span>
           </div>
           <div
-            className={`${styles.likeBtn} ${!jiraConnected ? styles.likeBtnLocked : ''}`}
+            className={styles.likeBtn}
             role="button"
-            tabIndex={jiraConnected ? 0 : -1}
+            tabIndex={0}
             onClick={handleLike}
             onKeyDown={e => e.key === 'Enter' && handleLike(e)}
           >
-            <span className={`
-    ${styles.heart} 
-    ${jiraConnected ? styles.heartActive : ''} 
-    ${displayCount === 0 ? styles.heartZero : ''}
-  `}><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <span className={`${styles.heart} ${styles.heartActive} ${displayCount === 0 ? styles.heartZero : ''}`}><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
             </svg></span>
             <span className={styles.likeCounter}>
@@ -132,5 +146,6 @@ export default function BlogCard({ post, jiraConnected }) {
         )}
       </div>
     </a>
+    </>
   )
 }

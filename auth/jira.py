@@ -14,7 +14,7 @@ JIRA_CLIENT_ID = os.environ.get('JIRA_CLIENT_ID')
 JIRA_CLIENT_SECRET = os.environ.get('JIRA_CLIENT_SECRET')
 JIRA_REDIRECT_URI = os.environ.get('JIRA_REDIRECT_URI', 'http://localhost:5000/auth/jira/callback')
 FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
-JIRA_SCOPES = 'read:jira-work read:me offline_access'
+JIRA_SCOPES = 'read:jira-work read:me'
 
 
 @jira_bp.route('/login')
@@ -94,43 +94,19 @@ def status():
     })
 
 
-@jira_bp.route('/issues')
-def get_issues():
+@jira_bp.route('/token')
+def get_token():
     token = session.get('jira_access_token')
     cloud_id = session.get('jira_cloud_id')
 
     if not token or not cloud_id:
         return jsonify({'error': 'Not authenticated with Jira'}), 401
 
-    res = requests.get(
-        f'{ATLASSIAN_API_BASE}/{cloud_id}/rest/api/3/search/jql',
-        headers={'Authorization': f'Bearer {token}', 'Accept': 'application/json'},
-        params={
-            'fields': 'summary,description,status,priority',
-            'maxResults': 50,
-            'jql': 'assignee = currentUser() ORDER BY updated DESC',
-        },
-    )
-
-    print(f'[Jira Issues] status={res.status_code} body={res.text[:500]}')
-
-    if res.status_code == 401:
-        session.pop('jira_access_token', None)
-        return jsonify({'error': 'Jira session expired, please reconnect'}), 401
-
-    data = res.json()
-    issues = [
-        {
-            'key': issue['key'],
-            'summary': issue['fields']['summary'],
-            'description': _extract_description(issue['fields'].get('description')),
-            'status': issue['fields']['status']['name'],
-            'priority': issue['fields']['priority']['name'] if issue['fields'].get('priority') else None,
-        }
-        for issue in data.get('issues', [])
-    ]
-
-    return jsonify({'issues': issues, 'site': session.get('jira_site_name')})
+    return jsonify({
+        'access_token': token,
+        'cloud_id': cloud_id,
+        'site': session.get('jira_site_name'),
+    })
 
 
 @jira_bp.route('/logout', methods=['POST'])
@@ -142,18 +118,3 @@ def logout():
     return jsonify({'ok': True})
 
 
-def _extract_description(desc):
-    """Extract plain text from Atlassian Document Format (ADF)."""
-    if not desc:
-        return None
-    if isinstance(desc, str):
-        return desc
-    texts = []
-    def traverse(node):
-        if isinstance(node, dict):
-            if node.get('type') == 'text':
-                texts.append(node.get('text', ''))
-            for child in node.get('content', []):
-                traverse(child)
-    traverse(desc)
-    return ' '.join(texts).strip() or None

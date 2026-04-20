@@ -307,10 +307,10 @@ export default function BlogFeed({ formRef }) {
         </>
       ) : (
         <>
-          {/* 1. Most Liked Recently (locked teaser or real) */}
-          <div className={styles.section}>
-            <p className={styles.heading}>Trending Blog Posts</p>
-            {jiraConnected && filteredMostLiked.length > 0 ? (
+          {/* 1. Trending — visible to all users */}
+          {filteredMostLiked.length > 0 && (
+            <div className={styles.section}>
+              <p className={styles.heading}>Trending Blog Posts</p>
               <div className={styles.scrollRow}>
                 {filteredMostLiked.map(post => (
                   <div key={post.id} className={styles.scrollCard}>
@@ -318,23 +318,13 @@ export default function BlogFeed({ formRef }) {
                   </div>
                 ))}
               </div>
-            ) : !jiraConnected ? (
-              <div className={styles.lockedContainer}>
-                <div className={styles.ghostGrid}>
-                  {[0, 1, 2].map(i => <div key={i} className={styles.ghostCard} />)}
-                </div>
-                <div className={styles.lockedOverlay}>
-                  <span className={styles.lockIcon}>⬡</span>
-                  <p className={styles.lockedMsg}>&gt;_ connect jira to view trending blog posts</p>
-                </div>
-              </div>
-            ) : null}
-          </div>
+            </div>
+          )}
 
-          {/* 2. Posts for You — exclude posts already shown in Most Liked */}
+          {/* 2. Posts for You — exclude posts already shown in Trending */}
           {(() => {
             const mostLikedIds = new Set(filteredMostLiked.map(p => p.id))
-            const postsForYou = jiraConnected ? filtered.filter(p => !mostLikedIds.has(p.id)) : filtered
+            const postsForYou = filtered.filter(p => !mostLikedIds.has(p.id))
             return (
               <div className={styles.section}>
                 <p className={styles.heading}>

@@ -12,7 +12,7 @@
       --bg: #f7f5f0;
       --ink: #1a1a18;
       --muted: #6b6860;
-      --accent: #2563eb;
+      --accent: #1a1a18;
       --border: #dedad3;
       --card: #ffffff;
     }
@@ -29,7 +29,7 @@
     header {
       background: var(--card);
       border-bottom: 1px solid var(--border);
-      padding: 2rem 0;
+      padding: 1.25rem 0;
     }
 
     .container {
@@ -38,29 +38,10 @@
       padding: 0 2rem;
     }
 
-    .brand {
-      font-family: 'DM Serif Display', serif;
-      font-size: 1.5rem;
-      color: var(--ink);
-      letter-spacing: -0.5px;
-    }
-
-    .brand span {
-      color: var(--accent);
-    }
-
-    .badge {
-      display: inline-block;
-      margin-top: 0.4rem;
-      font-size: 0.72rem;
-      font-weight: 500;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--muted);
-      background: var(--bg);
-      border: 1px solid var(--border);
-      padding: 0.2rem 0.6rem;
-      border-radius: 999px;
+    .logo {
+      height: 40px;
+      width: auto;
+      display: block;
     }
 
     main {
@@ -104,7 +85,7 @@
       width: 6px;
       height: 6px;
       border-radius: 50%;
-      background: var(--accent);
+      background: var(--ink);
       flex-shrink: 0;
     }
 
@@ -131,32 +112,33 @@
       content: '→';
       position: absolute;
       left: 0;
-      color: var(--accent);
+      color: var(--ink);
       font-size: 0.8rem;
       top: 0.45rem;
     }
 
     .highlight-box {
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      border-radius: 10px;
+      background: #f0f0ee;
+      border: 1px solid #d0cec9;
+      border-radius: 4px;
       padding: 1.25rem 1.5rem;
       margin: 1rem 0;
     }
 
     .highlight-box p {
       margin: 0;
-      color: #1e3a8a;
+      color: #1a1a18;
       font-size: 0.93rem;
     }
 
     a {
-      color: var(--accent);
-      text-decoration: none;
+      color: var(--ink);
+      text-decoration: underline;
+      text-underline-offset: 2px;
     }
 
     a:hover {
-      text-decoration: underline;
+      opacity: 0.7;
     }
 
     footer {
@@ -172,85 +154,103 @@
 
   <header>
     <div class="container">
-      <div class="brand">one<span>search</span></div>
-      <div class="badge">Atlassian App</div>
+      <a href="/"><img src="/static/logo.png" alt="onesearch" class="logo" /></a>
     </div>
   </header>
 
   <main>
     <div class="container">
       <h1 class="page-title">Privacy Policy</h1>
-      <p class="meta">Last updated: April 18, 2026 &nbsp;·&nbsp; Effective immediately</p>
+      <p class="meta">Last updated: April 21, 2026 &nbsp;·&nbsp; Effective immediately</p>
 
       <section>
         <h2>Overview</h2>
         <p>
           This Privacy Policy describes how <strong>onesearch</strong> ("we", "our", or "the app")
-          handles information when you install and use our Atlassian application. We are committed
-          to protecting your privacy and being transparent about our practices.
+          handles information when you use our service. We are committed to protecting your privacy
+          and being transparent about our data practices.
         </p>
         <div class="highlight-box">
           <p>
-            ✓ &nbsp;<strong>onesearch does not collect, store, or share any personal data.</strong>
-            All data access is temporary, used only to serve your in-session requests.
+            onesearch is designed with a minimal data footprint. We do not collect browsing behaviour,
+            sell data, or share your information with third parties. The only personal data we store
+            is an email address you voluntarily provide to use the post-liking feature.
           </p>
         </div>
       </section>
 
       <section>
-        <h2>Information We Access</h2>
-        <p>To provide its functionality, onesearch may temporarily access:</p>
+        <h2>Information We Collect</h2>
+        <p>We collect and store only the following:</p>
         <ul>
-          <li>Atlassian project and issue data within your authorized workspace</li>
-          <li>Your Atlassian account identifier (AccountID) for authentication purposes</li>
-          <li>Search queries you submit within the app</li>
+          <li>
+            <strong>Email address</strong> — collected when you choose to like a post. Stored locally
+            in your browser (localStorage) and on our servers solely to record your like. We do not
+            use this email for marketing or share it with third parties.
+          </li>
+        </ul>
+        <p>We do <strong>not</strong> collect names, passwords, IP addresses, device identifiers, or browsing history.</p>
+      </section>
+
+      <section>
+        <h2>Jira Integration</h2>
+        <p>
+          If you choose to connect your Atlassian Jira account, onesearch uses OAuth 2.0 to request
+          read-only access. The following applies:
+        </p>
+        <ul>
+          <li>Your Jira issues are fetched <strong>directly from Atlassian to your browser</strong> — they never pass through or are stored on our servers</li>
+          <li>We request only the <strong>read:jira-work</strong> and <strong>read:me</strong> scopes — no write, delete, or admin permissions</li>
+          <li>An OAuth access token is stored in your server-side session for the duration of your browser session and is cleared on disconnect or browser close</li>
+          <li>We never receive or store your Atlassian password</li>
+          <li>Your Atlassian account ID is not stored in our database</li>
         </ul>
         <p>
-          This data is accessed in real-time to process your requests and is
-          <strong>never stored, logged, or retained</strong> beyond your active session.
+          Connecting Jira is entirely optional. The app is fully functional without it.
+          Before connecting, please ensure your use is permitted under your employer's IT and acceptable-use policies.
         </p>
       </section>
 
       <section>
-        <h2>Data Storage</h2>
+        <h2>Cookies &amp; Sessions</h2>
         <p>
-          onesearch does <strong>not</strong> store personal data in any database or external system.
-          We do not cache user data for more than the duration of a single request. No Atlassian
-          AccountIDs, names, email addresses, or workspace content are persisted on our servers.
+          onesearch uses a server-side session cookie solely to maintain your Jira OAuth token during
+          an active browser session. This cookie:
+        </p>
+        <ul>
+          <li>Contains no personally identifiable information directly</li>
+          <li>Is invalidated when you disconnect Jira or close the browser</li>
+          <li>Is not used for tracking or advertising</li>
+        </ul>
+        <p>No third-party cookies or tracking scripts are used on this site.</p>
+      </section>
+
+      <section>
+        <h2>Data Storage &amp; Retention</h2>
+        <p>
+          Email addresses provided for the liking feature are stored in our database and associated
+          with the specific posts you liked. We do not store any Jira or Atlassian workspace content.
+        </p>
+        <p>
+          To request deletion of your email and associated likes, contact us at the address below.
         </p>
       </section>
 
       <section>
         <h2>Third-Party Sharing</h2>
         <p>
-          We do not sell, trade, rent, or otherwise share your information with any third parties.
-          onesearch operates exclusively within the Atlassian ecosystem and does not integrate with
-          external advertising, analytics, or data-brokering services.
+          We do not sell, rent, or share your information with any third parties.
+          onesearch does not integrate with advertising networks, analytics platforms,
+          or data-brokering services.
         </p>
-      </section>
-
-      <section>
-        <h2>Atlassian Marketplace Compliance</h2>
-        <p>
-          onesearch is built in accordance with the
-          <a href="https://developer.atlassian.com/platform/marketplace/atlassian-marketplace-app-privacy-policy-requirements/" target="_blank">
-            Atlassian Marketplace Privacy Policy requirements
-          </a>.
-          We request only the following OAuth scopes, and nothing more:
-        </p>
-        <ul>
-          <li><strong>read:jira-work</strong> — Read project and issue data from Jira</li>
-          <li><strong>read:me</strong> — Read your basic Atlassian account profile (name, account ID)</li>
-        </ul>
-        <p>No write, admin, or any other scopes are requested or used.</p>
       </section>
 
       <section>
         <h2>Security</h2>
         <p>
           All communication between onesearch and Atlassian services is encrypted via HTTPS/TLS.
-          Authentication is handled entirely through Atlassian's OAuth 2.0 framework — we never
-          receive or store your Atlassian password.
+          Our servers are hosted on Microsoft Azure with access controls in place.
+          No security system is infallible — in the event of a breach we will notify affected users promptly.
         </p>
       </section>
 
@@ -266,11 +266,10 @@
       <section>
         <h2>Contact Us</h2>
         <p>
-          If you have any questions or concerns about this Privacy Policy, please reach out:
+          If you have questions, concerns, or a data deletion request, please contact:
         </p>
         <ul>
           <li>Email: <a href="mailto:admin@onesearch.blog">admin@onesearch.blog</a></li>
-          <li>Atlassian Marketplace listing page for onesearch</li>
         </ul>
       </section>
 

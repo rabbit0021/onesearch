@@ -601,12 +601,13 @@ def suggested_feed():
 
 @app.route("/posts/<int:post_id>/like", methods=["POST"])
 def like_post(post_id):
-    jira_account_id = session.get('jira_account_id')
-    if not jira_account_id:
-        return jsonify({"error": "Not authenticated with Jira"}), 401
+    data = request.get_json(silent=True) or {}
+    user_email = data.get('email', '').strip().lower()
+    if not user_email or '@' not in user_email:
+        return jsonify({"error": "Valid email required to like posts"}), 400
     conn = app.db.get_connection()
     try:
-        count, is_new = app.db.like_post(conn, post_id, jira_account_id)
+        count, is_new = app.db.like_post(conn, post_id, user_email)
         return jsonify({"count": count, "is_new": is_new})
     finally:
         conn.close()
