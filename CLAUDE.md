@@ -83,4 +83,8 @@ scrape_pubs.py → classify (classifier.py) → DB (posts, unlabeled)
 
 ### Deployment
 
-Push to `main` triggers GitHub Actions: builds Docker image → pushes to Azure Container Registry → runs pytest in container → updates Azure AKS deployment via `kubectl`.
+Push to `main` triggers GitHub Actions (`.github/workflows/ci-cd.yml`):
+1. Builds Docker image and runs pytest inside it
+2. SSHs into Hetzner VPS → `git pull origin main` → `docker compose up -d --build`
+
+Secrets (`VPS_HOST`, `VPS_SSH_KEY`, `POSTS_SECRET_KEY`, `SMTP_*`, `JIRA_*`, etc.) are stored in GitHub repository secrets/vars.

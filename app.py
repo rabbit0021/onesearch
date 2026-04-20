@@ -238,6 +238,11 @@ def admin_tempdata():
     feedbacks_sorted = sorted(feedbacks, key=lambda x: x.get("timestamp", ""), reverse=True)
     return jsonify({"interested-count": data.get("interested-count", 0), "feedbacks": feedbacks_sorted})
 
+@app.route("/privacy-policy.html")
+@app.route("/privacy-policy")
+def privacy_policy():
+    return send_from_directory(REACT_BUILD_DIR, "privacy-policy.html")
+
 @app.route("/robots.txt")
 def robots_txt():
     return send_from_directory(app.static_folder, "robots.txt")
