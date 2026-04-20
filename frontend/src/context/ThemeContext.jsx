@@ -58,7 +58,7 @@ export function ThemeProvider({ children }) {
   )
 
   const [darkMode, setDarkMode] = useState(
-    () => localStorage.getItem('darkMode') === 'claude'
+    () => localStorage.getItem('darkMode') === 'true'
   )
 
   useEffect(() => {
