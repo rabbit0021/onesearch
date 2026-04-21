@@ -107,8 +107,17 @@ def index(path):
     if os.path.isdir(REACT_BUILD_DIR):
         target = os.path.join(REACT_BUILD_DIR, path)
         if path and os.path.isfile(target):
-            return send_from_directory(REACT_BUILD_DIR, path)
-        return send_from_directory(REACT_BUILD_DIR, "index.html")
+            response = send_from_directory(REACT_BUILD_DIR, path)
+            # Hashed assets (JS/CSS bundles) can be cached forever — content hash guarantees freshness
+            if path.startswith("assets/"):
+                response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+            else:
+                response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+            return response
+        response = send_from_directory(REACT_BUILD_DIR, "index.html")
+        # index.html must never be cached — it's the entry point that references hashed bundles
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        return response
     return render_template("index.html", time=time.time)
 
 @app.route("/techteams", methods=["GET"])
