@@ -110,7 +110,7 @@
 }
 
 body {
-  font-family: 'Roboto', Courier, monospace;
+  font-family: 'Courier Prime', 'Courier', 'IBM Plex Mono', 'JetBrains Mono', 'Space Mono', 'Share Tech Mono', monospace;
   color: var(--text-base);
   min-height: 100vh;
   background-color: var(--bg-page);
