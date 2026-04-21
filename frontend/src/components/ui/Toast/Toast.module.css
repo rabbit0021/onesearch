@@ -36,7 +36,6 @@
   border-radius: 6px;
   padding: 11px 20px;
   font-size: var(--fs-md);
-  font-family: 'Courier New', monospace;
   color: var(--text-base);
   max-width: 360px;
   word-break: break-word;

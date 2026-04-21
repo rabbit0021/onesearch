@@ -40,7 +40,6 @@
   left: 7px;
   font-size: var(--fs-xs);
   font-weight: 700;
-  font-family: 'Courier New', monospace;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.9);
@@ -109,7 +108,6 @@
   background: rgba(167, 166, 166, 0.5);
   color: var(--text-base);
   font-size: 0.6rem;
-  font-family: 'Courier New', monospace;
   white-space: nowrap;
   padding: 3px 6px;
   pointer-events: none;
@@ -199,7 +197,6 @@
 .publisher {
   font-size: var(--fs-md);
   font-weight: 700;
-  font-family: 'Courier New', monospace;
   letter-spacing: 0.03em;
   color: var(--card-publisher);
   white-space: nowrap;
@@ -210,7 +207,6 @@
 
 .date {
   font-size: var(--fs-2xs);
-  font-family: 'Courier New', monospace;
   color: var(--text-muted);
   white-space: nowrap;
   flex-shrink: 0;
@@ -237,7 +233,6 @@
 
 .tag {
   font-size: var(--fs-2xs);
-  font-family: 'Courier New', monospace;
   background-color: var(--card-hint);
   color: var(--text-base);
   padding: 1px 5px;
@@ -264,7 +259,6 @@
 .matchKey {
   font-size: var(--fs-xs);
   font-weight: 700;
-  font-family: 'Courier New', monospace;
   color: var(--text-secondary);
   flex-shrink: 0;
   white-space: nowrap;
@@ -272,7 +266,6 @@
 
 .matchSummary {
   font-size: var(--fs-xs);
-  font-family: 'Courier New', monospace;
   color: var(--text-base);
   white-space: nowrap;
   overflow: hidden;

@@ -18,7 +18,6 @@
   border: none;
   color: var(--text-secondary);
   font-size: var(--fs-std);
-  font-family: 'Courier New', monospace;
   letter-spacing: 0.08em;
   padding: 1px 5px;
   cursor: pointer;

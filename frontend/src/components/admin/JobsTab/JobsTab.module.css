@@ -87,7 +87,6 @@
 }
 
 .jobId code {
-  font-family: 'Courier New', monospace;
   background: var(--bg-surface);
   padding: 1px 5px;
   border-radius: 3px;
@@ -190,7 +189,7 @@
 
 .pastRunTime { color: var(--text-base); flex: 1; }
 .pastRunLogs { color: var(--text-muted); }
-.pastRunId   { color: var(--text-muted); font-family: 'Courier New', monospace; }
+.pastRunId   { color: var(--text-muted); }
 .toggle      { color: var(--text-muted); margin-left: auto; }
 
 .toggleLogs {
@@ -214,7 +213,6 @@
 .logs {
   margin-top: 8px;
   font-size: var(--fs-sm);
-  font-family: 'Courier New', monospace;
   background: var(--bg-wizard);
   border-radius: 4px;
   padding: 0.6rem 0;

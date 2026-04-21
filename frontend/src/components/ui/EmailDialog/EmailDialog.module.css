@@ -15,7 +15,6 @@
   box-shadow: 0 0 0 1px #000, 0 0 10px rgba(85, 255, 85, 0.2), inset 0 0 10px rgba(0, 0, 0, 0.8);
   width: 420px;
   max-width: calc(100vw - 32px);
-  font-family: 'Courier New', Courier, monospace;
   overflow: hidden;
   border-radius: 2px;
 }
@@ -109,7 +108,6 @@
   border: none;
   outline: none;
   color: var(--text-strong);
-  font-family: 'Courier New', Courier, monospace;
   font-size: 0.82rem;
   letter-spacing: 0.04em;
   caret-color: var(--color-primary);
@@ -180,7 +178,6 @@
 }
 
 .btnResend {
-  font-family: 'Courier New', Courier, monospace;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -200,7 +197,6 @@
 .resendWait {
   font-size: 0.7rem;
   color: var(--text-muted);
-  font-family: 'Courier New', Courier, monospace;
   align-self: center;
 }
 

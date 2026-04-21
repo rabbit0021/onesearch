@@ -10,7 +10,7 @@
   --bg-wizard: rgb(238, 238, 235);
   --bg-wizard-option: rgb(220, 220, 217);
 
-  --text-base: #131313;
+  --text-base: #6c6b6b;
   --text-strong: #000000;
   --text-secondary: #737985; /* headings */
   --text-muted: #606369;
@@ -35,7 +35,7 @@
   --card-bg: #ffffff;
   --card-shadow: rgba(0, 0, 0, 0.07);
   --card-shadow-hover: rgba(0, 0, 0, 0.12);
-  --card-title: #05060a;
+  --card-title: #4c4e58;
   --card-publisher: #6b7280;
   --card-hint: var(--color-primary-tint);
 
@@ -49,7 +49,7 @@
   --fs-sm:   0.82rem;   /* small: filters, secondary text */                                                            
   --fs-base: 0.87rem;   /* base: most UI elements */                                                                    
   --fs-md:   0.92rem;   /* medium: body copy */                                                                         
-  --fs-std:  .95rem;      /* standard: inputs, headings */                                                                
+  --fs-std:  0.96rem;      /* standard: inputs, headings */                                                                
   --fs-lg:   1.2rem;    /* large: section headings */                                                                   
   --fs-xl:   1.3rem;    /* xl: page titles */                                                                           
   --fs-2xl:  1.5rem;    /* icon sizes */                                                                                
@@ -110,7 +110,7 @@
 }
 
 body {
-  font-family: 'Courier New', Courier, monospace;
+  font-family: 'Roboto', Courier, monospace;
   color: var(--text-base);
   min-height: 100vh;
   background-color: var(--bg-page);
