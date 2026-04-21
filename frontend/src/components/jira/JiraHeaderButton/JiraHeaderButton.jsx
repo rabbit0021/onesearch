@@ -59,7 +59,6 @@ function ConnectButton() {
           <ul className={styles.infoList}>
             <li><span className={styles.infoBullet}>✓</span> Read-only — we don't have permission to create, edit, or delete your issues</li>
             <li><span className={styles.infoBullet}>✓</span> Issues flow directly from Atlassian to your browser — we don't store them anywhere - not at server & not even in cookies</li>
-            <li><span className={styles.infoBullet}>✓</span> Access ends when you disconnect or close the browser</li>
             <li><span className={styles.infoBullet}>✓</span> OAuth 2.0 via Atlassian — we never see your password</li>
             <li className={styles.infoItemWarn}><span className={styles.infoBulletWarn}>⚠</span> Check with your IT / HR before connecting work tools to third-party services</li>
           </ul>
