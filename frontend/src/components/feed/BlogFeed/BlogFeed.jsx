@@ -30,7 +30,7 @@ export default function BlogFeed({ formRef }) {
 
   useEffect(() => {
     getMostLikedFeed(10).then(setMostLiked).catch(() => { })
-    getMostLikedAllTimeFeed(20).then(setMostLikedAllTime).catch(() => { })
+    getMostLikedAllTimeFeed(15).then(setMostLikedAllTime).catch(() => { })
 
     async function loadFeed() {
       try {

@@ -725,6 +725,7 @@ def most_liked_feed():
             "published_at": post["published_at"],
             "tags": post["tags"],
             "like_count": post["like_count"],
+            "recent_like_count": post["recent_like_count"],
         } for post in posts])
     finally:
         conn.close()
