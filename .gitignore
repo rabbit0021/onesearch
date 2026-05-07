@@ -19,6 +19,7 @@ venv/
 *.env
 
 data/
+!frontend/src/data/
 
 logs/
 
