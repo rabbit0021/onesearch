@@ -59,20 +59,21 @@
 .iconItem {
   display: flex;
   align-items: center;
-  gap: 3px;
   font-size: var(--fs-md);
   line-height: 1;
+  gap: 1px;
 }
 
 .recentCount {
   font-size: var(--fs-md);
-  color: #4caf50;
+  color: #7bc07d;
   line-height: 1;
 }
 
 .iconItem:not(.likeBtn) svg {
-  color: #4caf50;
+  color: #3c933f;
   flex-shrink: 0;
+  margin-top: -3px;
 }
 
 /* ── Like button ── */
@@ -80,7 +81,7 @@
   position: relative;
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 1px;
   cursor: pointer;
   border-radius: 3px;
   transition: background 0.15s;
