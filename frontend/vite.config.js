@@ -19,6 +19,7 @@ export default defineConfig({
       '/admin/jobs': { target: FLASK, changeOrigin: false },
       '/admin/notifications': FLASK,
       '/admin/tempdata': FLASK,
+      '/admin/likes': FLASK,
       '/interested': FLASK,
       '/feedback': FLASK,
       '/verify-email': FLASK,

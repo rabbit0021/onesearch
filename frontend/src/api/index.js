@@ -147,6 +147,14 @@ export async function getJobHistory(jobName, secretKey) {
   return res.json()
 }
 
+export async function getAdminLikes(secretKey) {
+  const res = await fetch('/admin/likes', {
+    headers: { 'X-SECRET-KEY': secretKey },
+  })
+  if (res.status === 401) throw new Error('Unauthorized')
+  return res.json()
+}
+
 export async function getAdminTempdata(secretKey) {
   const res = await fetch('/admin/tempdata', {
     headers: { 'X-SECRET-KEY': secretKey },

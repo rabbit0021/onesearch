@@ -262,6 +262,25 @@ def admin_tempdata():
     feedbacks_sorted = sorted(feedbacks, key=lambda x: x.get("timestamp", ""), reverse=True)
     return jsonify({"interested-count": data.get("interested-count", 0), "feedbacks": feedbacks_sorted})
 
+@app.route("/admin/likes", methods=["GET"])
+@require_secret_key
+def admin_likes():
+    conn = app.db.get_connection()
+    try:
+        c = conn.cursor()
+        c.execute("""
+            SELECT pl.user_email, pl.liked_at,
+                   po.title, po.url, pu.publisher_name AS publisher,
+                   (SELECT COUNT(*) FROM post_likes WHERE post_id = po.id) AS total_likes
+            FROM post_likes pl
+            JOIN posts po ON po.id = pl.post_id
+            JOIN publishers pu ON pu.id = po.publisher_id
+            ORDER BY pl.liked_at DESC
+        """)
+        return jsonify([dict(r) for r in c.fetchall()])
+    finally:
+        conn.close()
+
 @app.route("/privacy-policy.html")
 @app.route("/privacy-policy")
 def privacy_policy():
