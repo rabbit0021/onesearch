@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { subscribe, getSubscriptionsForEmail } from '../../api'
 import { useToast } from '../../context/ToastContext'
 
@@ -38,12 +38,7 @@ export default function Home() {
   const toggleRef = useRef(null)
 
   const formRef = useRef(null)
-  const [atTop, setAtTop] = useState(true)
-  useEffect(() => {
-    const onScroll = () => setAtTop(window.scrollY <= 50)
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+  const atTop = true
 
   function handleSourceChange(id, checked) {
     setSources((prev) =>
@@ -150,12 +145,12 @@ export default function Home() {
             </button>
           </form>
 
-          <BlogFeed formRef={formRef} />
+          <div className={styles.feedWrapper}>
+            <BlogFeed formRef={formRef} />
 
-          {/* <JiraIssuesSummary /> */}
-
-          <div className={styles.sidebar}>
+            {/* <JiraIssuesSummary /> */}
           </div>
+
         </div>
 
         {/* <Footer /> */}

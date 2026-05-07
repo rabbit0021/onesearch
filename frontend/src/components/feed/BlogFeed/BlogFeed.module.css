@@ -5,8 +5,7 @@
   margin: 1.25rem;
   padding: .5rem;
   box-sizing: border-box;
-  max-width: 90%;
-  width: 800px;
+  width: 100%;
 }
 
 @media (max-width: 768px) {
