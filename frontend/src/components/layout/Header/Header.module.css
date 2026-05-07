@@ -3,9 +3,8 @@
   align-items: flex-start;
   gap: 20px;
   flex-direction: column;
-  margin-bottom: 1rem;
   color: var(--text-base);
-  margin-left: -12px;
+  margin-left: -7px;
 }
 
 .themeSwitcherWrap {

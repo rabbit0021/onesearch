@@ -76,7 +76,7 @@
   scrollbar-width: thin;
   scrollbar-color: var(--color-primary) transparent;
   flex: 0 0 40%;
-  padding: 1rem;
+  padding: .5rem;
   overflow-x: hidden;
 }
 
@@ -85,6 +85,7 @@
   flex-direction: column;
   gap: 1.25rem;
   margin-top: 20px;
+  padding: .5rem;
 }
 
 .formWrapper::-webkit-scrollbar {
@@ -218,6 +219,7 @@
     gap: 10px;
     justify-content: flex-start;
     align-items: flex-start;
+    margin-left: 5px;
   }
 
   .page {
