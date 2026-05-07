@@ -102,6 +102,12 @@ export async function getMostLikedFeed(limit = 50) {
   return res.json()
 }
 
+export async function getMostLikedAllTimeFeed(limit = 20) {
+  const res = await fetch(`/feed/most-liked-all-time?limit=${limit}`)
+  if (!res.ok) throw new Error('Failed to fetch all-time most liked feed')
+  return res.json()
+}
+
 export async function getPendingNotifications(secretKey) {
   const res = await fetch('/admin/notifications/pending', {
     headers: { 'X-SECRET-KEY': secretKey },

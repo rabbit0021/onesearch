@@ -730,6 +730,26 @@ def most_liked_feed():
         conn.close()
 
 
+@app.route("/feed/most-liked-all-time", methods=["GET"])
+def most_liked_all_time_feed():
+    limit = min(int(request.args.get("limit", 20)), 50)
+    conn = app.db.get_connection()
+    try:
+        posts = app.db.get_most_liked_all_time(conn, limit=limit)
+        return jsonify([{
+            "id": post["id"],
+            "url": post["url"],
+            "title": post["title"],
+            "topic": post["topic"],
+            "publisher": post["publisher_name"],
+            "published_at": post["published_at"],
+            "tags": post["tags"],
+            "like_count": post["like_count"],
+        } for post in posts])
+    finally:
+        conn.close()
+
+
 if __name__ == "__main__":
     if os.getenv("FLASK_ENV") == "Production":
         app.run()

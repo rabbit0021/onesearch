@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { getFeed, getSuggestedFeed, getMostLikedFeed } from '../../../api'
+import { getFeed, getSuggestedFeed, getMostLikedFeed, getMostLikedAllTimeFeed } from '../../../api'
 import { getJiraStatus, getJiraIssues } from '../../../api/jira'
 import BlogCard, { TOPIC_COLORS } from '../BlogCard/BlogCard'
 import styles from './BlogFeed.module.css'
@@ -17,6 +17,7 @@ export default function BlogFeed({ formRef }) {
   const [error, setError] = useState(null)
   const [jiraConnected, setJiraConnected] = useState(false)
   const [mostLiked, setMostLiked] = useState([])
+  const [mostLikedAllTime, setMostLikedAllTime] = useState([])
 
   const [search, setSearch] = useState('')
   const [publisher, setPublisher] = useState('')
@@ -28,7 +29,8 @@ export default function BlogFeed({ formRef }) {
   const [filterClosed, setFilterClosed] = useState(true)
 
   useEffect(() => {
-    getMostLikedFeed(5).then(setMostLiked).catch(() => { })
+    getMostLikedFeed(10).then(setMostLiked).catch(() => { })
+    getMostLikedAllTimeFeed(20).then(setMostLikedAllTime).catch(() => { })
 
     async function loadFeed() {
       try {
@@ -92,6 +94,7 @@ export default function BlogFeed({ formRef }) {
 
   const filtered = useMemo(() => posts.filter(filterPredicate), [posts, filterPredicate])
   const filteredMostLiked = useMemo(() => mostLiked.filter(filterPredicate), [mostLiked, filterPredicate])
+  const filteredMostLikedAllTime = useMemo(() => mostLikedAllTime.filter(filterPredicate), [mostLikedAllTime, filterPredicate])
 
   function toggleTag(tag) {
     setActiveTags(prev =>
@@ -291,7 +294,21 @@ export default function BlogFeed({ formRef }) {
             </div>
           )}
 
-          {/* 3. Other Posts — exclude posts already shown in Most Liked */}
+          {/* 3. All Time Favourites */}
+          {filteredMostLikedAllTime.length > 0 && (
+            <div className={styles.section}>
+              <p className={styles.heading}>All Time Favourites</p>
+              <div className={styles.scrollRow}>
+                {filteredMostLikedAllTime.map(post => (
+                  <div key={post.id} className={styles.scrollCard}>
+                    <BlogCard post={post} jiraConnected={jiraConnected} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 4. Other Posts — exclude posts already shown in Trending */}
           {(() => {
             const mostLikedIds = new Set(filteredMostLiked.map(p => p.id))
             const otherPosts = grouped.unmatched.filter(p => !mostLikedIds.has(p.id))
@@ -321,7 +338,21 @@ export default function BlogFeed({ formRef }) {
             </div>
           )}
 
-          {/* 2. Posts for You — exclude posts already shown in Trending */}
+          {/* 2. All Time Favourites */}
+          {filteredMostLikedAllTime.length > 0 && (
+            <div className={styles.section}>
+              <p className={styles.heading}>All Time Favourites</p>
+              <div className={styles.scrollRow}>
+                {filteredMostLikedAllTime.map(post => (
+                  <div key={post.id} className={styles.scrollCard}>
+                    <BlogCard post={post} jiraConnected={jiraConnected} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 3. Posts for You — exclude posts already shown in Trending */}
           {(() => {
             const mostLikedIds = new Set(filteredMostLiked.map(p => p.id))
             const postsForYou = filtered.filter(p => !mostLikedIds.has(p.id))

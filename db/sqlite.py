@@ -563,7 +563,7 @@ class SQLiteDatabase:
             FROM post_likes pl
             JOIN posts po ON pl.post_id = po.id
             JOIN publishers p ON po.publisher_id = p.id
-            WHERE strftime('%Y-%m', pl.liked_at) = strftime('%Y-%m', 'now')
+            WHERE pl.liked_at >= datetime('now', '-30 days')
               AND po.labelled = 1
             GROUP BY po.id
             ORDER BY like_count DESC
@@ -571,7 +571,26 @@ class SQLiteDatabase:
         """, (limit,))
         rows = c.fetchall()
         return [dict(row) for row in rows]
+
     
+    def get_most_liked_all_time(self, conn, limit=20):
+        c = conn.cursor()
+        c.execute("""
+            SELECT po.id, po.url, po.title, po.tags, po.published_at,
+                   po.modified_at, po.labelled, po.topic,
+                   p.id AS publisher_id, p.publisher_name, p.publisher_type,
+                   COUNT(pl.user_email) AS like_count
+            FROM post_likes pl
+            JOIN posts po ON pl.post_id = po.id
+            JOIN publishers p ON po.publisher_id = p.id
+            WHERE po.labelled = 1
+            GROUP BY po.id
+            ORDER BY like_count DESC
+            LIMIT ?
+        """, (limit,))
+        rows = c.fetchall()
+        return [dict(row) for row in rows]
+
     def get_posts_by_publisher_id(self, conn, pub_id):
         c = conn.cursor()
         c.execute("""

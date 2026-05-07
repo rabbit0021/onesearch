@@ -1,11 +1,9 @@
 .wrapper {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  margin: 1.25rem;
+  margin: 1rem;
   padding: .5rem;
   box-sizing: border-box;
-  width: 100%;
 }
 
 @media (max-width: 768px) {
@@ -50,7 +48,7 @@
 }
 
 .heading {
-  font-size: var(--fs-base);
+  font-size: var(--fs-std);
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -64,14 +62,16 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  margin-top: 1.5rem;
 }
 
 .trendingSection {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  margin-top: 1.5rem;
+}
+
+.wrapper > div:nth-child(2) {
+  margin-top: 2rem;
 }
 
 .grid {
@@ -452,23 +452,12 @@
   flex-direction: row;
   gap: 1rem;
   overflow-x: auto;
-  padding-bottom: 0.5rem;
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-primary) transparent;
   padding: 2px;
+  scrollbar-width: none;
 }
 
 .scrollRow::-webkit-scrollbar {
-  height: 4px;
-}
-
-.scrollRow::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.scrollRow::-webkit-scrollbar-thumb {
-  background: var(--color-primary);
-  border-radius: 2px;
+  display: none;
 }
 
 .scrollCard {
