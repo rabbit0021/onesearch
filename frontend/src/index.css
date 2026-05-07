@@ -9,6 +9,7 @@
   --bg-disabled: rgb(230, 230, 230);
   --bg-wizard: rgb(238, 238, 235);
   --bg-wizard-option: rgb(220, 220, 217);
+  --bg-feed:rgb(244, 243, 241);
 
   --text-base: #6c6b6b;
   --text-strong: #000000;
@@ -22,7 +23,7 @@
 
   --primary-button-bg: rgb(70, 70, 70);
 
-  --filter-bg: rgb(239, 239, 237);
+  --filter-bg: rgb(237, 236, 230);
   --filter-border: rgb(230, 230, 228);
   --filter-text: #2c2c2c;
   --filter-dim: #666;
@@ -66,6 +67,7 @@
   --bg-disabled: rgb(25, 25, 25);
   --bg-wizard: rgb(30, 30, 27);
   --bg-wizard-option: rgb(20, 20, 17);
+  --bg-feed:rgb(25, 25, 25);
 
   --text-base: #e0dcd4;
   --text-strong: #f0ece4;

@@ -1,15 +1,16 @@
 .topRight {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 10;
   display: flex;
-  align-items: center;
   gap: 10px;
+  justify-content: end;
+  margin-bottom: 30px;
+  padding-right: 25px;
 }
 
 .headerRow {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.25rem 0;
 }
 
 .notifBtn {
@@ -57,6 +58,7 @@
   flex: 1;
   overflow: hidden;
   min-height: 0;
+  padding-top: 0;
 }
 
 .form {
@@ -90,6 +92,11 @@
   min-width: 0;
   scrollbar-width: thin;
   scrollbar-color: var(--color-primary) transparent;
+  background-color: var(--bg-feed);
+  padding-left: 5px;
+  padding-right: 5px;
+  padding-top: 25px;
+  border-radius: 5px;
 }
 
 .feedWrapper::-webkit-scrollbar {
@@ -187,9 +194,6 @@
   }
 
   .topRight {
-    position: static;
-    top: auto;
-    right: auto;
     display: contents;
   }
 
@@ -234,6 +238,8 @@
     overflow-y: visible;
     flex: none;
     width: 100%;
+    background-color: transparent;
+    border-radius: 0;
   }
 }
 

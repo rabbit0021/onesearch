@@ -54,19 +54,18 @@
   align-items: center;
   gap: 4px;
   flex-shrink: 0;
-  background-color: red;
 }
 
 .iconItem {
   display: flex;
   align-items: center;
-  gap: 2px;
-  font-size: var(--fs-sm);
+  gap: 3px;
+  font-size: var(--fs-md);
   line-height: 1;
 }
 
 .recentCount {
-  font-size: var(--fs-sm);
+  font-size: var(--fs-md);
   color: #4caf50;
   line-height: 1;
 }
@@ -95,7 +94,7 @@
 .heart {
   display: flex;
   align-items: center;
-  height: 16px;
+  height: 17px;
   line-height: 0;
   transition: color 0.15s, transform 0.15s;
   flex-shrink: 0;
@@ -149,53 +148,16 @@
 }
 
 /* ── Like count ticker ── */
+@keyframes countPop {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 .likeCounter {
-  position: relative;
-  display: flex;
-  align-items: center;
-  width: 2ch;
-  height: 16px;
-  overflow: hidden;
-}
-
-.countStatic {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  font-size: var(--fs-sm);
+  font-size: var(--fs-md);
   color: var(--text-base);
-  white-space: nowrap;
-}
-
-@keyframes tickOut {
-  from { transform: translateY(0);      opacity: 1; }
-  to   { transform: translateY(-16px); opacity: 0; }
-}
-
-@keyframes tickIn {
-  from { transform: translateY(16px);  opacity: 0; }
-  to   { transform: translateY(0);       opacity: 1; }
-}
-
-.tickOut {
-  position: absolute;
-  top: 0; left: 0;
-  font-size: var(--fs-sm);
-  color: var(--text-muted);
-  line-height: 16px;
-  white-space: nowrap;
-  animation: tickOut .5s ease forwards;
-}
-
-.tickIn {
-  position: absolute;
-  top: 0; left: 0;
-  font-size: var(--fs-sm);
-  color: var(--text-base);
-  line-height: 16px;
-  white-space: nowrap;
-  animation: tickIn .5s ease forwards;
+  line-height: 17px;
+  animation: countPop 0.3s ease forwards;
 }
 
 /* ── Card body ── */

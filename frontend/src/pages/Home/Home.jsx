@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { subscribe, getSubscriptionsForEmail } from '../../api'
 import { useToast } from '../../context/ToastContext'
 
@@ -38,7 +38,16 @@ export default function Home() {
   const toggleRef = useRef(null)
 
   const formRef = useRef(null)
-  const atTop = true
+  const feedWrapperRef = useRef(null)
+  const [atTop, setAtTop] = useState(true)
+
+  useEffect(() => {
+    const el = feedWrapperRef.current
+    if (!el) return
+    const onScroll = () => setAtTop(el.scrollTop <= 50)
+    el.addEventListener('scroll', onScroll, { passive: true })
+    return () => el.removeEventListener('scroll', onScroll)
+  }, [])
 
   function handleSourceChange(id, checked) {
     setSources((prev) =>
@@ -99,21 +108,14 @@ export default function Home() {
       <Sidebar open={sidebarOpen} onClose={closeSidebar} toggleRef={toggleRef} />
 
       <main className={styles.container}>
-        <div className={styles.headerRow}>
+        {/* <div className={styles.headerRow}>
           <Header />
-          <div className={styles.topRight}>
-            <div className={`${styles.topRightHideable} ${atTop && !sidebarOpen ? '' : styles.topRightHidden}`}>
-              <JiraHeaderButton />
-              <ThemeSwitcher />
-            </div>
-            <div className={styles.notifBtn}>
-              <NotificationIcon open={sidebarOpen} hasDot={hasDot} onClick={handleSidebarToggle} btnRef={toggleRef} />
-            </div>
-          </div>
-        </div>
+        
+        </div> */}
 
         <div className={styles.layout}>
           <form ref={formRef} className={styles.form} onSubmit={handleSubmit} noValidate>
+            <Header />
             <div className={styles.text}>
               <h1 className={styles.title}>Subscribe to what you need</h1>
               <p className={styles.intro}>
@@ -145,7 +147,14 @@ export default function Home() {
             </button>
           </form>
 
-          <div className={styles.feedWrapper}>
+          <div className={styles.feedWrapper} ref={feedWrapperRef}>
+            <div className={styles.topRight}>
+                <JiraHeaderButton />
+                <ThemeSwitcher />
+              <div className={styles.notifBtn}>
+                <NotificationIcon open={sidebarOpen} hasDot={hasDot} onClick={handleSidebarToggle} btnRef={toggleRef} />
+              </div>
+            </div>
             <BlogFeed formRef={formRef} />
 
             {/* <JiraIssuesSummary /> */}

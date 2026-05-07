@@ -5,6 +5,7 @@
   flex-direction: column;
   margin-bottom: 1rem;
   color: var(--text-base);
+  margin-left: -12px;
 }
 
 .themeSwitcherWrap {

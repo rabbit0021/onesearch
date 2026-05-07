@@ -1,8 +1,8 @@
 .wrapper {
   display: flex;
   flex-direction: column;
-  margin: 1rem;
-  padding: .5rem;
+  margin: 0 1rem;
+  padding: 0 .5rem .5rem;
   box-sizing: border-box;
 }
 
@@ -54,7 +54,7 @@
   text-transform: uppercase;
   color: var(--text-muted);
   margin: 0;
-  background-color: var(--bg-wizard);
+  background-color: var(--filter-bg);
   padding: 5px;
 }
 
@@ -71,7 +71,7 @@
 }
 
 .wrapper > div:nth-child(2) {
-  margin-top: 2rem;
+  margin-top: 2.5rem;
 }
 
 .grid {
