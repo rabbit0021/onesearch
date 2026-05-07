@@ -8,12 +8,12 @@
  */
 export const INDIVIDUALS_META = {
   'addy osmani': {
-    image: '../../public/individuals/addy-osmani.jpg',
+    image: '/individuals/addy-osmani.jpg',
     website: 'https://addyosmani.com',
     bio: 'Engineering Manager at Google Chrome, author on web performance & frontend engineering.',
   },
   'julia evans': {
-    image: '../../public/individuals/julia-evans.jpg',
+    image: '/individuals/julia-evans.jpg',
     website: 'https://jvns.ca',
     bio: 'Software engineer and zine author, writes about debugging, networking, and developer tools.',
   },
