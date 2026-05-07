@@ -132,6 +132,16 @@ def get_companies():
     conn.close()  
     return jsonify(teamNames)
 
+@app.route("/individuals", methods=["GET"])
+def get_individuals():
+    query = request.args.get("search", "").lower()
+    conn = app.db.get_connection()
+    individuals = app.db.get_publishers_by_type(conn, publisher_type="individual")
+    names = [p["publisher_name"] for p in individuals if query in p["publisher_name"].lower()]
+    names.sort()
+    conn.close()
+    return jsonify(names)
+
 @app.route('/subscribe', methods=['POST'])
 def subscribe():
     data = request.form
@@ -166,6 +176,17 @@ def subscribe():
                 if not any(sub["publisher"]["id"] == publisher["id"] and sub["topic"] == topic for sub in existing_subscriptions):
                     app.db.add_subscription(conn, email, topic, publisher['id'], frequency=frequency)
         
+        if individuals:
+            individuals = [p.lower().strip() for p in individuals.split(',')]
+            for name in individuals:
+                publishers = app.db.get_publisher_by_name(conn, name)
+                if not publishers:
+                    return jsonify({"status": "error", "message": f"Publisher '{name}' not found."}), 404
+                publisher = publishers[0]
+                existing_subscriptions = app.db.get_subscriptions_by_email(conn, email)
+                if not any(sub["publisher"]["id"] == publisher["id"] and sub["topic"] == topic for sub in existing_subscriptions):
+                    app.db.add_subscription(conn, email, topic, publisher['id'], frequency=frequency)
+
         conn.commit()
         return jsonify({
             "status": "success",

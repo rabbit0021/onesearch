@@ -54,7 +54,7 @@ def scrape_pubs(db, conn, target_publishers=None, cancel_event=None):
         if not last_scraped_at:
             last_scraped_at = datetime.fromisoformat("2025-01-01T00:00:00+00:00")    
 
-        if publisher.get("publisher_type") == "techteam":    
+        if publisher.get("publisher_type") in ("techteam", "individual"):
 
             subscribers = db.get_subscriptions_by_publisher(conn, publisher["id"])
             if not subscribers:

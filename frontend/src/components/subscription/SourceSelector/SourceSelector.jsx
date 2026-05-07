@@ -2,7 +2,7 @@ import styles from './SourceSelector.module.css'
 
 const SOURCES = [
   { id: 'techteams', label: 'Tech Teams', enabled: true },
-  { id: 'individuals', label: 'Individuals', enabled: false, soon: true },
+  { id: 'individuals', label: 'Individuals', enabled: true },
   { id: 'communities', label: 'Communities', enabled: false, soon: true },
 ]
 

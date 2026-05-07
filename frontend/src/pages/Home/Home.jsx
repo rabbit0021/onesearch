@@ -13,6 +13,7 @@ import EmailInput from '../../components/subscription/EmailInput/EmailInput'
 import TopicSelector from '../../components/subscription/TopicSelector/TopicSelector'
 import SourceSelector from '../../components/subscription/SourceSelector/SourceSelector'
 import CompanySelector from '../../components/subscription/CompanySelector/CompanySelector'
+import IndividualsSelector from '../../components/subscription/IndividualsSelector/IndividualsSelector'
 import FrequencySlider from '../../components/subscription/FrequencySlider/FrequencySlider'
 import SubscriptionStatus from '../../components/subscription/SubscriptionStatus/SubscriptionStatus'
 
@@ -28,6 +29,7 @@ export default function Home() {
   const [topic, setTopic] = useState('')
   const [sources, setSources] = useState(['techteams'])
   const [companies, setCompanies] = useState([])
+  const [individuals, setIndividuals] = useState([])
   const [frequency, setFrequency] = useState(2)
   const [existingSubs, setExistingSubs] = useState(null)
   const [submitting, setSubmitting] = useState(false)
@@ -54,6 +56,7 @@ export default function Home() {
       checked ? [...prev, id] : prev.filter((s) => s !== id)
     )
     if (id === 'techteams' && !checked) setCompanies([])
+    if (id === 'individuals' && !checked) setIndividuals([])
   }
 
   async function handleEmailBlur(email) {
@@ -80,16 +83,19 @@ export default function Home() {
 
     if (!email) return showToast('Please enter your email.')
     if (!topic) return showToast('Please select a topic.')
-    if (sources.includes('techteams') && companies.length === 0)
+    if (sources.includes('techteams') && companies.length === 0 && !sources.includes('individuals'))
       return showToast('Please select at least one tech team.')
+    if (sources.includes('individuals') && individuals.length === 0 && !sources.includes('techteams'))
+      return showToast('Please select at least one individual.')
 
     setSubmitting(true)
     try {
-      const res = await subscribe({ email, techteams: companies, topic, frequency })
+      const res = await subscribe({ email, techteams: companies, individuals, topic, frequency })
       if (res.status === 'success') {
         showToast('Subscribed!')
         setTopic('')
         setCompanies([])
+        setIndividuals([])
         setFrequency(2)
       } else {
         showToast(res.message || 'Subscription failed. Try again.')
@@ -141,6 +147,12 @@ export default function Home() {
                 selected={companies}
                 onChange={setCompanies}
                 disabled={!sources.includes('techteams')}
+              />
+
+              <IndividualsSelector
+                selected={individuals}
+                onChange={setIndividuals}
+                disabled={!sources.includes('individuals')}
               />
 
               <FrequencySlider value={frequency} onChange={setFrequency} />

@@ -9,6 +9,12 @@ export async function getTechTeams(search = '') {
   return res.json()
 }
 
+export async function getIndividuals(search = '') {
+  const res = await fetch(`/individuals?search=${encodeURIComponent(search)}`)
+  if (!res.ok) throw new Error('Failed to fetch individuals')
+  return res.json()
+}
+
 export async function getSubscriptionsForEmail(email) {
   const res = await fetch(`/subscriptions_for_email?email=${encodeURIComponent(email)}`)
   if (!res.ok) throw new Error('Failed to fetch subscriptions')
@@ -18,12 +24,13 @@ export async function getSubscriptionsForEmail(email) {
 /**
  * @param {{ email: string, techteams: string[], topic: string, frequency: number }} params
  */
-export async function subscribe({ email, techteams, topic, frequency }) {
+export async function subscribe({ email, techteams, individuals, topic, frequency }) {
   const body = new URLSearchParams()
   body.set('email', email)
   body.set('topic', topic)
-  body.set('techteams', techteams.join(','))
   body.set('frquency', String(frequency)) // note: typo preserved to match Flask backend
+  if (techteams?.length) body.set('techteams', techteams.join(','))
+  if (individuals?.length) body.set('individuals', individuals.join(','))
   const res = await fetch('/subscribe', { method: 'POST', body })
   return res.json()
 }
