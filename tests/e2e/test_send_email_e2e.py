@@ -123,6 +123,84 @@ def test_send_email_e2e(db, dummy_smtp):
     
     conn.close()
 
+@pytest.mark.notifications
+def test_last_notified_at_is_committed_after_send(db, dummy_smtp):
+    """
+    Regression test: last_notified_at must be persisted after process_notifications.
+    Previously a missing conn.commit() meant the value was never written to disk,
+    causing notify.py to re-queue the same posts on every run.
+    """
+    conn = db.get_connection()
+    email = "subscriber@example.com"
+
+    db.add_publisher(conn, "TestCo", "techteam")
+    db.add_subscription(conn, email, "Software Engineering", 1, frequency=0)
+    conn.commit()
+
+    before = datetime.now(timezone.utc).replace(microsecond=0)
+
+    maturity_date = datetime.now(timezone.utc).isoformat()
+    db.add_notification(conn, email, "TestCo, Software Engineering", "v1",
+                        "https://testco.com/post-1", "Post One", maturity_date)
+    conn.commit()
+
+    process_notifications(db, conn)
+
+    assert len(dummy_smtp.sent) == 1
+
+    subs = db.get_subscriptions_by_email(conn, email)
+    assert len(subs) == 1
+    last_notified_at = subs[0]["last_notified_at"]
+    assert last_notified_at is not None, "last_notified_at was not committed after sending"
+
+    last_notified_dt = datetime.fromisoformat(last_notified_at)
+    if last_notified_dt.tzinfo is None:
+        last_notified_dt = last_notified_dt.replace(tzinfo=timezone.utc)
+    assert last_notified_dt >= before
+
+    conn.close()
+
+
+@pytest.mark.notifications
+def test_all_category_notifications_deleted_after_send(db, dummy_smtp):
+    """
+    Regression test: when an email contains posts across multiple categories,
+    ALL notifications must be deleted — not just the last category's.
+    Previously the loop variable `notifications_for_email` held only the last
+    iteration's value, so earlier categories were never cleaned up.
+    """
+    conn = db.get_connection()
+    email = "multi@example.com"
+    maturity_date = datetime.now(timezone.utc).isoformat()
+
+    db.add_publisher(conn, "TestCo", "techteam")
+    db.add_subscription(conn, email, "Software Engineering", 1, frequency=0)
+    db.add_subscription(conn, email, "Data Science", 1, frequency=0)
+    conn.commit()
+
+    # Two notifications in different categories — triggers the multi-key heading_map bug
+    db.add_notification(conn, email, "TestCo, Software Engineering", "v1",
+                        "https://testco.com/se-post", "SE Post", maturity_date)
+    db.add_notification(conn, email, "TestCo, Data Science", "v1",
+                        "https://testco.com/ds-post", "DS Post", maturity_date)
+    conn.commit()
+
+    process_notifications(db, conn)
+
+    assert len(dummy_smtp.sent) == 1, "Expected one combined email for both categories"
+
+    notifications = db.get_notifications_by_email(conn, email)
+    assert len(notifications) == 2
+
+    for n in notifications:
+        assert n["deleted"] == 1, (
+            f"Notification for '{n['post_title']}' was not deleted — "
+            "multi-category cleanup bug may still be present"
+        )
+
+    conn.close()
+
+
 @pytest.mark.real
 def test_send_email_real(db):
     """

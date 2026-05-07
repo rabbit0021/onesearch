@@ -164,6 +164,7 @@ def process_notifications(db, conn, target_email=None, cancel_event=None):
         MONO = "Courier New, Courier, monospace"
 
         category_sections = ""
+        all_notifications_for_email = []
         for heading, notifications_for_email in heading_map.items():
             category = heading
 
@@ -232,6 +233,8 @@ def process_notifications(db, conn, target_email=None, cancel_event=None):
                 for notification in notifications_for_email
             ])
 
+            all_notifications_for_email.extend(notifications_for_email)
+
             category_sections += f"""
                 <table width="100%" cellpadding="0" cellspacing="0" border="0"
                        style="margin-bottom:26px;">
@@ -270,14 +273,15 @@ def process_notifications(db, conn, target_email=None, cancel_event=None):
             failed_emails.append((email, e))
             continue
 
-        for notification in notifications_for_email:
+        for notification in all_notifications_for_email:
             logger.info(f"Deleting notification for email: {email} and post url: {notification['post_url']}")
 
-        for notification in notifications_for_email:
+        for notification in all_notifications_for_email:
             db.delete_notification(conn, email, notification['post_url'])
             conn.commit()
 
         db.update_subscription_last_notified(conn, email)
+        conn.commit()
 
     if failed_emails:
         summary = ", ".join(f"{e}" for _, e in failed_emails)

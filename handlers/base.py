@@ -1,5 +1,5 @@
 import feedparser
-from datetime import timezone
+from datetime import timezone, datetime
 import ssl
 import urllib
 from logger_config import get_logger
@@ -39,11 +39,14 @@ class BaseScraper:
             try:
                 # Parse published date using the correct format
                 published = None
-                if hasattr(entry, "published"):
-                    published = parsedate_to_datetime(entry.published)
-                elif hasattr(entry, "updated"):
-                    published = parsedate_to_datetime(entry.updated)
-                
+                raw_date = entry.get("published") or entry.get("updated")
+                if raw_date:
+                    try:
+                        published = parsedate_to_datetime(raw_date)
+                    except Exception:
+                        # Fallback for ISO 8601 (Atom feeds, e.g. 2024-01-01T00:00:00Z)
+                        published = datetime.fromisoformat(raw_date.replace("Z", "+00:00"))
+
                 if published is None:
                    published = self.get_date_from_url(entry)
                                                           
