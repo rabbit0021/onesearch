@@ -59,7 +59,7 @@ export default function Home() {
   async function handleEmailBlur(email) {
     setEmail(email)
     if (!email || !email.includes('@')) {
-      setExistingSubs(null) 
+      setExistingSubs(null)
       return
     }
     try {
@@ -108,62 +108,67 @@ export default function Home() {
       <Sidebar open={sidebarOpen} onClose={closeSidebar} toggleRef={toggleRef} />
 
       <main className={styles.container}>
-        {/* <div className={styles.headerRow}>
-          <Header />
-        
-        </div> */}
-
         <div className={styles.layout}>
-          <form ref={formRef} className={styles.form} onSubmit={handleSubmit} noValidate>
-            <Header />
-            <div className={styles.text}>
-              <h1 className={styles.title}>Subscribe to what you need</h1>
-              <p className={styles.intro}>
-                Onesearch aggregates insights from top tech publishers — so you always know what the industry is building, breaking,
-   and shipping.
-              </p>
-            </div>
-            <EmailInput
-              value={email}
-              onChange={handleEmailBlur}
-            />
-
-            <SubscriptionStatus data={existingSubs} />
-
-            <TopicSelector value={topic} onChange={setTopic} />
-
-            <SourceSelector selected={sources} onChange={handleSourceChange} />
-
-            <CompanySelector
-              selected={companies}
-              onChange={setCompanies}
-              disabled={!sources.includes('techteams')}
-            />
-
-            <FrequencySlider value={frequency} onChange={setFrequency} />
-
-            <button type="submit" className={styles.submitBtn} disabled={submitting}>
-              {submitting ? <>subscribing<span className={styles.blink}>_</span></> : <><span className={styles.prompt}>&gt;_</span> subscribe</>}
-            </button>
-          </form>
-
-          <div className={styles.feedWrapper} ref={feedWrapperRef}>
-            <div className={styles.topRight}>
+          <div className={styles.formWrapper}>
+            {/* Mobile: header + action buttons inline */}
+            <div className={styles.mobileHeaderRow}>
+              <Header />
+              <div className={styles.mobileActions}>
                 <JiraHeaderButton />
                 <ThemeSwitcher />
-              <div className={styles.notifBtn}>
-                <NotificationIcon open={sidebarOpen} hasDot={hasDot} onClick={handleSidebarToggle} btnRef={toggleRef} />
               </div>
             </div>
+            <form ref={formRef} className={styles.form} onSubmit={handleSubmit} noValidate>
+              <div className={styles.text}>
+                <h1 className={styles.title}>Subscribe to what you need</h1>
+                <p className={styles.intro}>
+                  Onesearch aggregates insights from top tech publishers — so you always know what the industry is building, breaking,
+                  and shipping.
+                </p>
+              </div>
+              <EmailInput
+                value={email}
+                onChange={handleEmailBlur}
+              />
+
+              <SubscriptionStatus data={existingSubs} />
+
+              <TopicSelector value={topic} onChange={setTopic} />
+
+              <SourceSelector selected={sources} onChange={handleSourceChange} />
+
+              <CompanySelector
+                selected={companies}
+                onChange={setCompanies}
+                disabled={!sources.includes('techteams')}
+              />
+
+              <FrequencySlider value={frequency} onChange={setFrequency} />
+
+              <button type="submit" className={styles.submitBtn} disabled={submitting}>
+                {submitting ? <>subscribing<span className={styles.blink}>_</span></> : <><span className={styles.prompt}>&gt;_</span> subscribe</>}
+              </button>
+            </form>
+          </div>
+
+          <div className={styles.feedWrapper} ref={feedWrapperRef}>
             <BlogFeed formRef={formRef} />
 
             {/* <JiraIssuesSummary /> */}
           </div>
-
         </div>
 
         {/* <Footer /> */}
       </main>
+
+      {/* Fixed top-right corner — desktop: all buttons; mobile: notif only */}
+      <div className={`${styles.topRight} ${atTop ? '' : styles.topRightHidden}`}>
+        <div className={`${styles.topRightHideable} ${atTop ? '' : styles.topRightHidden}`}>
+          <JiraHeaderButton />
+          <ThemeSwitcher />
+        </div>
+        <NotificationIcon open={sidebarOpen} hasDot={hasDot} onClick={handleSidebarToggle} btnRef={toggleRef} />
+      </div>
     </div>
   )
 }

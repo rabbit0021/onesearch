@@ -1,20 +1,12 @@
 .topRight {
-  display: flex;
-  gap: 10px;
-  justify-content: end;
-  margin-bottom: 30px;
-  padding-right: 25px;
-}
-
-.headerRow {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 2;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0.25rem 0;
-}
-
-.notifBtn {
-  display: contents;
+  gap: 10px;
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .topRightHideable {
@@ -30,6 +22,20 @@
   opacity: 0;
   pointer-events: none;
   transform: translateY(-4px);
+}
+
+/* Mobile header row: logo + action buttons side by side */
+.mobileHeaderRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Hidden on desktop, shown inline on mobile */
+.mobileActions {
+  display: none;
+  align-items: center;
+  gap: 10px;
 }
 
 .page {
@@ -48,7 +54,7 @@
   flex-direction: column;
   max-width: 100%;
   margin: 0 auto;
-  padding: .5rem;
+  padding: .1rem;
   min-height: 0;
 }
 
@@ -61,27 +67,35 @@
   padding-top: 0;
 }
 
-.form {
+.formWrapper {
   flex: 0 0 40%;
-  padding: .5rem;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
   margin-top: 20px;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--color-primary) transparent;
+  flex: 0 0 40%;
+  padding: 1rem;
+  overflow-x: hidden;
 }
 
-.form::-webkit-scrollbar {
-  width: 4px;
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-top: 20px;
 }
 
-.form::-webkit-scrollbar-track {
+.formWrapper::-webkit-scrollbar {
+  width: 2px;
+}
+
+.formWrapper::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.form::-webkit-scrollbar-thumb {
+.formWrapper::-webkit-scrollbar-thumb {
   background: var(--color-primary);
   border-radius: 2px;
 }
@@ -90,17 +104,15 @@
   flex: 1;
   overflow-y: auto;
   min-width: 0;
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-primary) transparent;
   background-color: var(--bg-feed);
   padding-left: 5px;
   padding-right: 5px;
-  padding-top: 25px;
+  padding-top: 70px;
   border-radius: 5px;
 }
 
 .feedWrapper::-webkit-scrollbar {
-  width: 4px;
+  width: 0px;
 }
 
 .feedWrapper::-webkit-scrollbar-track {
@@ -181,66 +193,58 @@
 }
 
 @media (max-width: 768px) {
-  .headerRow {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .headerRow > :first-child {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .topRight {
-    display: contents;
-  }
-
-  .notifBtn {
-    order: 1;
-  }
-
+  /* Hide desktop buttons from fixed corner; keep only notification icon */
   .topRightHideable {
-    order: 2;
-    flex-basis: 100%;
-    opacity: 1;
-    pointer-events: auto;
-    transform: none;
+    display: none;
+  }
+
+  /* Notification icon always visible on mobile regardless of scroll */
+  .topRight {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: none !important;
+  }
+
+  /* Stack header logo above action buttons */
+  .mobileHeaderRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  /* Show action buttons horizontally below the header */
+  .mobileActions {
+    display: flex;
+    flex-direction: column;
     gap: 10px;
-    margin-left: 15px;
-    margin-right: 15px;
-    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
   }
 
   .page {
     height: auto;
     overflow: visible;
-  }
-
-  .container {
-    overflow: visible;
+    padding: 0px;
   }
 
   .layout {
     flex-direction: column;
-    overflow: visible;
     flex: none;
+    
   }
 
-  .form {
-    flex: none;
-    width: 100%;
-    overflow-y: visible;
+  .form{
+    margin-left: -15px;
+  }
+  
+  .container{
   }
 
-  .feedWrapper {
-    overflow-y: visible;
-    flex: none;
-    width: 100%;
+  .feedWrapper{
+    padding-top: 5px;
     background-color: transparent;
-    border-radius: 0;
   }
+
+
 }
 
 @media (max-width: 600px) {
