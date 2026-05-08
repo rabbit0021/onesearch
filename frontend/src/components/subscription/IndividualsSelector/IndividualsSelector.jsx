@@ -8,6 +8,7 @@ import styles from './IndividualsSelector.module.css'
 export default function IndividualsSelector({ selected, onChange, disabled }) {
   const [all, setAll] = useState([])
   const [query, setQuery] = useState('')
+  const [browseQuery, setBrowseQuery] = useState('')
   const [lightbox, setLightbox] = useState(null) // { name, image, website }
   const [browseOpen, setBrowseOpen] = useState(false)
 
@@ -25,6 +26,10 @@ export default function IndividualsSelector({ selected, onChange, disabled }) {
   }
 
   if (all.length === 0) return null
+
+  function thumbOf(image) {
+    return image ? image.replace(/(\.[^.]+)$/, '-thumb$1') : null
+  }
 
   const q = query.toLowerCase().trim()
   const queryWords = q.split(/\s+/).filter(w => w.length > 0)
@@ -86,7 +91,7 @@ export default function IndividualsSelector({ selected, onChange, disabled }) {
                   <div className={styles.avatarWrap}>
                     {meta.image ? (
                       <img
-                        src={meta.image}
+                        src={thumbOf(meta.image)}
                         alt={name}
                         className={styles.avatar}
                         onMouseDown={e => {
@@ -138,10 +143,31 @@ export default function IndividualsSelector({ selected, onChange, disabled }) {
           <div className={styles.browseModal} onClick={e => e.stopPropagation()}>
             <div className={styles.browseHeader}>
               <span className={styles.browseTitle}>All Individuals</span>
-              <button type="button" className={styles.browseClose} onClick={() => setBrowseOpen(false)}>×</button>
+              <div className={styles.browseSearchWrap}>
+                <svg className={styles.browseSearchIcon} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input
+                  type="text"
+                  className={styles.browseSearch}
+                  placeholder="Search…"
+                  value={browseQuery}
+                  onChange={e => setBrowseQuery(e.target.value)}
+                  autoFocus
+                  autoComplete="off"
+                />
+                {browseQuery && (
+                  <button type="button" className={styles.browseClearSearch} onClick={() => setBrowseQuery('')}>×</button>
+                )}
+              </div>
+              <button type="button" className={styles.browseClose} onClick={() => { setBrowseOpen(false); setBrowseQuery('') }}>×</button>
             </div>
             <div className={styles.browseGrid}>
-              {all.map(name => {
+              {all.filter(name => {
+                if (!browseQuery.trim()) return true
+                const bq = browseQuery.toLowerCase().trim()
+                return name.toLowerCase().split(/\s+/).some(w => w.startsWith(bq))
+              }).map(name => {
                 const meta = INDIVIDUALS_META[name] || {}
                 const isSelected = selected.includes(name)
                 return (
@@ -153,7 +179,7 @@ export default function IndividualsSelector({ selected, onChange, disabled }) {
                     <div className={styles.browseAvatarWrap}>
                       {meta.image ? (
                         <img
-                          src={meta.image}
+                          src={thumbOf(meta.image)}
                           alt={name}
                           className={styles.browseAvatar}
                           onClick={e => {
