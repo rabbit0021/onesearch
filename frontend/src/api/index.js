@@ -115,6 +115,15 @@ export async function getIndividualsFeed(limit = 15) {
   return res.json()
 }
 
+let _individualStatsCache = null
+export async function getIndividualStats() {
+  if (_individualStatsCache) return _individualStatsCache
+  const res = await fetch('/feed/individuals/stats')
+  if (!res.ok) throw new Error('Failed to fetch individual stats')
+  _individualStatsCache = await res.json()
+  return _individualStatsCache
+}
+
 export async function getMostLikedAllTimeFeed(limit = 20) {
   const res = await fetch(`/feed/most-liked-all-time?limit=${limit}`)
   if (!res.ok) throw new Error('Failed to fetch all-time most liked feed')

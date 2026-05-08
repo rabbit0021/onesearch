@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { likePost } from '../../../api'
+import { likePost, getIndividualStats } from '../../../api'
 import EmailDialog, { getSavedEmail } from '../../ui/EmailDialog/EmailDialog'
+import ImageLightbox from '../../ui/ImageLightbox/ImageLightbox'
 import { INDIVIDUALS_META } from '../../../data/individuals'
 import styles from './BlogCard.module.css'
 
@@ -49,6 +50,8 @@ export default function BlogCard({ post }) {
 
   const [displayCount, setDisplayCount] = useState(post.like_count || 0)
   const [showEmailDialog, setShowEmailDialog] = useState(false)
+  const [showLightbox, setShowLightbox] = useState(false)
+  const [individualLikeCount, setIndividualLikeCount] = useState(null)
 
   async function submitLike(email) {
     try {
@@ -77,6 +80,16 @@ export default function BlogCard({ post }) {
         onCancel={() => setShowEmailDialog(false)}
       />
     )}
+    {showLightbox && individualMeta && (
+      <ImageLightbox
+        image={individualMeta.image}
+        name={post.publisher}
+        realName={individualMeta.realName}
+        website={individualMeta.website}
+        likeCount={individualLikeCount}
+        onClose={() => setShowLightbox(false)}
+      />
+    )}
     <a
       href={post.url}
       target="_blank"
@@ -91,6 +104,15 @@ export default function BlogCard({ post }) {
               alt={post.publisher}
               className={styles.individualAvatar}
               onError={e => { e.currentTarget.style.display = 'none' }}
+              onClick={e => {
+                e.preventDefault()
+                e.stopPropagation()
+                setShowLightbox(true)
+                getIndividualStats().then(stats => {
+                  setIndividualLikeCount(stats[post.publisher?.toLowerCase()] ?? 0)
+                }).catch(() => {})
+              }}
+              style={{ cursor: 'pointer' }}
             />
           </div>
         ) : favicon ? (

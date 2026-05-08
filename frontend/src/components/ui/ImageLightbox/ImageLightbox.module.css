@@ -74,6 +74,15 @@
   font-weight: 400;
 }
 
+.likeCount {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: var(--fs-std);
+  font-weight: 600;
+}
+
 .link {
   color: var(--color-primary);
   font-size: var(--fs-std);

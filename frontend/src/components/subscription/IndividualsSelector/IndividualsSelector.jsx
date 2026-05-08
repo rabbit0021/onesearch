@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getIndividuals } from '../../../api'
+import { getIndividuals, getIndividualStats } from '../../../api'
 import { INDIVIDUALS_META } from '../../../data/individuals'
 import ImageLightbox from '../../ui/ImageLightbox/ImageLightbox'
 import TagBadge from '../../ui/TagBadge/TagBadge'
@@ -11,6 +11,7 @@ export default function IndividualsSelector({ selected, onChange, disabled }) {
   const [browseQuery, setBrowseQuery] = useState('')
   const [lightbox, setLightbox] = useState(null) // { name, image, website }
   const [browseOpen, setBrowseOpen] = useState(false)
+  const [individualStats, setIndividualStats] = useState({})
 
   useEffect(() => {
     getIndividuals().then(setAll).catch(() => {})
@@ -49,7 +50,10 @@ export default function IndividualsSelector({ selected, onChange, disabled }) {
         <button
           type="button"
           className={styles.browseBtn}
-          onClick={() => setBrowseOpen(true)}
+          onClick={() => {
+            setBrowseOpen(true)
+            getIndividualStats().then(setIndividualStats).catch(() => {})
+          }}
           title="Browse all individuals"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -97,7 +101,7 @@ export default function IndividualsSelector({ selected, onChange, disabled }) {
                         onMouseDown={e => {
                           e.stopPropagation()
                           e.preventDefault()
-                          setLightbox({ name, image: meta.image, website: meta.website })
+                          setLightbox({ name, image: meta.image, website: meta.website, likeCount: individualStats[name] ?? null })
                         }}
                       />
                     ) : (
@@ -135,6 +139,7 @@ export default function IndividualsSelector({ selected, onChange, disabled }) {
           name={lightbox.name}
           realName={lightbox.realName}
           website={lightbox.website}
+          likeCount={lightbox.likeCount}
           onClose={() => setLightbox(null)}
         />
       )}
@@ -185,7 +190,7 @@ export default function IndividualsSelector({ selected, onChange, disabled }) {
                           className={styles.browseAvatar}
                           onClick={e => {
                             e.stopPropagation()
-                            setLightbox({ name, realName: meta.realName, image: meta.image, website: meta.website })
+                            setLightbox({ name, realName: meta.realName, image: meta.image, website: meta.website, likeCount: individualStats[name] ?? null })
                           }}
                         />
                       ) : (
@@ -196,6 +201,14 @@ export default function IndividualsSelector({ selected, onChange, disabled }) {
                     <span className={styles.browseName}>{name}</span>
                     {meta.realName && <span className={styles.browseRealName}>{meta.realName}</span>}
                     {meta.bio && <span className={styles.browseBio}>{meta.bio}</span>}
+                    {typeof individualStats[name] === 'number' && (
+                      <div className={styles.browseLikeCount}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="rgb(255, 96, 96)">
+                          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                        </svg>
+                        <span>{individualStats[name]}</span>
+                      </div>
+                    )}
                     {meta.website && (
                       <a
                         href={meta.website}

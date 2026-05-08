@@ -372,6 +372,23 @@ def get_individuals_feed():
     finally:
         conn.close()
 
+@app.route("/feed/individuals/stats", methods=["GET"])
+def get_individuals_stats():
+    conn = app.db.get_connection()
+    try:
+        cursor = conn.execute("""
+            SELECT pub.publisher_name, COUNT(pl.user_email) AS total_likes
+            FROM publishers pub
+            LEFT JOIN posts po ON po.publisher_id = pub.id
+            LEFT JOIN post_likes pl ON pl.post_id = po.id
+            WHERE pub.publisher_type = 'individual'
+            GROUP BY pub.publisher_name
+        """)
+        result = {row["publisher_name"].lower(): row["total_likes"] for row in cursor.fetchall()}
+        return jsonify(result)
+    finally:
+        conn.close()
+
 @app.route("/publishers", methods=["GET"])
 @require_secret_key
 def get_publishers():
