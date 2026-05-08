@@ -52,8 +52,9 @@
 .iconTray {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   flex-shrink: 0;
+  padding: 2px 0;
 }
 
 .iconItem {
@@ -176,15 +177,16 @@
   justify-content: space-between;
   align-items: center;
   gap: 0.5rem;
-  height: 30px;
+  min-height: 30px;
 }
 
-.metadesc{
+.metadesc {
   display: flex;
   flex-direction: row;
   gap: 8px;
   align-items: center;
   flex: 1;
+  min-width: 0;
 }
 
 .publisher {
