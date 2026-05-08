@@ -83,6 +83,13 @@
   gap: 1px;
 }
 
+.recentPlus {
+  font-size: var(--fs-md);
+  color: #7bc07d;
+  font-weight: 700;
+  line-height: 1;
+}
+
 .recentCount {
   font-size: var(--fs-md);
   color: #7bc07d;
