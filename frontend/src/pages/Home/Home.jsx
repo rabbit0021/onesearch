@@ -36,7 +36,7 @@ export default function Home() {
 
   // Sidebar state
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [hasDot, setHasDot] = useState(true)
+  const [hasDot, setHasDot] = useState(() => localStorage.getItem('sidebar_seen') !== '1')
   const toggleRef = useRef(null)
 
   const formRef = useRef(null)
@@ -76,6 +76,7 @@ export default function Home() {
   function handleSidebarToggle() {
     setSidebarOpen((prev) => !prev)
     setHasDot(false)
+    localStorage.setItem('sidebar_seen', '1')
   }
 
   async function handleSubmit(e) {
