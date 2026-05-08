@@ -45,6 +45,38 @@
   transform: translateY(-4px);
 }
 
+.paletteToggle {
+  background: none;
+  border: none;
+  border-radius: 4px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1;
+  padding: 2px 5px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.paletteToggle:hover {
+  color: var(--color-primary);
+}
+
+.palette {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+  max-width: 0;
+  opacity: 0;
+  transition: max-width 0.25s ease, opacity 0.2s ease;
+}
+
+.paletteOpen {
+  max-width: 200px;
+  opacity: 1;
+}
+
 .swatch {
   width: 14px;
   height: 14px;
