@@ -57,7 +57,7 @@
   background: color-mix(in srgb, var(--bg-wizard) 100%, transparent);
   backdrop-filter: blur(12px);
   border: 1px solid var(--border-mid);
-  border-radius: 10px;
+  border-radius: 7px;
   width: 90%;
   height: 90%;
   display: flex;
@@ -89,7 +89,7 @@
   width: min(300px, 100%);
   margin-left: auto;
   background: var(--bg-input);
-  border: 1px solid var(--border-mid);
+  border: .1px solid var(--border-mid);
   border-radius: 6px;
   padding: 6px 10px;
   gap: 8px;
