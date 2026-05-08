@@ -17,4 +17,10 @@ export const INDIVIDUALS_META = {
     website: 'https://jvns.ca',
     bio: 'Software engineer and zine author, writes about debugging, networking, and developer tools.',
   },
+  'antirez': {
+    realName: 'Salvatore Sanfilippo',
+    image: '/individuals/antirez.jpg',
+    website: 'http://antirez.com',
+    bio: 'Creator of Redis. Writes about systems programming, software design, and life as an engineer.',
+  },
 }

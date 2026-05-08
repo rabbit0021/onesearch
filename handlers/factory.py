@@ -1,4 +1,4 @@
-from handlers import aws, github, linkedin, netflix, airbnb, dropbox, facebook, slack, spotify, cloudfare, nvidea, salesforce, google, databricks, addy_osmani, julia_evans
+from handlers import aws, github, linkedin, netflix, airbnb, dropbox, facebook, slack, spotify, cloudfare, nvidea, salesforce, google, databricks, addy_osmani, julia_evans, antirez
 from logger_config import get_logger;
 
 logger = get_logger("HANDLERS")
@@ -37,6 +37,8 @@ class ScraperFactory:
             return addy_osmani.AddyOsmaniScraper()
         elif comapny.lower() == "julia evans":
             return julia_evans.JuliaEvansScraper()
+        elif comapny.lower() == "antirez":
+            return antirez.AntirezScraper()
         else:
             logger.error(f"No handler found for {comapny}")
             return None

@@ -2,7 +2,7 @@
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.85);
-  z-index: 1000;
+  z-index: 4;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -55,11 +55,23 @@
   gap: 1.5rem;
 }
 
+.nameWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .name {
   color: #fff;
   font-size: var(--fs-std);
   font-weight: 600;
   letter-spacing: 0.04em;
+}
+
+.realName {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: var(--fs-sm);
+  font-weight: 400;
 }
 
 .link {

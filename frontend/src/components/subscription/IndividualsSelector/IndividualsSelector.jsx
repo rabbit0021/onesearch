@@ -133,6 +133,7 @@ export default function IndividualsSelector({ selected, onChange, disabled }) {
         <ImageLightbox
           image={lightbox.image}
           name={lightbox.name}
+          realName={lightbox.realName}
           website={lightbox.website}
           onClose={() => setLightbox(null)}
         />
@@ -184,7 +185,7 @@ export default function IndividualsSelector({ selected, onChange, disabled }) {
                           className={styles.browseAvatar}
                           onClick={e => {
                             e.stopPropagation()
-                            setLightbox({ name, image: meta.image, website: meta.website })
+                            setLightbox({ name, realName: meta.realName, image: meta.image, website: meta.website })
                           }}
                         />
                       ) : (
@@ -193,6 +194,7 @@ export default function IndividualsSelector({ selected, onChange, disabled }) {
                       {isSelected && <div className={styles.browseSelectedBadge}>✓</div>}
                     </div>
                     <span className={styles.browseName}>{name}</span>
+                    {meta.realName && <span className={styles.browseRealName}>{meta.realName}</span>}
                     {meta.bio && <span className={styles.browseBio}>{meta.bio}</span>}
                     {meta.website && (
                       <a

@@ -150,7 +150,7 @@
 
 .browseGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
   gap: 10px;
   padding: 14px;
   overflow-y: auto;
@@ -265,6 +265,12 @@
   font-size: var(--fs-std);
   font-weight: 600;
   color: var(--text-strong);
+}
+
+.browseRealName {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  font-weight: 400;
 }
 
 .browseBio {
