@@ -76,11 +76,12 @@
 }
 
 .browseTitle {
-  font-size: var(--fs-std);
-  font-weight: 700;
-  color: var(--text-strong);
   white-space: nowrap;
   flex-shrink: 0;
+  font-size: var(--fs-xl);
+  font-weight: 600;
+  color: var(--text-secondary);
+  line-height: 1.3;
 }
 
 .browseSearchWrap {
