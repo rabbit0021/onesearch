@@ -343,6 +343,35 @@ def get_feed():
     finally:
         conn.close()
 
+@app.route("/feed/individuals", methods=["GET"])
+def get_individuals_feed():
+    limit = min(int(request.args.get("limit", 15)), 50)
+    conn = app.db.get_connection()
+    try:
+        individuals = app.db.get_publishers_by_type(conn, publisher_type="individual")
+        individual_ids = {p["id"] for p in individuals}
+        posts = app.db.get_posts(conn)
+        result = []
+        for post in posts:
+            if not post.get("labelled"):
+                continue
+            if post.get("publisher_id") not in individual_ids:
+                continue
+            result.append({
+                "id": post["id"],
+                "url": post["url"],
+                "title": post["title"],
+                "topic": post["topic"],
+                "publisher": post["publisher_name"],
+                "published_at": post["published_at"],
+                "tags": post["tags"],
+                "like_count": post.get("like_count", 0),
+            })
+        result.sort(key=lambda x: datetime.fromisoformat(x["published_at"]), reverse=True)
+        return jsonify(result[:limit])
+    finally:
+        conn.close()
+
 @app.route("/publishers", methods=["GET"])
 @require_secret_key
 def get_publishers():

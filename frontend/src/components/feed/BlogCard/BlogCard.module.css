@@ -34,6 +34,24 @@
   padding: 4px;
 }
 
+.individualProfile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.individualAvatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2.5px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+
 .topicLabel {
   position: absolute;
   bottom: 6px;

@@ -1,6 +1,7 @@
 .wrapper {
   display: flex;
   flex-direction: column;
+  gap: 2rem;
   margin: 0 1rem;
   padding: 0 .5rem .5rem;
   box-sizing: border-box;
@@ -62,16 +63,14 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  padding: 5px;
+  border-radius: 5px;
 }
 
 .trendingSection {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-}
-
-.wrapper > div:nth-child(2) {
-  margin-top: 2.5rem;
 }
 
 .grid {
@@ -445,8 +444,6 @@
 
 
 /* ── Most Liked Recently ── */
-.mostLikedSection {}
-
 .scrollRow {
   display: flex;
   flex-direction: row;

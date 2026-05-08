@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { getFeed, getSuggestedFeed, getMostLikedFeed, getMostLikedAllTimeFeed } from '../../../api'
+import { getFeed, getSuggestedFeed, getMostLikedFeed, getMostLikedAllTimeFeed, getIndividualsFeed } from '../../../api'
 import { getJiraStatus, getJiraIssues } from '../../../api/jira'
 import BlogCard, { TOPIC_COLORS } from '../BlogCard/BlogCard'
 import styles from './BlogFeed.module.css'
@@ -18,6 +18,7 @@ export default function BlogFeed({ formRef }) {
   const [jiraConnected, setJiraConnected] = useState(false)
   const [mostLiked, setMostLiked] = useState([])
   const [mostLikedAllTime, setMostLikedAllTime] = useState([])
+  const [individualsPosts, setIndividualsPosts] = useState([])
 
   const [search, setSearch] = useState('')
   const [publisher, setPublisher] = useState('')
@@ -31,6 +32,7 @@ export default function BlogFeed({ formRef }) {
   useEffect(() => {
     getMostLikedFeed(10).then(setMostLiked).catch(() => { })
     getMostLikedAllTimeFeed(15).then(setMostLikedAllTime).catch(() => { })
+    getIndividualsFeed(15).then(setIndividualsPosts).catch(() => { })
 
     async function loadFeed() {
       try {
@@ -308,19 +310,28 @@ export default function BlogFeed({ formRef }) {
             </div>
           )}
 
-          {/* 4. Other Posts — exclude posts already shown in Trending */}
-          {(() => {
-            const mostLikedIds = new Set(filteredMostLiked.map(p => p.id))
-            const otherPosts = grouped.unmatched.filter(p => !mostLikedIds.has(p.id))
-            return otherPosts.length > 0 && (
-              <div className={styles.section}>
-                <p className={styles.heading}>Other Posts</p>
-                <div className={styles.grid}>
-                  {otherPosts.map(post => <BlogCard key={post.id} post={post} jiraConnected={jiraConnected} />)}
-                </div>
+          {/* 4. From Individuals */}
+          {individualsPosts.length > 0 && (
+            <div className={styles.section}>
+              <p className={styles.heading}>From Individuals</p>
+              <div className={styles.grid}>
+                {individualsPosts.map(post => <BlogCard key={post.id} post={post} jiraConnected={jiraConnected} />)}
               </div>
-            )
-          })()}
+            </div>
+          )}
+
+          {/* 5. All Posts */}
+          <div className={styles.section}>
+            <p className={styles.heading}>
+              {hasFilters ? `${filtered.length} post${filtered.length !== 1 ? 's' : ''} found` : 'All Posts'}
+            </p>
+            {filtered.length === 0
+              ? <p className={styles.hint}>No posts match your filters.</p>
+              : <div className={styles.grid}>
+                  {filtered.map(post => <BlogCard key={post.id} post={post} jiraConnected={jiraConnected} />)}
+                </div>
+            }
+          </div>
         </>
       ) : (
         <>
@@ -352,24 +363,28 @@ export default function BlogFeed({ formRef }) {
             </div>
           )}
 
-          {/* 3. Posts for You — exclude posts already shown in Trending */}
-          {(() => {
-            const mostLikedIds = new Set(filteredMostLiked.map(p => p.id))
-            const postsForYou = filtered.filter(p => !mostLikedIds.has(p.id))
-            return (
-              <div className={styles.section}>
-                <p className={styles.heading}>
-                  {hasFilters ? `${postsForYou.length} post${postsForYou.length !== 1 ? 's' : ''} found` : 'Posts for You'}
-                </p>
-                {postsForYou.length === 0
-                  ? <p className={styles.hint}>No posts match your filters.</p>
-                  : <div className={styles.grid}>
-                    {postsForYou.map(post => <BlogCard key={post.id} post={post} jiraConnected={jiraConnected} />)}
-                  </div>
-                }
+          {/* 3. From Individuals */}
+          {individualsPosts.length > 0 && (
+            <div className={styles.section}>
+              <p className={styles.heading}>From Individuals</p>
+              <div className={styles.grid}>
+                {individualsPosts.map(post => <BlogCard key={post.id} post={post} jiraConnected={jiraConnected} />)}
               </div>
-            )
-          })()}
+            </div>
+          )}
+
+          {/* 4. All Posts */}
+          <div className={styles.section}>
+            <p className={styles.heading}>
+              {hasFilters ? `${filtered.length} post${filtered.length !== 1 ? 's' : ''} found` : 'All Posts'}
+            </p>
+            {filtered.length === 0
+              ? <p className={styles.hint}>No posts match your filters.</p>
+              : <div className={styles.grid}>
+                  {filtered.map(post => <BlogCard key={post.id} post={post} jiraConnected={jiraConnected} />)}
+                </div>
+            }
+          </div>
         </>
       )}
 

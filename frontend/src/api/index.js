@@ -109,6 +109,12 @@ export async function getMostLikedFeed(limit = 50) {
   return res.json()
 }
 
+export async function getIndividualsFeed(limit = 15) {
+  const res = await fetch(`/feed/individuals?limit=${limit}`)
+  if (!res.ok) throw new Error('Failed to fetch individuals feed')
+  return res.json()
+}
+
 export async function getMostLikedAllTimeFeed(limit = 20) {
   const res = await fetch(`/feed/most-liked-all-time?limit=${limit}`)
   if (!res.ok) throw new Error('Failed to fetch all-time most liked feed')

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { likePost } from '../../../api'
 import EmailDialog, { getSavedEmail } from '../../ui/EmailDialog/EmailDialog'
+import { INDIVIDUALS_META } from '../../../data/individuals'
 import styles from './BlogCard.module.css'
 
 export const TOPIC_COLORS = {
@@ -41,6 +42,8 @@ export function timeAgo(iso) {
 export default function BlogCard({ post }) {
   const color = TOPIC_COLORS[post.topic] || TOPIC_COLORS['General']
   const favicon = faviconUrl(post.url)
+  const individualMeta = INDIVIDUALS_META[post.publisher?.toLowerCase()]
+  const individualThumb = individualMeta?.image?.replace(/(\.[^.]+)$/, '-thumb$1')
   const tags = post.tags ? post.tags.split(',').map(t => t.trim()).filter(Boolean) : []
   const match = post.matched_issue
 
@@ -81,14 +84,23 @@ export default function BlogCard({ post }) {
       className={`${styles.card} ${match ? styles.cardMatched : ''}`}
     >
       <div className={styles.thumbnail} style={{ background: color }}>
-        {favicon && (
+        {individualThumb ? (
+          <div className={styles.individualProfile}>
+            <img
+              src={individualThumb}
+              alt={post.publisher}
+              className={styles.individualAvatar}
+              onError={e => { e.currentTarget.style.display = 'none' }}
+            />
+          </div>
+        ) : favicon ? (
           <img
             src={favicon}
             alt=""
             className={styles.favicon}
             onError={e => { e.currentTarget.style.display = 'none' }}
           />
-        )}
+        ) : null}
         <span className={styles.topicLabel}>{post.topic}</span>
       </div>
 

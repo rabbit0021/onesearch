@@ -9,6 +9,7 @@ export default defineConfig({
   server: {
     port: 5179,
     proxy: {
+      '/feed/individuals': FLASK,
       '/feed': FLASK,
       '/subscribe': FLASK,
       '/techteams': FLASK,
