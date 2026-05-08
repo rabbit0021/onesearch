@@ -252,6 +252,15 @@
   border-radius: 0;
 }
 
+.tagMore {
+  font-size: var(--fs-2xs);
+  color: var(--text-muted);
+  background-color: var(--card-hint);
+  padding: 1px 5px;
+  border-radius: 0;
+  white-space: nowrap;
+}
+
 /* ── Jira match tip ── */
 .matchTip {
   display: flex;

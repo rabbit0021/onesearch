@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { likePost, getIndividualStats } from '../../../api'
 import EmailDialog, { getSavedEmail } from '../../ui/EmailDialog/EmailDialog'
 import ImageLightbox from '../../ui/ImageLightbox/ImageLightbox'
@@ -47,6 +47,27 @@ export default function BlogCard({ post }) {
   const individualThumb = individualMeta?.image?.replace(/(\.[^.]+)$/, '-thumb$1')
   const tags = post.tags ? post.tags.split(',').map(t => t.trim()).filter(Boolean) : []
   const match = post.matched_issue
+
+  const tagsContainerRef = useRef(null)
+  const [tagsSlice, setTagsSlice] = useState(null)
+
+  useEffect(() => {
+    const container = tagsContainerRef.current
+    if (!container) return
+    const els = Array.from(container.querySelectorAll('[data-tag]'))
+    if (!els.length) return
+    const seenTops = []
+    for (const el of els) {
+      const top = el.offsetTop
+      if (!seenTops.includes(top)) seenTops.push(top)
+      if (seenTops.length === 3) {
+        const idx = els.indexOf(el)
+        setTagsSlice(Math.max(1, idx - 1))
+        return
+      }
+    }
+    setTagsSlice(null)
+  }, [post.tags])
 
   const [displayCount, setDisplayCount] = useState(post.like_count || 0)
   const [showEmailDialog, setShowEmailDialog] = useState(false)
@@ -160,11 +181,13 @@ export default function BlogCard({ post }) {
         </div>
         <p className={styles.title}>{post.title}</p>
         {tags.length > 0 && (
-          <div className={styles.tags}>
-            {tags.slice(0, 3).map(tag => (
-              <span key={tag} className={styles.tag}>{tag}</span>
+          <div className={styles.tags} ref={tagsContainerRef}>
+            {(tagsSlice !== null ? tags.slice(0, tagsSlice) : tags).map(tag => (
+              <span key={tag} data-tag="" className={styles.tag}>{tag}</span>
             ))}
-
+            {tagsSlice !== null && (
+              <span className={styles.tagMore}>+{tags.length - tagsSlice} tags</span>
+            )}
           </div>
         )}
         {match && (

@@ -310,12 +310,16 @@ export default function BlogFeed({ formRef }) {
             </div>
           )}
 
-          {/* 4. From Individuals */}
+          {/* 4. Recently from Individuals */}
           {individualsPosts.length > 0 && (
             <div className={styles.section}>
-              <p className={styles.heading}>From Individuals</p>
-              <div className={styles.grid}>
-                {individualsPosts.map(post => <BlogCard key={post.id} post={post} jiraConnected={jiraConnected} />)}
+              <p className={styles.heading}>Recently from Individuals</p>
+              <div className={styles.scrollRow}>
+                {individualsPosts.map(post => (
+                  <div key={post.id} className={styles.scrollCard}>
+                    <BlogCard post={post} jiraConnected={jiraConnected} />
+                  </div>
+                ))}
               </div>
             </div>
           )}
@@ -363,12 +367,16 @@ export default function BlogFeed({ formRef }) {
             </div>
           )}
 
-          {/* 3. From Individuals */}
+          {/* 3. Recently from Individuals */}
           {individualsPosts.length > 0 && (
             <div className={styles.section}>
-              <p className={styles.heading}>From Individuals</p>
-              <div className={styles.grid}>
-                {individualsPosts.map(post => <BlogCard key={post.id} post={post} jiraConnected={jiraConnected} />)}
+              <p className={styles.heading}>Recently from Individuals</p>
+              <div className={styles.scrollRow}>
+                {individualsPosts.map(post => (
+                  <div key={post.id} className={styles.scrollCard}>
+                    <BlogCard post={post} jiraConnected={jiraConnected} />
+                  </div>
+                ))}
               </div>
             </div>
           )}
