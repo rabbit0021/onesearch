@@ -304,12 +304,12 @@ export default function BlogFeed({ formRef }) {
                 </div>
               )}
 
-              {/* 3. All Time Favourites */}
-              {filteredMostLikedAllTime.length > 0 && (
+              {/* 3. Recently from Individuals */}
+              {filteredIndividualsPosts.length > 0 && (
                 <div className={styles.section}>
-                  <p className={styles.heading}>All Time Favourites</p>
+                  <p className={styles.heading}>Recently from Individuals</p>
                   <div className={styles.scrollRow}>
-                    {filteredMostLikedAllTime.map(post => (
+                    {filteredIndividualsPosts.map(post => (
                       <div key={post.id} className={styles.scrollCard}>
                         <BlogCard post={post} jiraConnected={jiraConnected} />
                       </div>
@@ -318,12 +318,12 @@ export default function BlogFeed({ formRef }) {
                 </div>
               )}
 
-              {/* 4. Recently from Individuals */}
-              {filteredIndividualsPosts.length > 0 && (
+              {/* 4. All Time Favourites */}
+              {filteredMostLikedAllTime.length > 0 && (
                 <div className={styles.section}>
-                  <p className={styles.heading}>Recently from Individuals</p>
+                  <p className={styles.heading}>All Time Favourites</p>
                   <div className={styles.scrollRow}>
-                    {filteredIndividualsPosts.map(post => (
+                    {filteredMostLikedAllTime.map(post => (
                       <div key={post.id} className={styles.scrollCard}>
                         <BlogCard post={post} jiraConnected={jiraConnected} />
                       </div>
@@ -365,12 +365,12 @@ export default function BlogFeed({ formRef }) {
                 </div>
               )}
 
-              {/* 2. All Time Favourites */}
-              {filteredMostLikedAllTime.length > 0 && (
+              {/* 2. Recently from Individuals */}
+              {filteredIndividualsPosts.length > 0 && (
                 <div className={styles.section}>
-                  <p className={styles.heading}>All Time Favourites</p>
+                  <p className={styles.heading}>Recently from Individuals</p>
                   <div className={styles.scrollRow}>
-                    {filteredMostLikedAllTime.map(post => (
+                    {filteredIndividualsPosts.map(post => (
                       <div key={post.id} className={styles.scrollCard}>
                         <BlogCard post={post} jiraConnected={jiraConnected} />
                       </div>
@@ -379,12 +379,12 @@ export default function BlogFeed({ formRef }) {
                 </div>
               )}
 
-              {/* 3. Recently from Individuals */}
-              {filteredIndividualsPosts.length > 0 && (
+              {/* 3. All Time Favourites */}
+              {filteredMostLikedAllTime.length > 0 && (
                 <div className={styles.section}>
-                  <p className={styles.heading}>Recently from Individuals</p>
+                  <p className={styles.heading}>All Time Favourites</p>
                   <div className={styles.scrollRow}>
-                    {filteredIndividualsPosts.map(post => (
+                    {filteredMostLikedAllTime.map(post => (
                       <div key={post.id} className={styles.scrollCard}>
                         <BlogCard post={post} jiraConnected={jiraConnected} />
                       </div>
