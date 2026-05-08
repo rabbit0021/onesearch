@@ -17,6 +17,11 @@ export default function IndividualsSelector({ selected, onChange, disabled }) {
     getIndividuals().then(setAll).catch(() => {})
   }, [])
 
+  useEffect(() => {
+    document.body.style.overflow = browseOpen ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [browseOpen])
+
   function toggleSelect(name) {
     if (disabled) return
     onChange(
@@ -196,7 +201,13 @@ export default function IndividualsSelector({ selected, onChange, disabled }) {
                       ) : (
                         <div className={styles.browseAvatarFallback}>{name.charAt(0)}</div>
                       )}
-                      {isSelected && <div className={styles.browseSelectedBadge}>✓</div>}
+                      {isSelected && (
+                        <div className={styles.browseSelectedBadge}>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 6 9 17 4 12"/>
+                          </svg>
+                        </div>
+                      )}
                     </div>
                     <span className={styles.browseName}>{name}</span>
                     {meta.realName && <span className={styles.browseRealName}>{meta.realName}</span>}
