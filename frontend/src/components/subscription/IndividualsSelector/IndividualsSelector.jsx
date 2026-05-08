@@ -9,6 +9,7 @@ export default function IndividualsSelector({ selected, onChange, disabled }) {
   const [all, setAll] = useState([])
   const [query, setQuery] = useState('')
   const [lightbox, setLightbox] = useState(null) // { name, image, website }
+  const [browseOpen, setBrowseOpen] = useState(false)
 
   useEffect(() => {
     getIndividuals().then(setAll).catch(() => {})
@@ -38,7 +39,21 @@ export default function IndividualsSelector({ selected, onChange, disabled }) {
 
   return (
     <div className={styles.group}>
-      <label className={styles.label}>Select individuals</label>
+      <div className={styles.labelRow}>
+        <label className={styles.label}>Select individuals</label>
+        <button
+          type="button"
+          className={styles.browseBtn}
+          onClick={() => setBrowseOpen(true)}
+          title="Browse all individuals"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+          </svg>
+          Browse all
+        </button>
+      </div>
 
       {selected.length > 0 && (
         <div className={styles.tags}>
@@ -116,6 +131,60 @@ export default function IndividualsSelector({ selected, onChange, disabled }) {
           website={lightbox.website}
           onClose={() => setLightbox(null)}
         />
+      )}
+
+      {browseOpen && (
+        <div className={styles.browseOverlay} onClick={() => setBrowseOpen(false)}>
+          <div className={styles.browseModal} onClick={e => e.stopPropagation()}>
+            <div className={styles.browseHeader}>
+              <span className={styles.browseTitle}>All Individuals</span>
+              <button type="button" className={styles.browseClose} onClick={() => setBrowseOpen(false)}>×</button>
+            </div>
+            <div className={styles.browseGrid}>
+              {all.map(name => {
+                const meta = INDIVIDUALS_META[name] || {}
+                const isSelected = selected.includes(name)
+                return (
+                  <div
+                    key={name}
+                    className={`${styles.browseCard} ${isSelected ? styles.browseCardSelected : ''} ${disabled ? styles.browseCardDisabled : ''}`}
+                    onClick={() => { if (!disabled) toggleSelect(name) }}
+                  >
+                    <div className={styles.browseAvatarWrap}>
+                      {meta.image ? (
+                        <img
+                          src={meta.image}
+                          alt={name}
+                          className={styles.browseAvatar}
+                          onClick={e => {
+                            e.stopPropagation()
+                            setLightbox({ name, image: meta.image, website: meta.website })
+                          }}
+                        />
+                      ) : (
+                        <div className={styles.browseAvatarFallback}>{name.charAt(0)}</div>
+                      )}
+                      {isSelected && <div className={styles.browseSelectedBadge}>✓</div>}
+                    </div>
+                    <span className={styles.browseName}>{name}</span>
+                    {meta.bio && <span className={styles.browseBio}>{meta.bio}</span>}
+                    {meta.website && (
+                      <a
+                        href={meta.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.browseSiteLink}
+                        onClick={e => e.stopPropagation()}
+                      >
+                        {meta.website.replace(/^https?:\/\//, '')} ↗
+                      </a>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
