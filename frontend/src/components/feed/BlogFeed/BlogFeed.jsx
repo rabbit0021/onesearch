@@ -82,7 +82,12 @@ export default function BlogFeed({ formRef }) {
     const q = search.toLowerCase()
     const cutoff = dateDays ? Date.now() - dateDays * 86400000 : null
     return p => {
-      if (q && !p.title.toLowerCase().includes(q)) return false
+      if (q) {
+        const inTitle = p.title?.toLowerCase().includes(q)
+        const inPublisher = p.publisher?.toLowerCase().includes(q)
+        const inTags = p.tags?.toLowerCase().includes(q)
+        if (!inTitle && !inPublisher && !inTags) return false
+      }
       if (publisher && p.publisher !== publisher) return false
       if (topic && p.topic !== topic) return false
       if (cutoff && new Date(p.published_at).getTime() < cutoff) return false
