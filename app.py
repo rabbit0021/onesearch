@@ -619,11 +619,17 @@ def get_posts():
                 "topic": post["topic"],
                 "publisher": post["publisher_name"],
                 "published_at": post["published_at"],
+                "created_at": post["created_at"],
                 "tags": post["tags"],
                 "labelled": post['labelled']
             })
+        def _sort_dt(s):
+            try:
+                return datetime.fromisoformat(s.replace('Z', '+00:00')).replace(tzinfo=None)
+            except Exception:
+                return datetime.min
         result.sort(
-            key=lambda x: datetime.fromisoformat(x['published_at']),
+            key=lambda x: _sort_dt(x['created_at'] or x['published_at']),
             reverse=True
         )   
         return jsonify(result)

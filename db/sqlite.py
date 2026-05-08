@@ -89,6 +89,14 @@ class SQLiteDatabase:
         except Exception:
             pass  # column already exists
 
+        # Migration: add created_at column, backfill existing rows from published_at
+        try:
+            c.execute("ALTER TABLE posts ADD COLUMN created_at DATETIME")
+            c.execute("UPDATE posts SET created_at = published_at WHERE created_at IS NULL")
+            logger.info("Migration: added created_at column to posts")
+        except Exception:
+            pass  # column already exists
+
         # Migration: expand topic CHECK constraints to new detailed categories
         try:
             c.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='posts'")
@@ -475,8 +483,8 @@ class SQLiteDatabase:
         
         if not post:
             c.execute("""
-                INSERT INTO posts (url, title, publisher_id, topic, tags, published_at, modified_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO posts (url, title, publisher_id, topic, tags, published_at, modified_at, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
             """, (post_url, post_title, published_by, topic, tags, published_at, published_at))
             logger.info(f"post {post_title} added successfully!")
             return c.lastrowid
@@ -513,7 +521,7 @@ class SQLiteDatabase:
         c = conn.cursor()
         c.execute("""
             SELECT po.id, po.url, po.title, po.tags, po.published_at,
-                   po.modified_at, po.labelled, po.topic, po.embedding,
+                   po.modified_at, po.created_at, po.labelled, po.topic, po.embedding,
                    p.id AS publisher_id, p.publisher_name, p.publisher_type,
                    COALESCE(lc.like_count, 0) AS like_count
             FROM posts po
