@@ -66,8 +66,8 @@ export default function BlogFeed({ formRef }) {
   }, [formRef])
 
   const publishers = useMemo(
-    () => [...new Set(posts.map(p => p.publisher).filter(Boolean))].sort(),
-    [posts]
+    () => [...new Set([...posts, ...mostLiked, ...mostLikedAllTime, ...individualsPosts].map(p => p.publisher).filter(Boolean))].sort(),
+    [posts, mostLiked, mostLikedAllTime, individualsPosts]
   )
 
   const allTags = useMemo(() => {
@@ -97,6 +97,7 @@ export default function BlogFeed({ formRef }) {
   const filtered = useMemo(() => posts.filter(filterPredicate), [posts, filterPredicate])
   const filteredMostLiked = useMemo(() => mostLiked.filter(filterPredicate), [mostLiked, filterPredicate])
   const filteredMostLikedAllTime = useMemo(() => mostLikedAllTime.filter(filterPredicate), [mostLikedAllTime, filterPredicate])
+  const filteredIndividualsPosts = useMemo(() => individualsPosts.filter(filterPredicate), [individualsPosts, filterPredicate])
 
   function toggleTag(tag) {
     setActiveTags(prev =>
@@ -282,46 +283,50 @@ export default function BlogFeed({ formRef }) {
             }
           </div>
 
-          {/* 2. Most Liked Recently */}
-          {filteredMostLiked.length > 0 && (
-            <div className={styles.trendingSection}>
-              <p className={styles.heading}>Trending Blog Posts</p>
-              <div className={styles.scrollRow}>
-                {filteredMostLiked.map(post => (
-                  <div key={post.id} className={styles.scrollCard}>
-                    <BlogCard post={post} jiraConnected={jiraConnected} />
+          {!hasFilters && (
+            <>
+              {/* 2. Most Liked Recently */}
+              {filteredMostLiked.length > 0 && (
+                <div className={styles.trendingSection}>
+                  <p className={styles.heading}>Trending Blog Posts</p>
+                  <div className={styles.scrollRow}>
+                    {filteredMostLiked.map(post => (
+                      <div key={post.id} className={styles.scrollCard}>
+                        <BlogCard post={post} jiraConnected={jiraConnected} />
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
+                </div>
+              )}
 
-          {/* 3. All Time Favourites */}
-          {filteredMostLikedAllTime.length > 0 && (
-            <div className={styles.section}>
-              <p className={styles.heading}>All Time Favourites</p>
-              <div className={styles.scrollRow}>
-                {filteredMostLikedAllTime.map(post => (
-                  <div key={post.id} className={styles.scrollCard}>
-                    <BlogCard post={post} jiraConnected={jiraConnected} />
+              {/* 3. All Time Favourites */}
+              {filteredMostLikedAllTime.length > 0 && (
+                <div className={styles.section}>
+                  <p className={styles.heading}>All Time Favourites</p>
+                  <div className={styles.scrollRow}>
+                    {filteredMostLikedAllTime.map(post => (
+                      <div key={post.id} className={styles.scrollCard}>
+                        <BlogCard post={post} jiraConnected={jiraConnected} />
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
+                </div>
+              )}
 
-          {/* 4. Recently from Individuals */}
-          {individualsPosts.length > 0 && (
-            <div className={styles.section}>
-              <p className={styles.heading}>Recently from Individuals</p>
-              <div className={styles.scrollRow}>
-                {individualsPosts.map(post => (
-                  <div key={post.id} className={styles.scrollCard}>
-                    <BlogCard post={post} jiraConnected={jiraConnected} />
+              {/* 4. Recently from Individuals */}
+              {filteredIndividualsPosts.length > 0 && (
+                <div className={styles.section}>
+                  <p className={styles.heading}>Recently from Individuals</p>
+                  <div className={styles.scrollRow}>
+                    {filteredIndividualsPosts.map(post => (
+                      <div key={post.id} className={styles.scrollCard}>
+                        <BlogCard post={post} jiraConnected={jiraConnected} />
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </div>
+                </div>
+              )}
+            </>
           )}
 
           {/* 5. All Posts */}
@@ -339,46 +344,50 @@ export default function BlogFeed({ formRef }) {
         </>
       ) : (
         <>
-          {/* 1. Trending — visible to all users */}
-          {filteredMostLiked.length > 0 && (
-            <div className={styles.section}>
-              <p className={styles.heading}>Trending Blog Posts</p>
-              <div className={styles.scrollRow}>
-                {filteredMostLiked.map(post => (
-                  <div key={post.id} className={styles.scrollCard}>
-                    <BlogCard post={post} jiraConnected={jiraConnected} />
+          {!hasFilters && (
+            <>
+              {/* 1. Trending — visible to all users */}
+              {filteredMostLiked.length > 0 && (
+                <div className={styles.section}>
+                  <p className={styles.heading}>Trending Blog Posts</p>
+                  <div className={styles.scrollRow}>
+                    {filteredMostLiked.map(post => (
+                      <div key={post.id} className={styles.scrollCard}>
+                        <BlogCard post={post} jiraConnected={jiraConnected} />
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
+                </div>
+              )}
 
-          {/* 2. All Time Favourites */}
-          {filteredMostLikedAllTime.length > 0 && (
-            <div className={styles.section}>
-              <p className={styles.heading}>All Time Favourites</p>
-              <div className={styles.scrollRow}>
-                {filteredMostLikedAllTime.map(post => (
-                  <div key={post.id} className={styles.scrollCard}>
-                    <BlogCard post={post} jiraConnected={jiraConnected} />
+              {/* 2. All Time Favourites */}
+              {filteredMostLikedAllTime.length > 0 && (
+                <div className={styles.section}>
+                  <p className={styles.heading}>All Time Favourites</p>
+                  <div className={styles.scrollRow}>
+                    {filteredMostLikedAllTime.map(post => (
+                      <div key={post.id} className={styles.scrollCard}>
+                        <BlogCard post={post} jiraConnected={jiraConnected} />
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
+                </div>
+              )}
 
-          {/* 3. Recently from Individuals */}
-          {individualsPosts.length > 0 && (
-            <div className={styles.section}>
-              <p className={styles.heading}>Recently from Individuals</p>
-              <div className={styles.scrollRow}>
-                {individualsPosts.map(post => (
-                  <div key={post.id} className={styles.scrollCard}>
-                    <BlogCard post={post} jiraConnected={jiraConnected} />
+              {/* 3. Recently from Individuals */}
+              {filteredIndividualsPosts.length > 0 && (
+                <div className={styles.section}>
+                  <p className={styles.heading}>Recently from Individuals</p>
+                  <div className={styles.scrollRow}>
+                    {filteredIndividualsPosts.map(post => (
+                      <div key={post.id} className={styles.scrollCard}>
+                        <BlogCard post={post} jiraConnected={jiraConnected} />
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </div>
+                </div>
+              )}
+            </>
           )}
 
           {/* 4. All Posts */}
