@@ -29,6 +29,7 @@ export default function BlogFeed({ formRef }) {
   const [tagSearch, setTagSearch] = useState('')
 
   const [filterClosed, setFilterClosed] = useState(true)
+  const [sortBy, setSortBy] = useState(null)
 
   useEffect(() => {
     getMostLikedFeed(10).then(setMostLiked).catch(() => { })
@@ -101,7 +102,13 @@ export default function BlogFeed({ formRef }) {
     }
   }, [search, publisher, topic, dateDays, activeTags])
 
-  const filtered = useMemo(() => posts.filter(filterPredicate), [posts, filterPredicate])
+  const filtered = useMemo(() => {
+    const arr = posts.filter(filterPredicate)
+    if (sortBy === 'likes') return [...arr].sort((a, b) => (b.like_count || 0) - (a.like_count || 0))
+    if (sortBy === 'views') return [...arr].sort((a, b) => (b.view_count || 0) - (a.view_count || 0))
+    if (sortBy === 'stars') return [...arr].sort((a, b) => (b.fire_count || 0) - (a.fire_count || 0))
+    return arr // date — already sorted by API
+  }, [posts, filterPredicate, sortBy])
   const filteredMostLiked = useMemo(() => mostLiked.filter(filterPredicate), [mostLiked, filterPredicate])
   const filteredMostLikedAllTime = useMemo(() => mostLikedAllTime.filter(filterPredicate), [mostLikedAllTime, filterPredicate])
   const filteredIndividualsPosts = useMemo(() => individualsPosts.filter(filterPredicate), [individualsPosts, filterPredicate])
@@ -112,9 +119,10 @@ export default function BlogFeed({ formRef }) {
     )
   }
 
-  const hasFilters = search || publisher || topic || dateDays || activeTags.length > 0
+  const hasRealFilters = search || publisher || topic || dateDays || activeTags.length > 0
+  const hasFilters = hasRealFilters || sortBy
   const activeFilterCount = [search, publisher, topic, dateDays].filter(Boolean).length + activeTags.length
-  function clearAllFilters() { setSearch(''); setPublisher(''); setTopic(''); setDateDays(null); setActiveTags([]); setTagSearch('') }
+  function clearAllFilters() { setSearch(''); setPublisher(''); setTopic(''); setDateDays(null); setActiveTags([]); setTagSearch(''); setSortBy(null) }
 
   const grouped = useMemo(() => {
     const groups = {}
@@ -145,15 +153,40 @@ export default function BlogFeed({ formRef }) {
 
       <div className={styles.filterBar}>
 
-        <button
-          className={styles.filterToggle}
+        <div
+          className={styles.filterBarHeader}
           onClick={() => setFilterClosed(prev => !prev)}
-          title={filterClosed ? 'expand filters' : 'collapse filters'}
         >
-          {filterClosed ? '[+]' : '[-]'}
-        </button>
+          <span className={styles.filterHeading}>&gt;_ filters</span>
 
-        {filterClosed && hasFilters && (
+          <span className={styles.filterToggle}>
+            {filterClosed ? '[+]' : '[-]'}
+          </span>
+
+          <div className={styles.sortRow} onClick={e => e.stopPropagation()}>
+            <span className={styles.sortLabel}>sort //</span>
+
+            <button className={`${styles.sortPill} ${styles.sortPillLikes} ${sortBy === 'likes' ? styles.sortPillActive : ''}`} onClick={() => setSortBy(s => s === 'likes' ? null : 'likes')}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+              </svg>
+            </button>
+
+            <button className={`${styles.sortPill} ${styles.sortPillViews} ${sortBy === 'views' ? styles.sortPillActive : ''}`} onClick={() => setSortBy(s => s === 'views' ? null : 'views')}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5C21.27 7.61 17 4.5 12 4.5zm0 12.5c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+              </svg>
+            </button>
+
+            <button className={`${styles.sortPill} ${styles.sortPillStars} ${sortBy === 'stars' ? styles.sortPillActive : ''}`} onClick={() => setSortBy(s => s === 'stars' ? null : 'stars')}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 3l2.45 4.97 5.48.8-3.97 3.87.94 5.46L12 15.6l-4.9 2.57.94-5.46L4.07 8.77l5.48-.8z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {filterClosed && hasRealFilters && (
           <div className={styles.filterActiveMeta}>
             <span className={styles.filterActiveCount}>{activeFilterCount} filter{activeFilterCount !== 1 ? 's' : ''} active</span>
             <button className={styles.filterActiveClear} onClick={clearAllFilters}>clear</button>
