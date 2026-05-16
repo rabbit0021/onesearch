@@ -2,7 +2,6 @@
   display: flex;
   flex-direction: column;
   border-radius: 4px;
-  overflow: hidden;
   background: var(--card-bg);
   box-shadow: 0 1px 4px var(--card-shadow);
   text-decoration: none;
@@ -23,6 +22,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+  border-radius: 4px 4px 0 0;
 }
 
 .favicon {
@@ -96,19 +97,28 @@
   line-height: 1;
 }
 
-.iconItem:not(.likeBtn):not(.viewItem) svg {
+.iconItem:not(.likeBtn):not(.viewItem):not(.starItem) svg {
   color: #3c933f;
   flex-shrink: 0;
   margin-top: -3px;
 }
 
-/* ── Fire count ── */
-.fireIcon {
-  font-size: 13px;
+/* ── Star rating ── */
+.starRating {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  cursor: default;
   line-height: 1;
 }
 
-.fireCounter {
+.starFilled {
+  color: #f5a623;
+  flex-shrink: 0;
+  margin-top: -1px;
+}
+
+.starCount {
   font-size: var(--fs-md);
   color: var(--text-base);
   line-height: 17px;
@@ -219,6 +229,7 @@
   flex-direction: column;
   gap: 0.6rem;
   flex: 1;
+  overflow: visible;
 }
 
 .meta {
@@ -228,6 +239,7 @@
   align-items: center;
   gap: 0.5rem;
   min-height: 30px;
+  overflow: visible;
 }
 
 .metadesc {

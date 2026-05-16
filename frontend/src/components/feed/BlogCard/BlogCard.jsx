@@ -30,6 +30,15 @@ export function faviconUrl(postUrl) {
   }
 }
 
+export function fireToStars(fireCount) {
+  if (!fireCount || fireCount <= 0) return 0
+  if (fireCount <= 20) return 1
+  if (fireCount <= 40) return 2
+  if (fireCount <= 60) return 3
+  if (fireCount <= 80) return 4
+  return 5
+}
+
 export function timeAgo(iso) {
   const diff = Date.now() - new Date(iso).getTime()
   const days = Math.floor(diff / 86400000)
@@ -170,10 +179,14 @@ export default function BlogCard({ post }) {
               <span className={styles.viewCounter}>{viewCount}</span>
             </div>
 
-            {post.fire_count > 0 && (
-              <div className={styles.iconItem}>
-                <span className={styles.fireIcon}>🔥</span>
-                <span className={styles.fireCounter}>{post.fire_count}</span>
+            {fireToStars(post.fire_count) > 0 && (
+              <div className={`${styles.iconItem} ${styles.starItem}`}>
+                <div className={styles.starRating}>
+                  <svg className={styles.starFilled} width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 3l2.45 4.97 5.48.8-3.97 3.87.94 5.46L12 15.6l-4.9 2.57.94-5.46L4.07 8.77l5.48-.8z"/>
+                  </svg>
+                  <span className={styles.starCount}>{fireToStars(post.fire_count)}</span>
+                </div>
               </div>
             )}
 
