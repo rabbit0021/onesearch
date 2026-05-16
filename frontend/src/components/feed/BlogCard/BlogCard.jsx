@@ -34,7 +34,6 @@ export function timeAgo(iso) {
   const diff = Date.now() - new Date(iso).getTime()
   const days = Math.floor(diff / 86400000)
   if (days === 0) return 'Today'
-  if (days === 1) return 'Yesterday'
   if (days < 30) return `${days}d ago`
   const months = Math.floor(days / 30)
   return `${months}mo ago`
@@ -70,7 +69,7 @@ export default function BlogCard({ post }) {
   }, [post.tags])
 
   const [displayCount, setDisplayCount] = useState(post.like_count || 0)
-  const [viewCount, setViewCount] = useState(post.view_count || 0)
+  const [viewCount, setViewCount] = useState(Math.max(post.view_count || 0, post.like_count || 0))
   const [showEmailDialog, setShowEmailDialog] = useState(false)
   const [showLightbox, setShowLightbox] = useState(false)
   const [individualLikeCount, setIndividualLikeCount] = useState(null)
@@ -80,7 +79,7 @@ export default function BlogCard({ post }) {
     const userIdentifier = email || 'anonymous'
     const deviceId = getOrCreateDeviceId()
     recordView(post.id, userIdentifier, deviceId).then(() => {
-      setViewCount(c => c + 1)
+      setViewCount(c => Math.max(c + 1, displayCount))
     }).catch(() => {})
   }
 
