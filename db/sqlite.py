@@ -74,6 +74,25 @@ class SQLiteDatabase:
             FOREIGN KEY (post_id) REFERENCES posts(id)
         )
         """)
+        c.execute("""
+        CREATE TABLE IF NOT EXISTS fire (
+            post_id INTEGER PRIMARY KEY,
+            fire_count INTEGER NOT NULL DEFAULT 0,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (post_id) REFERENCES posts(id)
+        )
+        """)
+        c.execute("""
+        CREATE TABLE IF NOT EXISTS views (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            post_id INTEGER NOT NULL,
+            user_identifier TEXT NOT NULL,
+            device_id TEXT NOT NULL,
+            viewed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE (post_id, user_identifier, device_id),
+            FOREIGN KEY (post_id) REFERENCES posts(id)
+        )
+        """)
 
         # Migration: rename jira_account_id to user_email in post_likes
         try:
@@ -523,7 +542,9 @@ class SQLiteDatabase:
             SELECT po.id, po.url, po.title, po.tags, po.published_at,
                    po.modified_at, po.created_at, po.labelled, po.topic, po.embedding,
                    p.id AS publisher_id, p.publisher_name, p.publisher_type,
-                   COALESCE(lc.like_count, 0) AS like_count
+                   COALESCE(lc.like_count, 0) AS like_count,
+                   COALESCE(f.fire_count, 0) AS fire_count,
+                   COALESCE(vc.view_count, 0) AS view_count
             FROM posts po
             JOIN publishers p ON po.publisher_id = p.id
             LEFT JOIN (
@@ -531,6 +552,12 @@ class SQLiteDatabase:
                 FROM post_likes
                 GROUP BY post_id
             ) lc ON lc.post_id = po.id
+            LEFT JOIN fire f ON f.post_id = po.id
+            LEFT JOIN (
+                SELECT post_id, COUNT(*) AS view_count
+                FROM views
+                GROUP BY post_id
+            ) vc ON vc.post_id = po.id
         """)
         rows = c.fetchall()
         return [dict(row) for row in rows]
@@ -561,6 +588,25 @@ class SQLiteDatabase:
         c.execute("SELECT COUNT(*) FROM post_likes WHERE post_id = ?", (post_id,))
         return c.fetchone()[0], is_new
 
+    def record_view(self, conn, post_id, user_identifier, device_id):
+        c = conn.cursor()
+        c.execute(
+            "INSERT OR IGNORE INTO views (post_id, user_identifier, device_id) VALUES (?, ?, ?)",
+            (post_id, user_identifier, device_id)
+        )
+        conn.commit()
+        c.execute("SELECT COUNT(*) FROM views WHERE post_id = ?", (post_id,))
+        return c.fetchone()[0]
+
+    def set_fire_count(self, conn, post_id, fire_count):
+        c = conn.cursor()
+        c.execute("""
+            INSERT INTO fire (post_id, fire_count, updated_at)
+            VALUES (?, ?, CURRENT_TIMESTAMP)
+            ON CONFLICT(post_id) DO UPDATE SET fire_count = excluded.fire_count, updated_at = excluded.updated_at
+        """, (post_id, fire_count))
+        conn.commit()
+
     def get_most_liked_this_month(self, conn, limit=5):
         c = conn.cursor()
         c.execute("""
@@ -568,30 +614,66 @@ class SQLiteDatabase:
                    po.modified_at, po.labelled, po.topic,
                    p.id AS publisher_id, p.publisher_name, p.publisher_type,
                    COUNT(pl.user_email) AS recent_like_count,
-                   (SELECT COUNT(*) FROM post_likes WHERE post_id = po.id) AS like_count
+                   (SELECT COUNT(*) FROM post_likes WHERE post_id = po.id) AS like_count,
+                   COALESCE(f.fire_count, 0) AS fire_count,
+                   (SELECT COUNT(*) FROM views WHERE post_id = po.id) AS view_count,
+                   (COUNT(pl.user_email) * 2 + (SELECT COUNT(*) FROM views WHERE post_id = po.id)) AS trending_score
             FROM post_likes pl
             JOIN posts po ON pl.post_id = po.id
             JOIN publishers p ON po.publisher_id = p.id
-            WHERE pl.liked_at >= datetime('now', '-30 days')
+            LEFT JOIN fire f ON f.post_id = po.id
+            WHERE pl.liked_at >= datetime('now', '-15 days')
               AND po.labelled = 1
             GROUP BY po.id
-            ORDER BY recent_like_count DESC
+            ORDER BY trending_score DESC
             LIMIT ?
         """, (limit,))
         rows = c.fetchall()
         return [dict(row) for row in rows]
 
     
+    def get_recommended_by_fire(self, conn, limit=15):
+        c = conn.cursor()
+        c.execute("""
+            SELECT po.id, po.url, po.title, po.tags, po.published_at,
+                   po.modified_at, po.labelled, po.topic,
+                   p.id AS publisher_id, p.publisher_name, p.publisher_type,
+                   COALESCE(lc.like_count, 0) AS like_count,
+                   COALESCE(f.fire_count, 0) AS fire_count,
+                   COALESCE(vc.view_count, 0) AS view_count
+            FROM posts po
+            JOIN publishers p ON po.publisher_id = p.id
+            JOIN fire f ON f.post_id = po.id
+            LEFT JOIN (
+                SELECT post_id, COUNT(*) AS like_count
+                FROM post_likes GROUP BY post_id
+            ) lc ON lc.post_id = po.id
+            LEFT JOIN (
+                SELECT post_id, COUNT(*) AS view_count
+                FROM views GROUP BY post_id
+            ) vc ON vc.post_id = po.id
+            WHERE po.labelled = 1
+              AND f.fire_count > 0
+              AND po.published_at >= datetime('now', '-3 months')
+            ORDER BY f.fire_count DESC
+            LIMIT ?
+        """, (limit,))
+        rows = c.fetchall()
+        return [dict(row) for row in rows]
+
     def get_most_liked_all_time(self, conn, limit=20):
         c = conn.cursor()
         c.execute("""
             SELECT po.id, po.url, po.title, po.tags, po.published_at,
                    po.modified_at, po.labelled, po.topic,
                    p.id AS publisher_id, p.publisher_name, p.publisher_type,
-                   COUNT(pl.user_email) AS like_count
+                   COUNT(pl.user_email) AS like_count,
+                   COALESCE(f.fire_count, 0) AS fire_count,
+                   (SELECT COUNT(*) FROM views WHERE post_id = po.id) AS view_count
             FROM post_likes pl
             JOIN posts po ON pl.post_id = po.id
             JOIN publishers p ON po.publisher_id = p.id
+            LEFT JOIN fire f ON f.post_id = po.id
             WHERE po.labelled = 1
             GROUP BY po.id
             ORDER BY like_count DESC

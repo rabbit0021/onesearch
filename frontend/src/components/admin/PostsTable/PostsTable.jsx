@@ -17,7 +17,7 @@ export default function PostsTable({ posts, secretKey, onUpdated }) {
       <table className={styles.table}>
         <thead>
           <tr>
-            {['ID', 'Title', 'Topic', 'Publisher', 'Published', 'Tags', 'Labelled', 'Action'].map(
+            {['ID', 'Title', 'Topic', 'Publisher', 'Published', 'Tags', '🔥 Fire', 'Labelled', 'Action'].map(
               (h) => (
                 <th key={h} className={styles.th}>
                   {h}

@@ -334,6 +334,8 @@ def get_feed():
                 "published_at": post["published_at"],
                 "tags": post["tags"],
                 "like_count": post.get("like_count", 0),
+                "fire_count": post.get("fire_count", 0),
+                "view_count": post.get("view_count", 0),
             })
         result.sort(
             key=lambda x: datetime.fromisoformat(x["published_at"]),
@@ -366,6 +368,8 @@ def get_individuals_feed():
                 "published_at": post["published_at"],
                 "tags": post["tags"],
                 "like_count": post.get("like_count", 0),
+                "fire_count": post.get("fire_count", 0),
+                "view_count": post.get("view_count", 0),
             })
         result.sort(key=lambda x: datetime.fromisoformat(x["published_at"]), reverse=True)
         return jsonify(result[:limit])
@@ -621,7 +625,8 @@ def get_posts():
                 "published_at": post["published_at"],
                 "created_at": post["created_at"],
                 "tags": post["tags"],
-                "labelled": post['labelled']
+                "labelled": post['labelled'],
+                "fire_count": post.get("fire_count", 0),
             })
         def _sort_dt(s):
             try:
@@ -648,10 +653,13 @@ def update_post(post_id):
         return jsonify({"status": "error", "message": "No topic provided"}), 400
 
     tags = data.get("tags") or None
+    fire_count = data.get("fire_count")
 
     conn = app.db.get_connection()
     try:
         app.db.update_post_label(conn, post_id, topic, tags=tags)
+        if fire_count is not None:
+            app.db.set_fire_count(conn, post_id, int(fire_count))
         return jsonify({"status": "success", "message": f"Post {post_id} updated"})
     finally:
         conn.close()
@@ -684,6 +692,8 @@ def suggested_feed():
                 "published_at": post["published_at"],
                 "tags": post["tags"],
                 "like_count": post.get("like_count", 0),
+                "fire_count": post.get("fire_count", 0),
+                "view_count": post.get("view_count", 0),
                 "embedding": post.get("embedding"),
             })
         feed.sort(key=lambda x: datetime.fromisoformat(x["published_at"]), reverse=True)
@@ -787,6 +797,22 @@ def verify_email_confirm():
     return jsonify({"ok": True})
 
 
+@app.route("/posts/<int:post_id>/view", methods=["POST"])
+def record_view(post_id):
+    data = request.get_json(silent=True) or {}
+    user_identifier = data.get('user_identifier', 'anonymous').strip() or 'anonymous'
+    device_id = data.get('device_id', '').strip()
+    if not device_id:
+        return jsonify({"error": "device_id required"}), 400
+
+    conn = app.db.get_connection()
+    try:
+        count = app.db.record_view(conn, post_id, user_identifier, device_id)
+        return jsonify({"view_count": count})
+    finally:
+        conn.close()
+
+
 @app.route("/posts/<int:post_id>/like", methods=["POST"])
 def like_post(post_id):
     data = request.get_json(silent=True) or {}
@@ -818,6 +844,30 @@ def most_liked_feed():
             "tags": post["tags"],
             "like_count": post["like_count"],
             "recent_like_count": post["recent_like_count"],
+            "fire_count": post.get("fire_count", 0),
+            "view_count": post.get("view_count", 0),
+        } for post in posts])
+    finally:
+        conn.close()
+
+
+@app.route("/feed/recommended", methods=["GET"])
+def recommended_feed():
+    limit = min(int(request.args.get("limit", 15)), 30)
+    conn = app.db.get_connection()
+    try:
+        posts = app.db.get_recommended_by_fire(conn, limit=limit)
+        return jsonify([{
+            "id": post["id"],
+            "url": post["url"],
+            "title": post["title"],
+            "topic": post["topic"],
+            "publisher": post["publisher_name"],
+            "published_at": post["published_at"],
+            "tags": post["tags"],
+            "like_count": post.get("like_count", 0),
+            "fire_count": post.get("fire_count", 0),
+            "view_count": post.get("view_count", 0),
         } for post in posts])
     finally:
         conn.close()
@@ -838,6 +888,8 @@ def most_liked_all_time_feed():
             "published_at": post["published_at"],
             "tags": post["tags"],
             "like_count": post["like_count"],
+            "fire_count": post.get("fire_count", 0),
+            "view_count": post.get("view_count", 0),
         } for post in posts])
     finally:
         conn.close()

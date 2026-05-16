@@ -96,10 +96,35 @@
   line-height: 1;
 }
 
-.iconItem:not(.likeBtn) svg {
+.iconItem:not(.likeBtn):not(.viewItem) svg {
   color: #3c933f;
   flex-shrink: 0;
   margin-top: -3px;
+}
+
+/* ── Fire count ── */
+.fireIcon {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.fireCounter {
+  font-size: var(--fs-md);
+  color: var(--text-base);
+  line-height: 17px;
+}
+
+/* ── View count ── */
+.viewIcon {
+  color: var(--border-strong);
+  flex-shrink: 0;
+  margin-top: -2px;
+}
+
+.viewCounter {
+  font-size: var(--fs-md);
+  color: #9a9a9a;
+  line-height: 17px;
 }
 
 /* ── Like button ── */
@@ -226,10 +251,16 @@
 }
 
 .date {
-  font-size: var(--fs-2xs);
+  font-size: var(--fs-xs);
   color: var(--text-muted);
   white-space: nowrap;
   flex-shrink: 0;
+}
+
+.titlePublisher {
+  font-weight: 700;
+  color: var(--card-publisher);
+  font-size: var(--fs-std);
 }
 
 .title {

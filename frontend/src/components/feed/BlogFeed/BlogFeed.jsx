@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { getFeed, getSuggestedFeed, getMostLikedFeed, getMostLikedAllTimeFeed, getIndividualsFeed } from '../../../api'
+import { getFeed, getSuggestedFeed, getMostLikedFeed, getMostLikedAllTimeFeed, getIndividualsFeed, getRecommendedFeed } from '../../../api'
 import { getJiraStatus, getJiraIssues } from '../../../api/jira'
 import BlogCard, { TOPIC_COLORS } from '../BlogCard/BlogCard'
 import styles from './BlogFeed.module.css'
@@ -19,6 +19,7 @@ export default function BlogFeed({ formRef }) {
   const [mostLiked, setMostLiked] = useState([])
   const [mostLikedAllTime, setMostLikedAllTime] = useState([])
   const [individualsPosts, setIndividualsPosts] = useState([])
+  const [recommended, setRecommended] = useState([])
 
   const [search, setSearch] = useState('')
   const [publisher, setPublisher] = useState('')
@@ -33,6 +34,7 @@ export default function BlogFeed({ formRef }) {
     getMostLikedFeed(10).then(setMostLiked).catch(() => { })
     getMostLikedAllTimeFeed(15).then(setMostLikedAllTime).catch(() => { })
     getIndividualsFeed(15).then(setIndividualsPosts).catch(() => { })
+    getRecommendedFeed(15).then(setRecommended).catch(() => { })
 
     async function loadFeed() {
       try {
@@ -318,6 +320,20 @@ export default function BlogFeed({ formRef }) {
                 </div>
               )}
 
+              {/* 4. Recommended by OneSearch */}
+              {recommended.length > 0 && (
+                <div className={styles.section}>
+                  <p className={styles.heading}>Recommended by OneSearch</p>
+                  <div className={styles.scrollRow}>
+                    {recommended.map(post => (
+                      <div key={post.id} className={styles.scrollCard}>
+                        <BlogCard post={post} jiraConnected={jiraConnected} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* 4. All Time Favourites */}
               {filteredMostLikedAllTime.length > 0 && (
                 <div className={styles.section}>
@@ -371,6 +387,20 @@ export default function BlogFeed({ formRef }) {
                   <p className={styles.heading}>Recently from Individuals</p>
                   <div className={styles.scrollRow}>
                     {filteredIndividualsPosts.map(post => (
+                      <div key={post.id} className={styles.scrollCard}>
+                        <BlogCard post={post} jiraConnected={jiraConnected} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* 3. Recommended by OneSearch */}
+              {recommended.length > 0 && (
+                <div className={styles.section}>
+                  <p className={styles.heading}>Recommended by OneSearch</p>
+                  <div className={styles.scrollRow}>
+                    {recommended.map(post => (
                       <div key={post.id} className={styles.scrollCard}>
                         <BlogCard post={post} jiraConnected={jiraConnected} />
                       </div>

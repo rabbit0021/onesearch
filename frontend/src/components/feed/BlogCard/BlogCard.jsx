@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { likePost, getIndividualStats } from '../../../api'
+import { likePost, getIndividualStats, recordView, getOrCreateDeviceId } from '../../../api'
 import EmailDialog, { getSavedEmail } from '../../ui/EmailDialog/EmailDialog'
 import ImageLightbox from '../../ui/ImageLightbox/ImageLightbox'
 import { INDIVIDUALS_META } from '../../../data/individuals'
@@ -70,9 +70,19 @@ export default function BlogCard({ post }) {
   }, [post.tags])
 
   const [displayCount, setDisplayCount] = useState(post.like_count || 0)
+  const [viewCount, setViewCount] = useState(post.view_count || 0)
   const [showEmailDialog, setShowEmailDialog] = useState(false)
   const [showLightbox, setShowLightbox] = useState(false)
   const [individualLikeCount, setIndividualLikeCount] = useState(null)
+
+  function handleCardClick() {
+    const email = getSavedEmail()
+    const userIdentifier = email || 'anonymous'
+    const deviceId = getOrCreateDeviceId()
+    recordView(post.id, userIdentifier, deviceId).then(() => {
+      setViewCount(c => c + 1)
+    }).catch(() => {})
+  }
 
   async function submitLike(email) {
     try {
@@ -116,6 +126,7 @@ export default function BlogCard({ post }) {
       target="_blank"
       rel="noopener noreferrer"
       className={`${styles.card} ${match ? styles.cardMatched : ''}`}
+      onClick={handleCardClick}
     >
       <div className={styles.thumbnail} style={{ background: color }}>
         {individualThumb ? (
@@ -150,10 +161,23 @@ export default function BlogCard({ post }) {
       <div className={styles.body}>
         <div className={styles.meta}>
           <div className={styles.metadesc}>
-            <span className={styles.publisher}>{post.publisher}</span>
             <span className={styles.date}>{timeAgo(post.published_at)}</span>
           </div>
           <div className={styles.iconTray}>
+            <div className={`${styles.iconItem} ${styles.viewItem}`}>
+              <svg className={styles.viewIcon} width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5C21.27 7.61 17 4.5 12 4.5zm0 12.5c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+              </svg>
+              <span className={styles.viewCounter}>{viewCount}</span>
+            </div>
+
+            {post.fire_count > 0 && (
+              <div className={styles.iconItem}>
+                <span className={styles.fireIcon}>🔥</span>
+                <span className={styles.fireCounter}>{post.fire_count}</span>
+              </div>
+            )}
+
             <div
               className={`${styles.iconItem} ${styles.likeBtn}`}
               role="button"
@@ -177,7 +201,9 @@ export default function BlogCard({ post }) {
             )}
           </div>
         </div>
-        <p className={styles.title}>{post.title}</p>
+        <p className={styles.title}>
+          <span className={styles.titlePublisher}>{post.publisher}: </span>{post.title}
+        </p>
         {tags.length > 0 && (
           <div className={styles.tags} ref={tagsContainerRef}>
             {(tagsSlice !== null ? tags.slice(0, tagsSlice) : tags).map(tag => (

@@ -130,6 +130,12 @@ export async function getMostLikedAllTimeFeed(limit = 20) {
   return res.json()
 }
 
+export async function getRecommendedFeed(limit = 15) {
+  const res = await fetch(`/feed/recommended?limit=${limit}`)
+  if (!res.ok) throw new Error('Failed to fetch recommended feed')
+  return res.json()
+}
+
 export async function getPendingNotifications(secretKey) {
   const res = await fetch('/admin/notifications/pending', {
     headers: { 'X-SECRET-KEY': secretKey },
@@ -213,14 +219,32 @@ export async function addPublisher(name, type, secretKey) {
   return res.json()
 }
 
-export async function updatePost(id, topic, tags, secretKey) {
+export function getOrCreateDeviceId() {
+  const key = 'onesearch_device_id'
+  let id = localStorage.getItem(key)
+  if (!id) {
+    id = crypto.randomUUID()
+    localStorage.setItem(key, id)
+  }
+  return id
+}
+
+export async function recordView(postId, userIdentifier, deviceId) {
+  await fetch(`/posts/${postId}/view`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ user_identifier: userIdentifier, device_id: deviceId }),
+  })
+}
+
+export async function updatePost(id, topic, tags, secretKey, fireCount) {
   const res = await fetch(`/posts/${id}`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
       'X-SECRET-KEY': secretKey,
     },
-    body: JSON.stringify({ topic, tags }),
+    body: JSON.stringify({ topic, tags, fire_count: fireCount }),
   })
   return res.json()
 }

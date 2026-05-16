@@ -35,6 +35,7 @@ export default function PostRow({ post, secretKey, onUpdated }) {
   const [topic, setTopic] = useState(post.topic || '')
   const [tags, setTags] = useState(() => parseTags(post.tags))
   const [tagInput, setTagInput] = useState('')
+  const [fireCount, setFireCount] = useState(post.fire_count ?? 0)
   const [saving, setSaving] = useState(false)
   const { showToast } = useToast()
 
@@ -63,7 +64,7 @@ export default function PostRow({ post, secretKey, onUpdated }) {
     setSaving(true)
     try {
       const tagsValue = tags.length > 0 ? tags.join(',') : null
-      const res = await updatePost(post.id, topic, tagsValue, secretKey)
+      const res = await updatePost(post.id, topic, tagsValue, secretKey, fireCount)
       if (res.status === 'success') {
         showToast(`Post ${post.id} updated.`)
         onUpdated()
@@ -114,6 +115,15 @@ export default function PostRow({ post, secretKey, onUpdated }) {
             placeholder={tags.length === 0 ? 'Add tag…' : ''}
           />
         </div>
+      </td>
+      <td className={styles.cell}>
+        <input
+          className={styles.fireInput}
+          type="number"
+          min="0"
+          value={fireCount}
+          onChange={(e) => setFireCount(Number(e.target.value))}
+        />
       </td>
       <td className={styles.cell}>{post.labelled ? '✅' : '❌'}</td>
       <td className={styles.cell}>

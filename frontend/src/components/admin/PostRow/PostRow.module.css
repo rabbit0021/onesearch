@@ -48,6 +48,20 @@
   max-width: 260px;
 }
 
+.fireInput {
+  width: 60px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 4px 6px;
+  font-size: var(--fs-base);
+  text-align: center;
+}
+
+.fireInput:focus {
+  border-color: var(--color-primary);
+  outline: none;
+}
+
 .tagInput {
   border: none;
   outline: none;
