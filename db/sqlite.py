@@ -484,6 +484,11 @@ class SQLiteDatabase:
         logger.info(f"Publisher {publisher_name} added successfully")
         return c.lastrowid
     
+    def delete_publisher(self, conn, publisher_id):
+        logger.info(f"Deleting publisher: {publisher_id}")
+        c = conn.cursor()
+        c.execute("DELETE FROM publishers WHERE id = ?", (publisher_id,))
+
     def update_publisher(self, conn, publisher_id, last_scraped_at):
         logger.info(f"Updating publisher: {publisher_id}, last_scraped_at: {last_scraped_at}")
         c = conn.cursor()

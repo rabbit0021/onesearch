@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getPublishers, addPublisher } from '../../../api'
+import { getPublishers, addPublisher, deletePublisher } from '../../../api'
 import styles from './PublishersTab.module.css'
 
 const TYPES = ['techteam', 'individual', 'community']
@@ -13,6 +13,7 @@ export default function PublishersTab({ secretKey }) {
   const [adding, setAdding]         = useState(false)
   const [addError, setAddError]     = useState('')
   const [search, setSearch]         = useState('')
+  const [deletingId, setDeletingId] = useState(null)
 
   async function load() {
     setLoading(true)
@@ -45,6 +46,17 @@ export default function PublishersTab({ secretKey }) {
       setAddError(e.message)
     } finally {
       setAdding(false)
+    }
+  }
+
+  async function handleDelete(id, name) {
+    if (!window.confirm(`Delete publisher "${name}"? This cannot be undone.`)) return
+    setDeletingId(id)
+    try {
+      await deletePublisher(id, secretKey)
+      await load()
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -105,6 +117,7 @@ export default function PublishersTab({ secretKey }) {
                 <th>Name</th>
                 <th>Type</th>
                 <th>Last Scraped</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -114,6 +127,15 @@ export default function PublishersTab({ secretKey }) {
                   <td>{p.publisher_name}</td>
                   <td><span className={`${styles.badge} ${styles[p.publisher_type]}`}>{p.publisher_type}</span></td>
                   <td className={styles.muted}>{p.last_scraped_at ? new Date(p.last_scraped_at).toLocaleDateString() : '—'}</td>
+                  <td>
+                    <button
+                      className={styles.deleteBtn}
+                      onClick={() => handleDelete(p.id, p.publisher_name)}
+                      disabled={deletingId === p.id}
+                    >
+                      {deletingId === p.id ? '…' : 'Delete'}
+                    </button>
+                  </td>
                 </tr>
               ))}
               {filtered.length === 0 && (

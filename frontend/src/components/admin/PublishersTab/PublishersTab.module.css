@@ -164,3 +164,25 @@
 .techteam   { background: #e8f4fd; color: #2980b9; }
 .individual { background: #eafaf1; color: #27ae60; }
 .community  { background: #fdf2e9; color: #e67e22; }
+
+.deleteBtn {
+  background: none;
+  border: 1px solid #e74c3c;
+  color: #e74c3c;
+  border-radius: 4px;
+  padding: 3px 10px;
+  font-size: var(--fs-xs);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.deleteBtn:hover:not(:disabled) {
+  background: #e74c3c;
+  color: #fff;
+}
+
+.deleteBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

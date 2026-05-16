@@ -207,6 +207,14 @@ export async function getPublishers(secretKey) {
   return res.json()
 }
 
+export async function deletePublisher(id, secretKey) {
+  const res = await fetch(`/publishers/${id}`, {
+    method: 'DELETE',
+    headers: { 'X-SECRET-KEY': secretKey },
+  })
+  return res.json()
+}
+
 export async function addPublisher(name, type, secretKey) {
   const res = await fetch('/publishers', {
     method: 'POST',

@@ -429,6 +429,21 @@ def add_publisher():
         conn.close()
 
 
+@app.route("/publishers/<int:publisher_id>", methods=["DELETE"])
+@require_secret_key
+def delete_publisher(publisher_id):
+    conn = app.db.get_connection()
+    try:
+        app.db.delete_publisher(conn, publisher_id)
+        conn.commit()
+        return jsonify({"status": "success"})
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"status": "error", "message": str(e)}), 500
+    finally:
+        conn.close()
+
+
 @app.route("/subscriptions", methods=["GET"])
 @require_secret_key
 def get_subscriptions():

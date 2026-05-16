@@ -23,4 +23,24 @@ export const INDIVIDUALS_META = {
     website: 'http://antirez.com',
     bio: 'Creator of Redis. Writes about systems programming, software design, and life as an engineer.',
   },
+  'marc brooker': {
+    image: '/individuals/marc-brooker.jpg',
+    website: 'https://brooker.co.za/blog',
+    bio: 'Principal Engineer at AWS. Writes about distributed systems, databases, and cloud infrastructure.',
+  },
+  'eli bendersky': {
+    image: '/individuals/eli-bendersky.jpg',
+    website: 'https://eli.thegreenplace.net',
+    bio: 'Software engineer at Google. Writes about compilers, systems programming, Go, and Python internals.',
+  },
+  'simon willison': {
+    image: '/individuals/simon-willison.jpg',
+    website: 'https://simonwillison.net',
+    bio: 'Co-creator of Django. Writes about AI, LLMs, Python, and open source.',
+  },
+  'gergely orosz': {
+    image: '/individuals/gergely-orosz.jpg',
+    website: 'https://blog.pragmaticengineer.com',
+    bio: 'Author of The Pragmatic Engineer newsletter. Writes about software engineering, engineering management, and the tech industry.',
+  },
 }
