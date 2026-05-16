@@ -3,23 +3,77 @@ import { likePost, getIndividualStats, recordView, getOrCreateDeviceId } from '.
 import EmailDialog, { getSavedEmail } from '../../ui/EmailDialog/EmailDialog'
 import ImageLightbox from '../../ui/ImageLightbox/ImageLightbox'
 import { INDIVIDUALS_META } from '../../../data/individuals'
+import { useTheme } from '../../../context/ThemeContext'
 import styles from './BlogCard.module.css'
 
-export const TOPIC_COLORS = {
-  'Software Engineering': '#FF5555',
-  'Frontend Engineering': '#55FFFF',
-  'Backend Engineering': '#5555FF',
-  'Mobile Engineering': '#FF55FF',
-  'Platform & Infrastructure': '#FFAA55',
-  'Data Engineering': '#55AAFF',
-  'Data Science': '#AA55FF',
-  'Machine Learning & AI': '#FF55AA',
-  'Data Analytics': '#55FFAA',
-  'Security Engineering': '#FF2222',
-  'QA & Testing': '#55FF55',
-  'Product Management': '#FFFF55',
-  'General': '#AAAAAA',
+const PALETTES = {
+  // Original neon
+  neon: {
+    'Software Engineering':       '#FF5555',
+    'Frontend Engineering':       '#55FFFF',
+    'Backend Engineering':        '#5555FF',
+    'Mobile Engineering':         '#FF55FF',
+    'Platform & Infrastructure':  '#FFAA55',
+    'Data Engineering':           '#55AAFF',
+    'Data Science':               '#AA55FF',
+    'Machine Learning & AI':      '#FF55AA',
+    'Data Analytics':             '#55FFAA',
+    'Security Engineering':       '#FF2222',
+    'QA & Testing':               '#55FF55',
+    'Product Management':         '#FFFF55',
+    'General':                    '#AAAAAA',
+  },
+  // Tailwind-700 deep
+  deep: {
+    'Software Engineering':       '#2563EB',
+    'Frontend Engineering':       '#0891B2',
+    'Backend Engineering':        '#6D28D9',
+    'Mobile Engineering':         '#BE185D',
+    'Platform & Infrastructure':  '#C2410C',
+    'Data Engineering':           '#0369A1',
+    'Data Science':               '#7C3AED',
+    'Machine Learning & AI':      '#9D174D',
+    'Data Analytics':             '#047857',
+    'Security Engineering':       '#B91C1C',
+    'QA & Testing':               '#15803D',
+    'Product Management':         '#B45309',
+    'General':                    '#475569',
+  },
+  // Jewel tones — dark, muted, premium
+  jewel: {
+    'Software Engineering':       '#1A3A5C',
+    'Frontend Engineering':       '#0D4A4A',
+    'Backend Engineering':        '#2D1B69',
+    'Mobile Engineering':         '#5C1A4A',
+    'Platform & Infrastructure':  '#5C2D0A',
+    'Data Engineering':           '#0A3D5C',
+    'Data Science':               '#3D1A5C',
+    'Machine Learning & AI':      '#5C1A2D',
+    'Data Analytics':             '#1A4A2D',
+    'Security Engineering':       '#4A0D0D',
+    'QA & Testing':               '#1A4A1A',
+    'Product Management':         '#4A3000',
+    'General':                    '#2D3748',
+  },
+  // Soft pastels — light, airy, smooth
+  soft: {
+    'Software Engineering':       '#93C5FD',
+    'Frontend Engineering':       '#67E8F9',
+    'Backend Engineering':        '#A5B4FC',
+    'Mobile Engineering':         '#F9A8D4',
+    'Platform & Infrastructure':  '#FCA5A5',
+    'Data Engineering':           '#7DD3FC',
+    'Data Science':               '#C4B5FD',
+    'Machine Learning & AI':      '#FDA4AF',
+    'Data Analytics':             '#6EE7B7',
+    'Security Engineering':       '#FCA5A5',
+    'QA & Testing':               '#86EFAC',
+    'Product Management':         '#FCD34D',
+    'General':                    '#CBD5E1',
+  },
 }
+
+export const TOPIC_COLORS = PALETTES.soft // fallback for external imports
 
 export function faviconUrl(postUrl) {
   try {
@@ -49,7 +103,9 @@ export function timeAgo(iso) {
 }
 
 export default function BlogCard({ post }) {
-  const color = TOPIC_COLORS[post.topic] || TOPIC_COLORS['General']
+  const { darkMode } = useTheme()
+  const palette = darkMode ? PALETTES.jewel : PALETTES.soft
+  const color = palette[post.topic] || palette['General']
   const favicon = faviconUrl(post.url)
   const individualMeta = INDIVIDUALS_META[post.publisher?.toLowerCase()]
   const individualThumb = individualMeta?.image?.replace(/(\.[^.]+)$/, '-thumb$1')
