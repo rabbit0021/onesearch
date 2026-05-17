@@ -1,8 +1,42 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { getFeed, getSuggestedFeed, getMostLikedFeed, getMostLikedAllTimeFeed, getIndividualsFeed, getRecommendedFeed } from '../../../api'
 import { getJiraStatus, getJiraIssues } from '../../../api/jira'
 import BlogCard, { TOPIC_COLORS } from '../BlogCard/BlogCard'
 import styles from './BlogFeed.module.css'
+
+function SkeletonCard() {
+  return (
+    <div className={styles.skCard}>
+      <div className={styles.skThumbnail} />
+      <div className={styles.skBody}>
+        <div className={`${styles.skLine} ${styles.skMetaLine}`} />
+        <div className={`${styles.skLine} ${styles.skTitleLine}`} />
+        <div className={`${styles.skLine} ${styles.skTitleShort}`} />
+        <div className={`${styles.skLine} ${styles.skTagLine}`} />
+      </div>
+    </div>
+  )
+}
+
+function SkeletonGrid({ count = 12 }) {
+  return (
+    <div className={styles.grid}>
+      {Array.from({ length: count }, (_, i) => <SkeletonCard key={i} />)}
+    </div>
+  )
+}
+
+function SkeletonScrollRow({ count = 6 }) {
+  return (
+    <div className={styles.scrollRow}>
+      {Array.from({ length: count }, (_, i) => (
+        <div key={i} className={styles.scrollCard}>
+          <SkeletonCard />
+        </div>
+      ))}
+    </div>
+  )
+}
 
 const DATE_OPTIONS = [
   { label: 'Any time', days: null },
@@ -30,6 +64,8 @@ export default function BlogFeed({ formRef }) {
 
   const [filterClosed, setFilterClosed] = useState(true)
   const [sortBy, setSortBy] = useState(null)
+  const [isTransitioning, setIsTransitioning] = useState(false)
+  const transitionTimer = useRef(null)
 
   useEffect(() => {
     getMostLikedFeed(10).then(setMostLiked).catch(() => { })
@@ -47,7 +83,7 @@ export default function BlogFeed({ formRef }) {
           if (issues.length > 0) {
             const suggested = await getSuggestedFeed(issues, 100)
             setPosts(suggested)
-            setLoading(false)
+            setTimeout(() => setLoading(false), 5000) // DEBUG: remove timeout
             return
           }
         }
@@ -57,10 +93,19 @@ export default function BlogFeed({ formRef }) {
       getFeed(100)
         .then(setPosts)
         .catch(e => setError(e.message))
-        .finally(() => setLoading(false))
+        .finally(() => setTimeout(() => setLoading(false), 200)) // DEBUG: remove timeout
     }
     loadFeed()
   }, [])
+
+  const isFirstRender = useRef(true)
+  useEffect(() => {
+    if (isFirstRender.current) { isFirstRender.current = false; return }
+    setIsTransitioning(true)
+    clearTimeout(transitionTimer.current)
+    transitionTimer.current = setTimeout(() => setIsTransitioning(false), 200)
+    return () => clearTimeout(transitionTimer.current)
+  }, [search, publisher, topic, dateDays, activeTags, sortBy])
 
   useEffect(() => {
     const handleScroll = () => {}
@@ -139,14 +184,7 @@ export default function BlogFeed({ formRef }) {
     return { groups: Object.values(groups), unmatched }
   }, [filtered])
 
-  if (loading) return (
-    <div className={styles.loadingWrap}>
-      <span className={styles.spinner} />
-      <span className={styles.loadingText}>loading posts<span className={styles.blink}>_</span></span>
-    </div>
-  )
   if (error) return <p className={styles.hint}>Could not load posts. {error}</p>
-  if (posts.length === 0) return <p className={styles.hint}>No posts yet.</p>
 
   return (
     <div className={styles.wrapper}>
@@ -295,183 +333,103 @@ export default function BlogFeed({ formRef }) {
         </div>{/* end filterBody */}
       </div>
 
-      {/* ── Section order:
-            Jira connected + matches → [Posts for You (grouped)] → [Most Liked] → [Other Posts]
-            Otherwise               → [Most Liked (locked/real)] → [Posts for You]
-      ── */}
-
-      {jiraConnected && grouped.groups.length > 0 ? (
+      {/* ── Scroll sections (always visible when no filters active) ── */}
+      {!hasFilters && (
         <>
-          {/* 1. Posts for You — Jira grouped */}
           <div className={styles.section}>
-            <p className={styles.heading}>
-              {hasFilters ? `${filtered.length} post${filtered.length !== 1 ? 's' : ''} found` : 'Posts for You'}
-            </p>
-            {filtered.length === 0
-              ? <p className={styles.hint}>No posts match your filters.</p>
-              : grouped.groups.map(group => (
-                <div key={group.issue.key} className={styles.issueSection}>
-                  <div className={styles.issueHeading}>
-                    <img src="https://cdn.simpleicons.org/jira/2584FF" className={styles.issueIcon} alt="" />
-                    <span className={styles.issueKey}>{group.issue.key}</span>
-                    <span className={styles.issueSummary}>{group.issue.summary}</span>
-                  </div>
-                  <div className={styles.grid}>
-                    {group.posts.map(post => <BlogCard key={post.id} post={post} jiraConnected={jiraConnected} />)}
-                  </div>
+            <p className={styles.heading}>Trending Blog Posts</p>
+            {loading || filteredMostLiked.length === 0
+              ? <SkeletonScrollRow />
+              : <div className={styles.scrollRow}>
+                  {filteredMostLiked.map(post => (
+                    <div key={post.id} className={styles.scrollCard}>
+                      <BlogCard post={post} jiraConnected={jiraConnected} />
+                    </div>
+                  ))}
                 </div>
-              ))
             }
           </div>
 
-          {!hasFilters && (
-            <>
-              {/* 2. Most Liked Recently */}
-              {filteredMostLiked.length > 0 && (
-                <div className={styles.trendingSection}>
-                  <p className={styles.heading}>Trending Blog Posts</p>
-                  <div className={styles.scrollRow}>
-                    {filteredMostLiked.map(post => (
-                      <div key={post.id} className={styles.scrollCard}>
-                        <BlogCard post={post} jiraConnected={jiraConnected} />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* 3. Recently from Individuals */}
-              {filteredIndividualsPosts.length > 0 && (
-                <div className={styles.section}>
-                  <p className={styles.heading}>Recently from Individuals</p>
-                  <div className={styles.scrollRow}>
-                    {filteredIndividualsPosts.map(post => (
-                      <div key={post.id} className={styles.scrollCard}>
-                        <BlogCard post={post} jiraConnected={jiraConnected} />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* 4. Recommended by OneSearch */}
-              {recommended.length > 0 && (
-                <div className={styles.section}>
-                  <p className={styles.heading}>Recommended by OneSearch</p>
-                  <div className={styles.scrollRow}>
-                    {recommended.map(post => (
-                      <div key={post.id} className={styles.scrollCard}>
-                        <BlogCard post={post} jiraConnected={jiraConnected} />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* 4. All Time Favourites */}
-              {filteredMostLikedAllTime.length > 0 && (
-                <div className={styles.section}>
-                  <p className={styles.heading}>All Time Favourites</p>
-                  <div className={styles.scrollRow}>
-                    {filteredMostLikedAllTime.map(post => (
-                      <div key={post.id} className={styles.scrollCard}>
-                        <BlogCard post={post} jiraConnected={jiraConnected} />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-
-          {/* 5. All Posts */}
           <div className={styles.section}>
-            <p className={styles.heading}>
-              {hasFilters ? `${filtered.length} post${filtered.length !== 1 ? 's' : ''} found` : 'All Posts'}
-            </p>
-            {filtered.length === 0
-              ? <p className={styles.hint}>No posts match your filters.</p>
-              : <div className={styles.grid}>
-                  {filtered.map(post => <BlogCard key={post.id} post={post} jiraConnected={jiraConnected} />)}
+            <p className={styles.heading}>Recently from Individuals</p>
+            {loading || filteredIndividualsPosts.length === 0
+              ? <SkeletonScrollRow />
+              : <div className={styles.scrollRow}>
+                  {filteredIndividualsPosts.map(post => (
+                    <div key={post.id} className={styles.scrollCard}>
+                      <BlogCard post={post} jiraConnected={jiraConnected} />
+                    </div>
+                  ))}
+                </div>
+            }
+          </div>
+
+          <div className={styles.section}>
+            <p className={styles.heading}>Recommended by OneSearch</p>
+            {loading || recommended.length === 0
+              ? <SkeletonScrollRow />
+              : <div className={styles.scrollRow}>
+                  {recommended.map(post => (
+                    <div key={post.id} className={styles.scrollCard}>
+                      <BlogCard post={post} jiraConnected={jiraConnected} />
+                    </div>
+                  ))}
+                </div>
+            }
+          </div>
+
+          <div className={styles.section}>
+            <p className={styles.heading}>All Time Favourites</p>
+            {loading || filteredMostLikedAllTime.length === 0
+              ? <SkeletonScrollRow />
+              : <div className={styles.scrollRow}>
+                  {filteredMostLikedAllTime.map(post => (
+                    <div key={post.id} className={styles.scrollCard}>
+                      <BlogCard post={post} jiraConnected={jiraConnected} />
+                    </div>
+                  ))}
                 </div>
             }
           </div>
         </>
+      )}
+
+      {/* ── Main grid (Jira grouped or flat) ── */}
+      {jiraConnected && !loading && grouped.groups.length > 0 ? (
+        <div className={styles.section}>
+          <p className={styles.heading}>
+            {hasFilters ? `${filtered.length} post${filtered.length !== 1 ? 's' : ''} found` : 'Posts for You'}
+          </p>
+          {filtered.length === 0
+            ? <p className={styles.hint}>No posts match your filters.</p>
+            : grouped.groups.map(group => (
+              <div key={group.issue.key} className={styles.issueSection}>
+                <div className={styles.issueHeading}>
+                  <img src="https://cdn.simpleicons.org/jira/2584FF" className={styles.issueIcon} alt="" />
+                  <span className={styles.issueKey}>{group.issue.key}</span>
+                  <span className={styles.issueSummary}>{group.issue.summary}</span>
+                </div>
+                <div className={styles.grid}>
+                  {group.posts.map(post => <BlogCard key={post.id} post={post} jiraConnected={jiraConnected} />)}
+                </div>
+              </div>
+            ))
+          }
+        </div>
       ) : (
-        <>
-          {!hasFilters && (
-            <>
-              {/* 1. Trending — visible to all users */}
-              {filteredMostLiked.length > 0 && (
-                <div className={styles.section}>
-                  <p className={styles.heading}>Trending Blog Posts</p>
-                  <div className={styles.scrollRow}>
-                    {filteredMostLiked.map(post => (
-                      <div key={post.id} className={styles.scrollCard}>
-                        <BlogCard post={post} jiraConnected={jiraConnected} />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* 2. Recently from Individuals */}
-              {filteredIndividualsPosts.length > 0 && (
-                <div className={styles.section}>
-                  <p className={styles.heading}>Recently from Individuals</p>
-                  <div className={styles.scrollRow}>
-                    {filteredIndividualsPosts.map(post => (
-                      <div key={post.id} className={styles.scrollCard}>
-                        <BlogCard post={post} jiraConnected={jiraConnected} />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* 3. Recommended by OneSearch */}
-              {recommended.length > 0 && (
-                <div className={styles.section}>
-                  <p className={styles.heading}>Recommended by OneSearch</p>
-                  <div className={styles.scrollRow}>
-                    {recommended.map(post => (
-                      <div key={post.id} className={styles.scrollCard}>
-                        <BlogCard post={post} jiraConnected={jiraConnected} />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* 3. All Time Favourites */}
-              {filteredMostLikedAllTime.length > 0 && (
-                <div className={styles.section}>
-                  <p className={styles.heading}>All Time Favourites</p>
-                  <div className={styles.scrollRow}>
-                    {filteredMostLikedAllTime.map(post => (
-                      <div key={post.id} className={styles.scrollCard}>
-                        <BlogCard post={post} jiraConnected={jiraConnected} />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-
-          {/* 4. All Posts */}
-          <div className={styles.section}>
-            <p className={styles.heading}>
-              {hasFilters ? `${filtered.length} post${filtered.length !== 1 ? 's' : ''} found` : 'All Posts'}
-            </p>
-            {filtered.length === 0
+        <div className={styles.section}>
+          <p className={styles.heading}>
+            {hasFilters ? `${filtered.length} post${filtered.length !== 1 ? 's' : ''} found` : 'All Posts'}
+          </p>
+          {loading || isTransitioning
+            ? <SkeletonGrid count={12} />
+            : filtered.length === 0
               ? <p className={styles.hint}>No posts match your filters.</p>
               : <div className={styles.grid}>
                   {filtered.map(post => <BlogCard key={post.id} post={post} jiraConnected={jiraConnected} />)}
                 </div>
-            }
-          </div>
-        </>
+          }
+        </div>
       )}
 
     </div>

@@ -11,7 +11,7 @@
   --bg-wizard-option: rgb(220, 220, 217);
   --bg-feed:rgb(244, 243, 241);
 
-  --bg-card-thumbnail:rgb(220, 220, 217);
+  --bg-card-thumbnail:var(--color-primary-tint);
 
   --text-base: #6c6b6b;
   --text-strong: #000000;
@@ -95,7 +95,7 @@
   --filter-placeholder: #929292;
   --filter-prefix-color: var(--color-primary);
 
-  --card-bg: #1c1a18;
+  --card-bg: #22201e;
   --card-shadow: rgba(0, 0, 0, 0.4);
   --card-shadow-hover: rgba(0, 0, 0, 0.6);
   --card-title: #c2c2bb;
