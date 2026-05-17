@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import re
+from urllib.parse import urljoin
 from .base import BaseScraper
 from logger_config import get_logger
 from email.utils import parsedate_to_datetime
@@ -81,6 +82,78 @@ class LinkedinScraper(BaseScraper):
 
         return posts       
             
+
+    def extract_article(self, url):
+        """
+        LinkedIn engineering blog posts split their content across multiple
+        `div.component-richText` and `div.component-standaloneImage` sections.
+        Readability only captures one of them, so we extract all sections manually.
+        """
+        try:
+            resp = requests.get(url, timeout=20, headers={
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '
+                              'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            })
+            resp.raise_for_status()
+            resp.encoding = resp.apparent_encoding or 'utf-8'
+        except Exception:
+            return None
+
+        soup = BeautifulSoup(resp.text, 'html.parser')
+
+        container = soup.find('section', id='component-container')
+        if not container:
+            return None
+
+        # Resolve LinkedIn's lazy-loaded images (data-delayed-url → src)
+        for img in container.find_all('img'):
+            if not img.get('src') or img['src'].startswith('data:'):
+                lazy = img.get('data-delayed-url')
+                if lazy:
+                    img['src'] = lazy
+            if not img.get('srcset'):
+                lazy_ss = img.get('data-delayed-srcset') or img.get('data-srcset')
+                if lazy_ss:
+                    img['srcset'] = lazy_ss
+
+        # Absolutize all src / href / srcset
+        for tag, attr in [('img', 'src'), ('a', 'href'), ('source', 'src')]:
+            for el in container.find_all(tag):
+                val = el.get(attr)
+                if val and not val.startswith(('http://', 'https://', 'data:', '#', 'mailto:')):
+                    el[attr] = urljoin(url, val)
+        for el in container.find_all(['img', 'source']):
+            ss = el.get('srcset') or ''
+            if ss and not ss.startswith('http'):
+                parts = []
+                for entry in ss.split(','):
+                    entry = entry.strip()
+                    if entry:
+                        tokens = entry.split()
+                        tokens[0] = urljoin(url, tokens[0])
+                        parts.append(' '.join(tokens))
+                el['srcset'] = ', '.join(parts)
+
+        # Collect content sections in document order, skip nav/header/related-posts
+        _SKIP = {'component-articleHeadline', 'component-postList'}
+        parts = []
+        for div in container.find_all('div', class_='component', recursive=False):
+            component_classes = set(div.get('class', []))
+            if component_classes & _SKIP:
+                continue
+            if 'component-richText' in component_classes:
+                rich = div.find('div', class_='rich-text')
+                if rich:
+                    parts.append(rich.decode_contents())
+            elif 'component-standaloneImage' in component_classes:
+                fig = div.find('figure')
+                if fig:
+                    parts.append(str(fig))
+
+        if not parts:
+            return None
+
+        return '<div>' + '\n'.join(parts) + '</div>'
 
     def search_blog_posts(self, category, last_scan_time):
         res = requests.get(BASE_URL)

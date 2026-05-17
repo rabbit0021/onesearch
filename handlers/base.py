@@ -20,6 +20,13 @@ class BaseScraper:
         soup: BeautifulSoup object (mutate in-place, return nothing).
         """
         pass
+
+    def extract_article(self, url):
+        """
+        Publisher-specific full article extraction, bypassing readability.
+        Return an HTML string, or None to fall back to the generic readability extractor.
+        """
+        return None
     
     def scrape(self):
         feed_url = self.get_feed_url()

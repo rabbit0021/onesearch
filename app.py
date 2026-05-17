@@ -1025,21 +1025,32 @@ def get_post_content(post_id):
     finally:
         conn.close()
 
-    try:
-        content = _extract_article_content(url)
-    except Exception as e:
-        return jsonify({"error": f"Could not fetch article: {str(e)}"}), 502
+    # Try publisher-specific extraction first; fall back to generic readability
+    scraper = ScraperFactory.get_scraper(publisher_name) if publisher_name else None
+    used_custom = False
+    content = None
+    if scraper:
+        try:
+            content = scraper.extract_article(url)
+            if content:
+                used_custom = True
+        except Exception:
+            content = None
+
+    if not content:
+        try:
+            content = _extract_article_content(url)
+        except Exception as e:
+            return jsonify({"error": f"Could not fetch article: {str(e)}"}), 502
 
     if not content:
         return jsonify({"error": "Could not extract article content"}), 422
 
-    # Publisher-specific cleanup via the handler
-    if publisher_name:
-        scraper = ScraperFactory.get_scraper(publisher_name)
-        if scraper:
-            soup = BeautifulSoup(content, 'html.parser')
-            scraper.clean_article(soup)
-            content = str(soup)
+    # Publisher-specific cleanup only applies to the generic readability path
+    if scraper and not used_custom:
+        soup = BeautifulSoup(content, 'html.parser')
+        scraper.clean_article(soup)
+        content = str(soup)
 
     return jsonify({"content": content, "url": url})
 
