@@ -891,6 +891,9 @@ def _extract_article_content(url):
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
     })
     response.raise_for_status()
+    # requests defaults to ISO-8859-1 for text/html with no declared charset,
+    # which corrupts UTF-8 characters. Force UTF-8, fall back to detected encoding.
+    response.encoding = response.apparent_encoding or 'utf-8'
     html = response.text
 
     # ── Pre-process: fix lazy-loaded images BEFORE readability strips them ──

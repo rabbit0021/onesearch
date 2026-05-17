@@ -602,11 +602,36 @@
 
 /* ── Mobile ── */
 @media (max-width: 600px) {
-  .readerBody { padding: 1.5rem 1.5rem 4rem; }
-  .readerInner{ max-width: 100%;}
-  .title { font-size: var(--fs-xl); }
-  .articleContent { font-size: var(--fs-std); line-height: 1.75; }
+  /* Top bar: hide dot, date, topic to save space; keep back + publisher + open */
+  .topBar { padding: 0.5rem 0.75rem; gap: 0.5rem; min-height: 44px; }
+  .dot { display: none; }
+  .date { display: none; }
+  .topic { display: none; }
+  .publisher { font-size: var(--fs-xs); }
+  .openBtn { font-size: var(--fs-2xs); padding: 3px 8px; }
+
+  /* Reader body */
+  .readerBody { padding: 1.25rem 1rem 5rem; }
+  .readerInner { max-width: 100%; }
+
+  /* Title */
+  .title { font-size: var(--fs-xl); line-height: 1.25; margin-bottom: 0.75rem; }
+
+  /* Meta row */
+  .metaRow { gap: 0.4rem 0.75rem; margin-bottom: 0.75rem; }
+  .stat { font-size: var(--fs-sm); }
+
+  /* Article body — larger, more comfortable reading */
+  .articleContent { font-size: var(--fs-lm); line-height: 1.85; }
+  .articleContent p { margin-bottom: 1.2rem; }
+  .articleContent h1 { font-size: var(--fs-xl); }
   .articleContent h2 { font-size: var(--fs-lg); }
-  .articleContent pre { font-size: var(--fs-sm); padding: 0.85rem 1rem; }
-  .topBar { padding: 0.5rem 0.75rem; }
+  .articleContent h3 { font-size: var(--fs-std); }
+  .articleContent h4,
+  .articleContent h5,
+  .articleContent h6 { font-size: var(--fs-base); }
+  .articleContent pre { font-size: var(--fs-xs); padding: 0.85rem 0.9rem; }
+  .articleContent blockquote { padding: 0.5rem 1rem; }
+  .articleContent ul,
+  .articleContent ol { margin-left: 1.2rem; }
 }
