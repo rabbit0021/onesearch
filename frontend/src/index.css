@@ -19,6 +19,9 @@
   --text-muted: #606369;
   --text-dim: #272727;
 
+  --reader-text-base: #6c6b6b;
+
+
   --border: #adadad;
   --border-mid: #d0d0d0;
   --border-strong: #a2a2a2;
@@ -79,6 +82,9 @@
   --text-secondary: #a0a09a;
   --text-muted: #6a6660;
   --text-dim: #c8c4bc;
+
+  --reader-text-base: #d4d0cb;
+
 
   --border: #1a1a1a;
   --border-mid: #3a3835;

@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { timeAgo, faviconUrl, fireToStars } from '../../components/feed/BlogCard/BlogCard'
 import { getPostContent } from '../../api'
 import { useTheme } from '../../context/ThemeContext'
+import ThemeSwitcher from '../../components/layout/ThemeSwitcher/ThemeSwitcher'
 import hljs from 'highlight.js/lib/common'
 import lightThemeCss from 'highlight.js/styles/github.min.css?inline'
 import darkThemeCss from 'highlight.js/styles/github-dark-dimmed.min.css?inline'
@@ -13,10 +14,175 @@ const HLJS_BG_OVERRIDE = '\n.hljs { background: transparent !important; }\n'
 
 const DEFAULT_READING_SPEED = 200 // words per minute — override per-user when personalisation is added
 
+const FONT_SCALES  = [0.85, 0.93, 1, 1.1, 1.2]
+const FONT_FAMILIES = [
+  { key: 'system',    label: 'System UI',     css: "system-ui, -apple-system, sans-serif" },
+  { key: 'lucida',    label: 'Lucida',        css: "'Lucida Grande', 'Lucida Sans', Lato, sans-serif" },
+  { key: 'inter',     label: 'Inter',         css: "'Inter', 'Helvetica Neue', Arial, sans-serif" },
+  { key: 'georgia',   label: 'Georgia',       css: "Georgia, Cambria, 'Times New Roman', serif" },
+  { key: 'palatino',  label: 'Palatino',      css: "'Palatino Linotype', Palatino, 'Book Antiqua', serif" },
+  { key: 'garamond',  label: 'Garamond',      css: "'EB Garamond', Garamond, 'Apple Garamond', serif" },
+  { key: 'baskerville', label: 'Baskerville', css: "'Libre Baskerville', Baskerville, 'Times New Roman', serif" },
+  { key: 'charter',   label: 'Charter',       css: "Charter, 'Bitstream Charter', 'Sitka Text', Cambria, serif" },
+  { key: 'iowan',     label: 'Iowan',         css: "'Iowan Old Style', 'Apple Garamond', Palatino, serif" },
+  { key: 'mono',      label: 'Monospace',     css: "'Fira Code', 'Cascadia Code', 'Courier New', monospace" },
+]
+
 function readingTime(html, wpm = DEFAULT_READING_SPEED) {
   const words = html.replace(/<[^>]+>/g, ' ').trim().split(/\s+/).filter(Boolean).length
   const mins = Math.max(1, Math.round(words / wpm))
   return `${mins} min read`
+}
+
+function Lightbox({ src, onClose }) {
+  const [scale, setScale] = useState(1)
+  const [pos, setPos] = useState({ x: 0, y: 0 })
+  const dragging = useRef(false)
+  const dragStart = useRef({ mx: 0, my: 0, px: 0, py: 0 })
+  const lastDist = useRef(null)
+
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [onClose])
+
+  // Reset when image changes
+  useEffect(() => { setScale(1); setPos({ x: 0, y: 0 }) }, [src])
+
+  const clampPos = (x, y, s) => ({ x, y }) // allow free pan
+
+  const onWheel = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const delta = e.deltaY < 0 ? 1.15 : 0.87
+    setScale(s => Math.min(8, Math.max(1, s * delta)))
+  }
+
+  const onMouseDown = (e) => {
+    if (scale <= 1) return
+    e.stopPropagation()
+    dragging.current = true
+    dragStart.current = { mx: e.clientX, my: e.clientY, px: pos.x, py: pos.y }
+  }
+  const onMouseMove = (e) => {
+    if (!dragging.current) return
+    setPos({
+      x: dragStart.current.px + e.clientX - dragStart.current.mx,
+      y: dragStart.current.py + e.clientY - dragStart.current.my,
+    })
+  }
+  const onMouseUp = () => { dragging.current = false }
+
+  // Touch pinch zoom
+  const onTouchStart = (e) => {
+    if (e.touches.length === 2) {
+      lastDist.current = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      )
+    } else if (e.touches.length === 1 && scale > 1) {
+      dragging.current = true
+      dragStart.current = { mx: e.touches[0].clientX, my: e.touches[0].clientY, px: pos.x, py: pos.y }
+    }
+  }
+  const onTouchMove = (e) => {
+    if (e.touches.length === 2) {
+      e.preventDefault()
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      )
+      if (lastDist.current) {
+        const delta = dist / lastDist.current
+        setScale(s => Math.min(8, Math.max(1, s * delta)))
+      }
+      lastDist.current = dist
+    } else if (e.touches.length === 1 && dragging.current) {
+      setPos({
+        x: dragStart.current.px + e.touches[0].clientX - dragStart.current.mx,
+        y: dragStart.current.py + e.touches[0].clientY - dragStart.current.my,
+      })
+    }
+  }
+  const onTouchEnd = () => { dragging.current = false; lastDist.current = null }
+
+  const handleOverlayClick = () => { if (scale <= 1) onClose() }
+
+  return (
+    <div
+      className={styles.lightboxOverlay}
+      onClick={handleOverlayClick}
+      onMouseMove={onMouseMove}
+      onMouseUp={onMouseUp}
+      onMouseLeave={onMouseUp}
+    >
+      <button className={styles.lightboxClose} onClick={onClose} aria-label="Close">×</button>
+      <img
+        src={src}
+        className={styles.lightboxImg}
+        alt=""
+        style={{
+          transform: `translate(${pos.x}px, ${pos.y}px) scale(${scale})`,
+          cursor: scale > 1 ? (dragging.current ? 'grabbing' : 'grab') : 'zoom-in',
+          transition: dragging.current ? 'none' : 'transform 0.15s ease',
+        }}
+        onClick={e => e.stopPropagation()}
+        onWheel={onWheel}
+        onMouseDown={onMouseDown}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      />
+      {scale > 1 && (
+        <button className={styles.lightboxReset} onClick={() => { setScale(1); setPos({ x: 0, y: 0 }) }}>
+          Reset zoom
+        </button>
+      )}
+    </div>
+  )
+}
+
+function FontSelect({ value, onChange, align = 'left' }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+  const active = FONT_FAMILIES.find(f => f.key === value)
+
+  useEffect(() => {
+    if (!open) return
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [open])
+
+  return (
+    <div className={styles.fontSelectWrap} ref={ref}>
+      <button
+        className={styles.fontSelectTrigger}
+        style={{ fontFamily: active?.css }}
+        onClick={() => setOpen(o => !o)}
+      >
+        {active?.label}
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor">
+          <path d="M2 3.5 L5 6.5 L8 3.5" stroke="currentColor" strokeWidth="1.4" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </button>
+      {open && (
+        <div className={styles.fontSelectDropdown} style={align === 'right' ? { right: 0, left: 'auto' } : {}}>
+          {FONT_FAMILIES.map(f => (
+            <button
+              key={f.key}
+              className={`${styles.fontSelectOption} ${f.key === value ? styles.fontSelectOptionActive : ''}`}
+              style={{ fontFamily: f.css }}
+              onClick={() => { onChange(f.key); setOpen(false) }}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
 }
 
 export default function ReaderPage() {
@@ -29,12 +195,51 @@ export default function ReaderPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [readTime, setReadTime] = useState(null)
+  const [fontLevel, setFontLevel] = useState(() => {
+    const saved = localStorage.getItem('reader-font-level')
+    return saved !== null ? Number(saved) : 2
+  })
+  const [fontFamily, setFontFamily] = useState(() => {
+    return localStorage.getItem('reader-font-family') || 'lucida'
+  })
+  const [progress, setProgress] = useState(0)
+  const [toolsOpen, setToolsOpen] = useState(false)
+  const [atTop, setAtTop] = useState(true)
+  const [lightboxSrc, setLightboxSrc] = useState(null)
   const contentRef = useRef(null)
   const readerBodyRef = useRef(null)
+  const overflowRef = useRef(null)
+
+  useEffect(() => { localStorage.setItem('reader-font-level', fontLevel) }, [fontLevel])
+  useEffect(() => { localStorage.setItem('reader-font-family', fontFamily) }, [fontFamily])
+
+
+  useEffect(() => {
+    if (!toolsOpen) return
+    const handler = (e) => {
+      if (overflowRef.current && !overflowRef.current.contains(e.target)) setToolsOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [toolsOpen])
 
   // Always start at top — browser may restore scroll from a previous visit
   useEffect(() => {
     if (readerBodyRef.current) readerBodyRef.current.scrollTop = 0
+  }, [])
+
+  // Track reading progress + toolbar visibility
+  useEffect(() => {
+    const el = readerBodyRef.current
+    if (!el) return
+    const onScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = el
+      const max = scrollHeight - clientHeight
+      setProgress(max > 0 ? Math.min(100, Math.round((scrollTop / max) * 100)) : 0)
+      setAtTop(scrollTop < 10)
+    }
+    el.addEventListener('scroll', onScroll, { passive: true })
+    return () => el.removeEventListener('scroll', onScroll)
   }, [])
 
   // Swap highlight.js theme when dark/light mode changes
@@ -83,10 +288,41 @@ export default function ReaderPage() {
 
   const favicon = faviconUrl(post.url)
   const tags = post.tags ? post.tags.split(',').map(t => t.trim()).filter(Boolean) : []
+  const totalMins = readTime ? parseInt(readTime, 10) : 0
+  const minsLeft = totalMins > 0 ? Math.max(0, Math.round(totalMins * (1 - progress / 100))) : null
+  const activeFontCss = FONT_FAMILIES.find(f => f.key === fontFamily)?.css
+
+  const fontSizeControls = (
+    <div className={styles.toolGroup}>
+      <button className={styles.toolIconBtn} onClick={() => setFontLevel(l => Math.max(0, l - 1))} disabled={fontLevel === 0} title="Decrease font size">
+        <svg width="18" height="14" viewBox="0 0 22 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M2 13 L7 1 L12 13"/><path d="M3.8 9 L10.2 9"/><path d="M15 7 L20 7"/>
+        </svg>
+      </button>
+      <span className={styles.toolScale}>{Math.round(FONT_SCALES[fontLevel] * 100)}%</span>
+      <button className={styles.toolIconBtn} onClick={() => setFontLevel(l => Math.min(4, l + 1))} disabled={fontLevel === 4} title="Increase font size">
+        <svg width="18" height="14" viewBox="0 0 22 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M2 13 L7 1 L12 13"/><path d="M3.8 9 L10.2 9"/><path d="M15 7 L20 7"/><path d="M17.5 4.5 L17.5 9.5"/>
+        </svg>
+      </button>
+    </div>
+  )
+
+  const fontFamilyControls = <FontSelect value={fontFamily} onChange={setFontFamily} />
+  const fontFamilyControlsRight = <FontSelect value={fontFamily} onChange={setFontFamily} align="right" />
+
+  const resetControl = (
+    <button className={styles.toolResetBtn} onClick={() => { setFontLevel(2); setFontFamily('lucida') }} title="Reset to defaults">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>
+      </svg>
+      Reset
+    </button>
+  )
 
   return (
     <div className={styles.page}>
-      {/* Top bar */}
+      {/* Top bar — on desktop the reader controls live here */}
       <div className={styles.topBar}>
         <button className={styles.backBtn} onClick={() => navigate(-1)}>← Back</button>
         <div className={styles.topMeta}>
@@ -99,9 +335,54 @@ export default function ReaderPage() {
           <span className={styles.date}>{timeAgo(post.published_at)}</span>
           {post.topic && <span className={styles.topic}>{post.topic}</span>}
         </div>
+        {/* Desktop: all controls inline in nav */}
+        <div className={styles.topBarControls}>
+          <div className={styles.toolTheme}><ThemeSwitcher /></div>
+          <div className={styles.toolSep} />
+          {fontSizeControls}
+          <div className={styles.toolSep} />
+          {fontFamilyControls}
+          <div className={styles.toolSep} />
+          {resetControl}
+        </div>
         <a href={post.url} target="_blank" rel="noopener noreferrer" className={styles.openBtn}>
           Open original ↗
         </a>
+      </div>
+
+      {/* Mobile toolbar — hidden when scrolled */}
+      <div className={`${styles.readerToolbar} ${atTop ? '' : styles.readerToolbarHidden}`}>
+        <div className={styles.toolTheme}><ThemeSwitcher /></div>
+        <div className={styles.toolSep} />
+        {fontSizeControls}
+        {/* These collapse into ⋮ on very narrow screens */}
+        <div className={`${styles.toolSep} ${styles.toolSepOverflow}`} />
+        <div className={styles.toolOverflowItems}>
+          {fontFamilyControls}
+          <div className={styles.toolSep} />
+          {resetControl}
+        </div>
+        {/* ⋮ button + popup — only shown when items above are hidden */}
+        <div className={styles.toolOverflowMenu} ref={overflowRef}>
+          <button
+            className={styles.toolDotsBtn}
+            onClick={() => setToolsOpen(o => !o)}
+            aria-label="More reading options"
+          >
+            more
+          </button>
+          {toolsOpen && (
+            <div className={styles.toolsPopover}>
+              <div className={styles.toolsPanelRow}>
+                {fontFamilyControlsRight}
+              </div>
+              <div className={styles.toolsPanelDivider} />
+              <div className={styles.toolsPanelRow}>
+                {resetControl}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Scrollable reader area */}
@@ -188,6 +469,10 @@ export default function ReaderPage() {
           {content && (
             <div
               className={styles.articleContent}
+              style={{
+                fontSize: `calc(var(--fs-lg) * ${FONT_SCALES[fontLevel]})`,
+                fontFamily: activeFontCss,
+              }}
               ref={el => {
                 contentRef.current = el
                 if (!el) return
@@ -199,7 +484,7 @@ export default function ReaderPage() {
                   t.parentNode.insertBefore(wrap, t)
                   wrap.appendChild(t)
                 })
-                // Hide images that fail to load
+                // Hide images that fail to load; make successful ones clickable
                 el.querySelectorAll('img').forEach(img => {
                   img.addEventListener('error', () => {
                     img.style.display = 'none'
@@ -208,6 +493,10 @@ export default function ReaderPage() {
                       fig.style.display = 'none'
                     }
                   })
+                  img.style.cursor = 'zoom-in'
+                  img.addEventListener('click', () => {
+                    if (img.src) setLightboxSrc(img.src)
+                  })
                 })
               }}
               dangerouslySetInnerHTML={{ __html: content }}
@@ -215,6 +504,26 @@ export default function ReaderPage() {
           )}
         </div>
       </div>
+
+      {/* Lightbox */}
+      {lightboxSrc && <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />}
+
+      {/* Progress dock — desktop only */}
+      {content && (
+        <div className={styles.readerDock}>
+          <div className={styles.dockPill}>
+            <div className={styles.dockTrack}>
+              <div className={styles.dockFill} style={{ width: `${progress}%` }} />
+            </div>
+            <span className={styles.dockText}>
+              {progress}%
+              {minsLeft !== null && progress < 100 && (
+                <span className={styles.dockSub}> · {minsLeft > 0 ? `${minsLeft} min` : 'almost done'}</span>
+              )}
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

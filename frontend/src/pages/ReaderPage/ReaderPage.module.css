@@ -96,6 +96,250 @@
 }
 .openBtn:hover { background: var(--color-primary); color: #fff; }
 
+/* All controls inline — desktop only */
+.topBarControls {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: auto;
+  margin-right: 0.75rem;
+}
+
+/* ── Mobile toolbar (below nav) ── */
+.readerToolbar {
+  display: none;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0 1rem;
+  height: 40px;
+  background: var(--filter-bg);
+  border-bottom: 1px solid var(--filter-border);
+  flex-shrink: 0;
+  opacity: 1;
+  transition: height 0.25s ease, opacity 0.2s ease, border-bottom-width 0s;
+  position: relative;
+}
+.readerToolbarHidden {
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+  border-bottom-width: 0;
+}
+
+/* Secondary items — hidden on mobile, always in the ⋮ menu */
+.toolOverflowItems {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.toolSepOverflow { display: flex; }
+
+/* ⋮ wrapper — hidden on desktop, always visible on mobile */
+.toolOverflowMenu {
+  display: none;
+  position: relative;
+  align-items: center;
+  margin-left: auto;
+}
+
+/* "more" text button */
+.toolDotsBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text-base);
+  cursor: pointer;
+  font-size: var(--fs-md);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 3px 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+.toolDotsBtn:hover { opacity: 0.7; }
+
+/* Popup anchored to the ⋮ button — no full overlay */
+.toolsPopover {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 200;
+  background: var(--filter-bg);
+  border: 1px solid var(--filter-border);
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  padding: 0.25rem 0.75rem 0.5rem;
+  min-width: 180px;
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
+}
+
+.toolsPopover .fontSelectWrap { width: 100%; }
+.toolsPopover .fontSelectTrigger { width: 100%; }
+
+.toolsPanelRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55rem 0;
+}
+
+.toolsPanelLabel {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.toolsPanelDivider {
+  height: 1px;
+  background: var(--filter-border);
+}
+
+.toolGroup {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+}
+
+.toolSep {
+  width: 1px;
+  height: 14px;
+  background: var(--filter-border);
+  margin: 0 0.4rem;
+  flex-shrink: 0;
+}
+
+/* Font size icon buttons */
+.toolIconBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  line-height: 0;
+  transition: color 0.15s, background 0.15s;
+}
+.toolIconBtn:hover:not(:disabled) { color: var(--text-base); background: var(--card-hint); }
+.toolIconBtn:disabled { opacity: 0.3; cursor: default; }
+
+.toolScale {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  min-width: 28px;
+  text-align: center;
+  letter-spacing: 0.02em;
+  opacity: 0.7;
+}
+
+/* Font family custom dropdown */
+.fontSelectWrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.fontSelectTrigger {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: 1px solid var(--filter-border);
+  color: var(--text-base);
+  font-size: var(--fs-xs);
+  cursor: pointer;
+  padding: 3px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  transition: border-color 0.15s;
+  min-width: 90px;
+  justify-content: space-between;
+}
+
+.fontSelectDropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 300;
+  background: var(--filter-bg);
+  border: 1px solid var(--filter-border);
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  padding: 4px;
+  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.fontSelectOption {
+  background: none;
+  border: none;
+  color: var(--text-base);
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 4px;
+  text-align: left;
+  transition: background 0.12s;
+}
+.fontSelectOption:hover { color: var(--color-primary); }
+.fontSelectOptionActive {
+  color: var(--color-primary-hover);
+  font-size: var(--fs-std);
+}
+
+/* ThemeSwitcher inline — strip card chrome, align to toolbar style */
+.toolTheme :global(.switcher) {
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
+  gap: 2px;
+}
+.toolTheme :global(.switcher::before) {
+  display: none;
+}
+.toolTheme :global(.darkToggle),
+.toolTheme :global(.paletteToggle) {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
+}
+.toolTheme :global(.darkToggle):hover,
+.toolTheme :global(.paletteToggle):hover {
+  color: var(--color-primary);
+  background: var(--card-hint);
+}
+
+/* Reset button */
+.toolResetBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  cursor: pointer;
+  padding: 3px 8px;
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+.toolResetBtn:hover { color: var(--text-base); background: var(--card-hint); }
+
 /* ── Reader body ── */
 .readerBody {
   flex: 1;
@@ -233,9 +477,9 @@
    Article content typography
    ══════════════════════════════════════════ */
 .articleContent {
-  font-size: var(--fs-lg);
-  line-height: 1.8;
-  color: var(--text-base);
+  font-size: var(--fs-lm);
+  line-height: 1.4;
+  color: var(--reader-text-base);
   font-family: 'Lucida Grande', 'Lato', sans-serif;
 }
 
@@ -246,7 +490,7 @@
 
 /* First paragraph lead-in */
 .articleContent > p:first-of-type {
-  font-size: var(--fs-lg);
+  font-size: var(--fs-lm);
   color: var(--text-base);
   opacity: 0.9;
 }
@@ -602,6 +846,124 @@
   width: 60%;
 }
 
+/* ── Progress dock (desktop only) ── */
+/* ── Lightbox ── */
+@keyframes lightboxFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.lightboxOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: rgba(113, 113, 113, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem;
+  animation: lightboxFadeIn 0.2s ease both;
+  cursor: zoom-out;
+}
+
+.lightboxImg {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 6px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.lightboxReset {
+  position: absolute;
+  bottom: 1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff;
+  font-size: var(--fs-xs);
+  padding: 4px 14px;
+  border-radius: 100px;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.15s;
+  letter-spacing: 0.03em;
+}
+.lightboxReset:hover { opacity: 1; }
+
+.lightboxClose {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+.lightboxClose:hover { opacity: 1; }
+
+@keyframes dockFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.readerDock {
+  position: fixed;
+  bottom: 1.25rem;
+  right: 1.25rem;
+  z-index: 200;
+  animation: dockFadeIn 0.3s ease both;
+}
+
+.dockPill {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--filter-bg);
+  border: 1px solid var(--filter-border);
+  border-radius: 100px;
+  padding: 6px 12px 6px 10px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+  width: 220px;
+}
+
+.dockTrack {
+  flex: 1;
+  min-width: 52px;
+  height: 3px;
+  background: var(--filter-border);
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.dockFill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 100px;
+  transition: width 0.3s ease;
+}
+
+.dockText {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  flex: 1;
+  text-align: left;
+}
+
+.dockSub { opacity: 0.7; }
+
 /* ── Mobile ── */
 @media (max-width: 600px) {
   /* Top bar: hide dot, date, topic to save space; keep back + publisher + open */
@@ -624,7 +986,7 @@
   .stat { font-size: var(--fs-sm); }
 
   /* Article body — larger, more comfortable reading */
-  .articleContent { font-size: var(--fs-lm); line-height: 1.85; }
+  .articleContent { font-size: var(--fs-lm); line-height: 1.4; }
   .articleContent p { margin-bottom: 1.2rem; }
   .articleContent h1 { font-size: var(--fs-xl); }
   .articleContent h2 { font-size: var(--fs-lg); }
@@ -636,4 +998,17 @@
   .articleContent blockquote { padding: 0.5rem 1rem; }
   .articleContent ul,
   .articleContent ol { margin-left: 1.2rem; }
+
+  /* Hide desktop inline controls, show toolbar below nav */
+  .topBarControls { display: none; }
+  .readerToolbar { display: flex; }
+
+  /* Always hide secondary items on mobile — they live in the ⋮ menu */
+  .toolOverflowItems { display: none; }
+  .toolSepOverflow   { display: none; }
+  .toolOverflowMenu  { display: flex; }
+
+  /* Progress dock — hidden on mobile */
+  .readerDock { display: none; }
 }
+
