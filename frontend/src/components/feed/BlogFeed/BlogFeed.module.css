@@ -74,7 +74,7 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
   gap: 1rem;
   padding: 2px;
 }
@@ -393,13 +393,13 @@
   opacity: 1;
 }
 
-.sortPillLikes { color: rgb(255, 96, 96); }
-.sortPillViews { color: #818a8f; }
-.sortPillStars { color: #f5a623; }
+.sortPillLikes,
+.sortPillViews,
+.sortPillStars { color: var(--text-muted); }
 
-.sortPillLikes.sortPillActive  { border-bottom-color: rgb(255, 96, 96); }
-.sortPillViews.sortPillActive  { border-bottom-color: #50595e; }
-.sortPillStars.sortPillActive  { border-bottom-color: #f5a623; }
+.sortPillLikes.sortPillActive,
+.sortPillViews.sortPillActive,
+.sortPillStars.sortPillActive { color: var(--color-primary); border-bottom-color: var(--color-primary); }
 
 /* ── Tag filter row ── */
 .tagFilter {
@@ -513,8 +513,8 @@
 }
 
 .scrollCard {
-  flex: 0 0 200px;
-  width: 200px;
+  flex: 0 0 210px;
+  width: 210px;
 }
 
 .lockedContainer {

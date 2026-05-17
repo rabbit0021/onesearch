@@ -18,7 +18,7 @@
 .thumbnail {
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 4 / 3;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -44,8 +44,8 @@
 }
 
 .individualAvatar {
-  width: 80px;
-  height: 80px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
   object-fit: cover;
   border: 2.5px solid rgba(255, 255, 255, 0.5);
@@ -121,7 +121,7 @@
 .starCount {
   font-size: var(--fs-md);
   color: var(--text-base);
-  line-height: 17px;
+  line-height: 20px;
 }
 
 /* ── View count ── */
@@ -134,7 +134,7 @@
 .viewCounter {
   font-size: var(--fs-md);
   color: #9a9a9a;
-  line-height: 17px;
+  line-height: 20px;
 }
 
 /* ── Like button ── */
@@ -156,7 +156,7 @@
 .heart {
   display: flex;
   align-items: center;
-  height: 17px;
+  height: 20px;
   line-height: 0;
   transition: color 0.15s, transform 0.15s;
   flex-shrink: 0;
@@ -218,7 +218,7 @@
 .likeCounter {
   font-size: var(--fs-md);
   color: var(--text-base);
-  line-height: 17px;
+  line-height: 20px;
   animation: countPop 0.3s ease forwards;
 }
 
@@ -263,7 +263,7 @@
 }
 
 .date {
-  font-size: var(--fs-xs);
+  font-size: var(--fs-md);
   color: var(--text-muted);
   white-space: nowrap;
   flex-shrink: 0;
@@ -276,7 +276,7 @@
 }
 
 .title {
-  font-size: var(--fs-std);
+  font-size: var(--fs-lg);
   color: var(--card-title);
   margin: 0;
   line-height: 1.4;
@@ -285,6 +285,7 @@
   line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif
 }
 
 .tags {

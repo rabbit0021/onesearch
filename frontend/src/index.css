@@ -50,7 +50,8 @@
   --fs-sm:   0.82rem;   /* small: filters, secondary text */                                                            
   --fs-base: 0.87rem;   /* base: most UI elements */                                                                    
   --fs-md:   0.92rem;   /* medium: body copy */                                                                         
-  --fs-std:  0.96rem;      /* standard: inputs, headings */                                                                
+  --fs-std:  0.96rem;   /* standard: inputs, headings */    
+  --fs-lm:   1.1rem;                                                                                                                             
   --fs-lg:   1.2rem;    /* large: section headings */                                                                   
   --fs-xl:   1.3rem;    /* xl: page titles */                                                                           
   --fs-2xl:  1.5rem;    /* icon sizes */                                                                                
@@ -93,8 +94,8 @@
   --card-bg: #1c1a18;
   --card-shadow: rgba(0, 0, 0, 0.4);
   --card-shadow-hover: rgba(0, 0, 0, 0.6);
-  --card-title: #f0ece4;
-  --card-publisher: #a0a09a;
+  --card-title: #c2c2bb;
+  --card-publisher: #d0ceca;
   --card-hint: var(--bg-surface);
 
 
