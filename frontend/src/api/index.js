@@ -243,6 +243,38 @@ export async function getPostContent(postId) {
   return res.json()
 }
 
+export async function getAdminReadingEvents(secretKey) {
+  const res = await fetch('/admin/reading-events', {
+    headers: { 'X-Secret-Key': secretKey },
+  })
+  if (!res.ok) throw new Error('Failed to fetch reading events')
+  return res.json()
+}
+
+export async function getReadEvent(postId, deviceId) {
+  const res = await fetch(`/posts/${postId}/read-event?device_id=${encodeURIComponent(deviceId)}`)
+  if (!res.ok) return null
+  const data = await res.json()
+  return Object.keys(data).length ? data : null
+}
+
+export function sendReadEvent(postId, { deviceId, userEmail, timeSpent, maxDepth, openedOriginal }) {
+  const payload = JSON.stringify({
+    device_id: deviceId,
+    user_email: userEmail || null,
+    time_spent: timeSpent,
+    max_depth: maxDepth,
+    opened_original: openedOriginal,
+  })
+  // sendBeacon works reliably on page unload; fall back to fetch if unavailable
+  if (navigator.sendBeacon) {
+    const blob = new Blob([payload], { type: 'application/json' })
+    navigator.sendBeacon(`/posts/${postId}/read-event`, blob)
+  } else {
+    fetch(`/posts/${postId}/read-event`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload, keepalive: true })
+  }
+}
+
 export async function recordView(postId, userIdentifier, deviceId) {
   await fetch(`/posts/${postId}/view`, {
     method: 'POST',

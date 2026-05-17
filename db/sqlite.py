@@ -175,6 +175,21 @@ class SQLiteDatabase:
             logger.warning(f"Topic category migration failed: {e}")
 
         c.execute("""
+        CREATE TABLE IF NOT EXISTS reading_events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            post_id INTEGER NOT NULL,
+            user_email TEXT,
+            device_id TEXT NOT NULL,
+            time_spent INTEGER NOT NULL DEFAULT 0,
+            max_depth INTEGER NOT NULL DEFAULT 0,
+            opened_original BOOLEAN NOT NULL DEFAULT 0,
+            last_read_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE (post_id, device_id),
+            FOREIGN KEY (post_id) REFERENCES posts(id)
+        )
+        """)
+
+        c.execute("""
         CREATE TABLE IF NOT EXISTS job_runs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             job_id TEXT NOT NULL UNIQUE,
@@ -730,6 +745,20 @@ class SQLiteDatabase:
         """, (label, tags, post_id))
         conn.commit()  # don’t forget to commit the change
         logger.info(f"Post {post_id} updated successfully")
+
+    def upsert_reading_event(self, conn, post_id, device_id, user_email, time_spent, max_depth, opened_original):
+        c = conn.cursor()
+        c.execute("""
+            INSERT INTO reading_events (post_id, device_id, user_email, time_spent, max_depth, opened_original, last_read_at)
+            VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+            ON CONFLICT(post_id, device_id) DO UPDATE SET
+                time_spent     = time_spent + excluded.time_spent,
+                max_depth      = MAX(max_depth, excluded.max_depth),
+                opened_original = opened_original OR excluded.opened_original,
+                user_email     = COALESCE(excluded.user_email, user_email),
+                last_read_at   = CURRENT_TIMESTAMP
+        """, (post_id, device_id, user_email, time_spent, max_depth, int(opened_original)))
+        conn.commit()
 
     @classmethod
     def get_instance(cls, db_path):

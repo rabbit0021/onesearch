@@ -303,6 +303,25 @@ def admin_likes():
     finally:
         conn.close()
 
+@app.route("/admin/reading-events", methods=["GET"])
+@require_secret_key
+def admin_reading_events():
+    conn = app.db.get_connection()
+    try:
+        c = conn.cursor()
+        c.execute("""
+            SELECT re.id, re.device_id, re.user_email,
+                   re.time_spent, re.max_depth, re.opened_original, re.last_read_at,
+                   po.title, po.url, pu.publisher_name AS publisher
+            FROM reading_events re
+            JOIN posts po ON po.id = re.post_id
+            JOIN publishers pu ON pu.id = po.publisher_id
+            ORDER BY re.last_read_at DESC
+        """)
+        return jsonify([dict(r) for r in c.fetchall()])
+    finally:
+        conn.close()
+
 @app.route("/privacy-policy.html")
 @app.route("/privacy-policy")
 def privacy_policy():
@@ -1067,6 +1086,44 @@ def record_view(post_id):
     try:
         count = app.db.record_view(conn, post_id, user_identifier, device_id)
         return jsonify({"view_count": count})
+    finally:
+        conn.close()
+
+
+@app.route("/posts/<int:post_id>/read-event", methods=["GET"])
+def get_read_event(post_id):
+    device_id = request.args.get('device_id', '').strip()
+    if not device_id:
+        return jsonify({"error": "device_id required"}), 400
+    conn = app.db.get_connection()
+    try:
+        c = conn.cursor()
+        c.execute("""
+            SELECT max_depth, time_spent, opened_original
+            FROM reading_events
+            WHERE post_id = ? AND device_id = ?
+        """, (post_id, device_id))
+        row = c.fetchone()
+        return jsonify(dict(row) if row else {})
+    finally:
+        conn.close()
+
+@app.route("/posts/<int:post_id>/read-event", methods=["POST"])
+def record_read_event(post_id):
+    data = request.get_json(silent=True) or {}
+    device_id = data.get('device_id', '').strip()
+    if not device_id:
+        return jsonify({"error": "device_id required"}), 400
+
+    user_email   = (data.get('user_email') or '').strip().lower() or None
+    time_spent   = max(0, int(data.get('time_spent', 0)))
+    max_depth    = max(0, min(100, int(data.get('max_depth', 0))))
+    opened_original = bool(data.get('opened_original', False))
+
+    conn = app.db.get_connection()
+    try:
+        app.db.upsert_reading_event(conn, post_id, device_id, user_email, time_spent, max_depth, opened_original)
+        return jsonify({"ok": True})
     finally:
         conn.close()
 

@@ -8,9 +8,10 @@ import JobsTab from '../../components/admin/JobsTab/JobsTab'
 import NotificationsTab from '../../components/admin/NotificationsTab/NotificationsTab'
 import FeedbackTab from '../../components/admin/FeedbackTab/FeedbackTab'
 import LikesTab from '../../components/admin/LikesTab/LikesTab'
+import ReadingEventsTab from '../../components/admin/ReadingEventsTab/ReadingEventsTab'
 import styles from './AdminPosts.module.css'
 
-const TABS = ['Posts', 'Publishers', 'Subscriptions', 'Notifications', 'Jobs', 'Feedback', 'Likes']
+const TABS = ['Posts', 'Publishers', 'Subscriptions', 'Notifications', 'Jobs', 'Feedback', 'Likes', 'Reading']
 const STORAGE_KEY = 'admin_secret_key'
 const TTL_MS = 3 * 24 * 60 * 60 * 1000 // 3 days
 
@@ -135,6 +136,10 @@ export default function AdminPosts() {
 
       {tab === 'Likes' && (
         <LikesTab secretKey={secretKey} />
+      )}
+
+      {tab === 'Reading' && (
+        <ReadingEventsTab secretKey={secretKey} />
       )}
     </div>
   )

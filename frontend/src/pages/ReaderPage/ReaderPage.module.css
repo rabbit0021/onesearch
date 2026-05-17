@@ -1,3 +1,56 @@
+/* ── Dev overlay ── */
+.devOverlay {
+  position: fixed;
+  bottom: 1.25rem;
+  left: 1.25rem;
+  z-index: 999;
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--text-base);
+  font-family: 'Fira Code', monospace;
+  font-size: var(--fs-std);
+  border-radius: 8px;
+  padding: 10px 14px;
+  min-width: 170px;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.08);
+  pointer-events: none; /* rows non-interactive; toggle re-enables itself */
+}
+.devHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  pointer-events: auto;
+}
+.devTitle {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-base);
+  font-weight: 700;
+}
+.devToggle {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0;
+  line-height: 1;
+  pointer-events: auto;
+}
+.devToggle:hover { color: var(--text-base); }
+.devRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 4px;
+}
+.devLabel { color: #5f6976; }
+.devValue { color: #ffffff; font-weight: 600; }
+.devGood  { color: #329357; }
+.devBad   { color: #f87171; }
+
 .page {
   position: fixed;
   inset: 0;
@@ -347,6 +400,7 @@
   padding: 2.5rem 1.25rem 5rem;
   scroll-behavior: smooth;
   overscroll-behavior: contain;
+  position: relative;
 }
 
 .readerInner {
@@ -915,6 +969,25 @@
   transition: opacity 0.15s;
 }
 .lightboxClose:hover { opacity: 1; }
+
+
+/* ── Resume scroll overlay ── */
+.resumeFade {
+  position: fixed;
+  inset: 0;
+  background: rgba(128, 128, 128, 0.35);
+  pointer-events: none;
+  z-index: 200;
+}
+
+.resumeFadeOut {
+  animation: resumeFadeOut 0.6s ease forwards;
+}
+
+@keyframes resumeFadeOut {
+  0%   { opacity: 1; }
+  100% { opacity: 0; }
+}
 
 @keyframes dockFadeIn {
   from { opacity: 0; transform: translateY(6px); }

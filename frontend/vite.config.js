@@ -21,6 +21,7 @@ export default defineConfig({
       '/admin/notifications': FLASK,
       '/admin/tempdata': FLASK,
       '/admin/likes': FLASK,
+      '/admin/reading':FLASK,
       '^/individuals(?!/)': { target: FLASK },
       '/interested': FLASK,
       '/feedback': FLASK,

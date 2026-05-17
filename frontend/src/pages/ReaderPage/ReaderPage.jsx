@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { timeAgo, faviconUrl, fireToStars } from '../../components/feed/BlogCard/BlogCard'
-import { getPostContent } from '../../api'
+import { getPostContent, sendReadEvent, getReadEvent, getOrCreateDeviceId } from '../../api'
 import { useTheme } from '../../context/ThemeContext'
+import { useToast } from '../../context/ToastContext'
 import ThemeSwitcher from '../../components/layout/ThemeSwitcher/ThemeSwitcher'
 import hljs from 'highlight.js/lib/common'
 import lightThemeCss from 'highlight.js/styles/github.min.css?inline'
@@ -140,11 +141,52 @@ function FontSelect({ value, onChange, align = 'left' }) {
   )
 }
 
+function DevOverlay({ timeSpent, maxDepth, isActiveRef, openedOriginal }) {
+  const [collapsed, setCollapsed] = useState(false)
+  return (
+    <div className={styles.devOverlay}>
+      <div className={styles.devHeader}>
+        <span className={styles.devTitle}>Engagement</span>
+        <button className={styles.devToggle} onClick={() => setCollapsed(c => !c)}>
+          {collapsed ? '▸' : '▾'}
+        </button>
+      </div>
+      {!collapsed && (
+        <>
+          <div className={styles.devRow}>
+            <span className={styles.devLabel}>Active time</span>
+            <span className={styles.devValue}>
+              {String(Math.floor(timeSpent / 60)).padStart(2, '0')}:{String(timeSpent % 60).padStart(2, '0')}
+            </span>
+          </div>
+          <div className={styles.devRow}>
+            <span className={styles.devLabel}>Max depth</span>
+            <span className={styles.devValue}>{maxDepth}%</span>
+          </div>
+          <div className={styles.devRow}>
+            <span className={styles.devLabel}>Idle</span>
+            <span className={`${styles.devValue} ${!isActiveRef.current ? styles.devBad : styles.devGood}`}>
+              {isActiveRef.current ? 'active' : 'idle'}
+            </span>
+          </div>
+          <div className={styles.devRow}>
+            <span className={styles.devLabel}>Opened original</span>
+            <span className={`${styles.devValue} ${openedOriginal ? styles.devGood : ''}`}>
+              {openedOriginal ? 'yes' : 'no'}
+            </span>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
 export default function ReaderPage() {
   const { state } = useLocation()
   const navigate = useNavigate()
   const post = state?.post
   const { darkMode } = useTheme()
+  const { showToast } = useToast()
 
   const [content, setContent] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -161,6 +203,20 @@ export default function ReaderPage() {
   const [toolsOpen, setToolsOpen] = useState(false)
   const [atTop, setAtTop] = useState(true)
   const [lightboxSrc, setLightboxSrc] = useState(null)
+  const [resumeOverlay, setResumeOverlay] = useState(false) // true=visible, 'fading'=fading out
+
+  // ── Engagement tracking ──
+  const [timeSpent, setTimeSpent] = useState(0)
+  const [maxDepth, setMaxDepth] = useState(0)
+  const [openedOriginal, setOpenedOriginal] = useState(false)
+  // Refs mirror state so sendBeacon closure always sees latest values
+  const timeSpentRef = useRef(0)
+  const maxDepthRef = useRef(0)
+  const openedOriginalRef = useRef(false)
+  const isActiveRef = useRef(true)
+  const idleTimer = useRef(null)
+  const IDLE_LIMIT = 60
+
   const contentRef = useRef(null)
   const readerBodyRef = useRef(null)
   const overflowRef = useRef(null)
@@ -171,8 +227,63 @@ export default function ReaderPage() {
     return () => { document.body.style.overflow = prev }
   }, [])
 
+  // Send engagement event on page leave (unload or tab hide)
+  useEffect(() => {
+    if (!post?.id) return
+    const flush = () => {
+      sendReadEvent(post.id, {
+        deviceId:       getOrCreateDeviceId(),
+        userEmail:      localStorage.getItem('onesearch_like_email') || null,
+        timeSpent:      timeSpentRef.current,
+        maxDepth:       maxDepthRef.current,
+        openedOriginal: openedOriginalRef.current,
+      })
+    }
+    window.addEventListener('beforeunload', flush)
+    document.addEventListener('visibilitychange', () => { if (document.hidden) flush() })
+    return () => {
+      flush() // also fire when navigating within the SPA
+      window.removeEventListener('beforeunload', flush)
+    }
+  }, [post?.id])
+
   useEffect(() => { localStorage.setItem('reader-font-level', fontLevel) }, [fontLevel])
   useEffect(() => { localStorage.setItem('reader-font-family', fontFamily) }, [fontFamily])
+
+  // Active-time timer — ticks only when tab visible + user not idle
+  useEffect(() => {
+    const tick = setInterval(() => {
+      if (isActiveRef.current) setTimeSpent(t => { const n = t + 1; timeSpentRef.current = n; return n })
+    }, 1000)
+    return () => clearInterval(tick)
+  }, [])
+
+  // Pause on tab hide, resume on tab show
+  useEffect(() => {
+    const onVisibility = () => {
+      isActiveRef.current = !document.hidden
+      if (!document.hidden) resetIdle()
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => document.removeEventListener('visibilitychange', onVisibility)
+  }, [])
+
+  // Reset idle timeout on any activity
+  function resetIdle() {
+    isActiveRef.current = true
+    clearTimeout(idleTimer.current)
+    idleTimer.current = setTimeout(() => { isActiveRef.current = false }, IDLE_LIMIT * 1000)
+  }
+
+  useEffect(() => {
+    resetIdle()
+    const events = ['scroll', 'mousemove', 'keydown', 'touchstart']
+    events.forEach(e => window.addEventListener(e, resetIdle, { passive: true }))
+    return () => {
+      clearTimeout(idleTimer.current)
+      events.forEach(e => window.removeEventListener(e, resetIdle))
+    }
+  }, [])
 
 
   useEffect(() => {
@@ -184,20 +295,41 @@ export default function ReaderPage() {
     return () => document.removeEventListener('mousedown', handler)
   }, [toolsOpen])
 
-  // Always start at top — browser may restore scroll from a previous visit
+  // Always start at top initially
   useEffect(() => {
     if (readerBodyRef.current) readerBodyRef.current.scrollTop = 0
   }, [])
 
-  // Track reading progress + toolbar visibility
+  // After content loads, fetch saved progress and scroll to it
+  useEffect(() => {
+    if (!content || !post?.id) return
+    getReadEvent(post.id, getOrCreateDeviceId()).then(event => {
+      if (!event) return
+      const pct = event.max_depth
+      if (pct < 5 || pct >= 95) return
+      setResumeOverlay(true)
+      requestAnimationFrame(() => {
+        const el = readerBodyRef.current
+        if (!el) return
+        const max = el.scrollHeight - el.clientHeight
+        el.scrollTop = Math.round((pct / 100) * max)
+        showToast(`Resumed from ${pct}%`, 1000)
+        setTimeout(() => setResumeOverlay('fading'), 300)
+      })
+    })
+  }, [content, post?.id])
+
+  // Track reading progress + toolbar visibility + max depth
   useEffect(() => {
     const el = readerBodyRef.current
     if (!el) return
     const onScroll = () => {
       const { scrollTop, scrollHeight, clientHeight } = el
       const max = scrollHeight - clientHeight
-      setProgress(max > 0 ? Math.min(100, Math.round((scrollTop / max) * 100)) : 0)
+      const pct = max > 0 ? Math.min(100, Math.round((scrollTop / max) * 100)) : 0
+      setProgress(pct)
       setAtTop(scrollTop < 10)
+      setMaxDepth(d => { const n = Math.max(d, pct); maxDepthRef.current = n; return n })
     }
     el.addEventListener('scroll', onScroll, { passive: true })
     return () => el.removeEventListener('scroll', onScroll)
@@ -306,7 +438,7 @@ export default function ReaderPage() {
           <div className={styles.toolSep} />
           {resetControl}
         </div>
-        <a href={post.url} target="_blank" rel="noopener noreferrer" className={styles.openBtn}>
+        <a href={post.url} target="_blank" rel="noopener noreferrer" className={styles.openBtn} onClick={() => { setOpenedOriginal(true); openedOriginalRef.current = true }}>
           Open original ↗
         </a>
       </div>
@@ -485,6 +617,17 @@ export default function ReaderPage() {
           </div>
         </div>
       )}
+
+      {/* Resume scroll overlay */}
+      {resumeOverlay && (
+        <div
+          className={`${styles.resumeFade} ${resumeOverlay === 'fading' ? styles.resumeFadeOut : ''}`}
+          onAnimationEnd={() => setResumeOverlay(false)}
+        />
+      )}
+
+      {/* Dev-only engagement metrics overlay */}
+      {import.meta.env.DEV && <DevOverlay timeSpent={timeSpent} maxDepth={maxDepth} isActiveRef={isActiveRef} openedOriginal={openedOriginal} />}
     </div>
   )
 }
