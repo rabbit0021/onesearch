@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { getFeed, getSuggestedFeed, getMostLikedFeed, getMostLikedAllTimeFeed, getIndividualsFeed, getRecommendedFeed } from '../../../api'
 import { getJiraStatus, getJiraIssues } from '../../../api/jira'
 import BlogCard, { TOPIC_COLORS } from '../BlogCard/BlogCard'
@@ -45,15 +45,35 @@ const DATE_OPTIONS = [
   { label: 'This month', days: 30 },
 ]
 
+// Module-level cache — survives navigation, invalidates after 5 minutes
+const CACHE_TTL = 5 * 60 * 1000
+const _cache = {
+  posts: null,
+  mostLiked: null,
+  mostLikedAllTime: null,
+  individualsPosts: null,
+  recommended: null,
+  jiraConnected: false,
+  ts: null,
+}
+function _cacheValid() {
+  return _cache.posts && _cache.ts && (Date.now() - _cache.ts) < CACHE_TTL
+}
+function _clearCache() {
+  _cache.posts = null; _cache.mostLiked = null; _cache.mostLikedAllTime = null
+  _cache.individualsPosts = null; _cache.recommended = null
+  _cache.jiraConnected = false; _cache.ts = null
+}
+
 export default function BlogFeed({ formRef }) {
-  const [posts, setPosts] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [posts, setPosts] = useState(_cacheValid() ? _cache.posts : [])
+  const [loading, setLoading] = useState(!_cacheValid())
   const [error, setError] = useState(null)
-  const [jiraConnected, setJiraConnected] = useState(false)
-  const [mostLiked, setMostLiked] = useState([])
-  const [mostLikedAllTime, setMostLikedAllTime] = useState([])
-  const [individualsPosts, setIndividualsPosts] = useState([])
-  const [recommended, setRecommended] = useState([])
+  const [jiraConnected, setJiraConnected] = useState(_cacheValid() ? _cache.jiraConnected : false)
+  const [mostLiked, setMostLiked] = useState(_cacheValid() ? _cache.mostLiked || [] : [])
+  const [mostLikedAllTime, setMostLikedAllTime] = useState(_cacheValid() ? _cache.mostLikedAllTime || [] : [])
+  const [individualsPosts, setIndividualsPosts] = useState(_cacheValid() ? _cache.individualsPosts || [] : [])
+  const [recommended, setRecommended] = useState(_cacheValid() ? _cache.recommended || [] : [])
 
   const [search, setSearch] = useState('')
   const [publisher, setPublisher] = useState('')
@@ -64,26 +84,32 @@ export default function BlogFeed({ formRef }) {
 
   const [filterClosed, setFilterClosed] = useState(true)
   const [sortBy, setSortBy] = useState(null)
-  const [isTransitioning, setIsTransitioning] = useState(false)
-  const transitionTimer = useRef(null)
 
   useEffect(() => {
-    getMostLikedFeed(10).then(setMostLiked).catch(() => { })
-    getMostLikedAllTimeFeed(15).then(setMostLikedAllTime).catch(() => { })
-    getIndividualsFeed(15).then(setIndividualsPosts).catch(() => { })
-    getRecommendedFeed(15).then(setRecommended).catch(() => { })
+    const valid = _cacheValid()
+    if (!valid) _clearCache()
+
+    if (!valid || !_cache.mostLiked) getMostLikedFeed(10).then(d => { _cache.mostLiked = d; setMostLiked(d) }).catch(() => { })
+    if (!valid || !_cache.mostLikedAllTime) getMostLikedAllTimeFeed(15).then(d => { _cache.mostLikedAllTime = d; setMostLikedAllTime(d) }).catch(() => { })
+    if (!valid || !_cache.individualsPosts) getIndividualsFeed(15).then(d => { _cache.individualsPosts = d; setIndividualsPosts(d) }).catch(() => { })
+    if (!valid || !_cache.recommended) getRecommendedFeed(15).then(d => { _cache.recommended = d; setRecommended(d) }).catch(() => { })
+
+    if (valid) return // cache still fresh, skip fetch
 
     async function loadFeed() {
       try {
         const status = await getJiraStatus()
         if (status.connected) {
+          _cache.jiraConnected = true
           setJiraConnected(true)
           const data = await getJiraIssues()
           const issues = data.issues || []
           if (issues.length > 0) {
             const suggested = await getSuggestedFeed(issues, 100)
+            _cache.posts = suggested
+            _cache.ts = Date.now()
             setPosts(suggested)
-            setTimeout(() => setLoading(false), 5000) // DEBUG: remove timeout
+            setLoading(false)
             return
           }
         }
@@ -91,21 +117,13 @@ export default function BlogFeed({ formRef }) {
         // fall through to regular feed
       }
       getFeed(100)
-        .then(setPosts)
+        .then(d => { _cache.posts = d; _cache.ts = Date.now(); setPosts(d) })
         .catch(e => setError(e.message))
-        .finally(() => setTimeout(() => setLoading(false), 200)) // DEBUG: remove timeout
+        .finally(() => setLoading(false))
     }
     loadFeed()
   }, [])
 
-  const isFirstRender = useRef(true)
-  useEffect(() => {
-    if (isFirstRender.current) { isFirstRender.current = false; return }
-    setIsTransitioning(true)
-    clearTimeout(transitionTimer.current)
-    transitionTimer.current = setTimeout(() => setIsTransitioning(false), 200)
-    return () => clearTimeout(transitionTimer.current)
-  }, [search, publisher, topic, dateDays, activeTags, sortBy])
 
   useEffect(() => {
     const handleScroll = () => {}
@@ -421,7 +439,7 @@ export default function BlogFeed({ formRef }) {
           <p className={styles.heading}>
             {hasFilters ? `${filtered.length} post${filtered.length !== 1 ? 's' : ''} found` : 'All Posts'}
           </p>
-          {loading || isTransitioning
+          {loading
             ? <SkeletonGrid count={12} />
             : filtered.length === 0
               ? <p className={styles.hint}>No posts match your filters.</p>

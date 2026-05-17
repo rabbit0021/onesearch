@@ -46,7 +46,24 @@ export default function Home() {
   useEffect(() => {
     const el = feedWrapperRef.current
     if (!el) return
-    const onScroll = () => setAtTop(el.scrollTop <= 50)
+
+    // Restore scroll position after content has painted
+    const saved = sessionStorage.getItem('feedScroll')
+    if (saved) {
+      const target = parseInt(saved, 10)
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          el.scrollTop = target
+          // Second attempt in case layout shifted after images/cards loaded
+          setTimeout(() => { el.scrollTop = target }, 100)
+        })
+      })
+    }
+
+    const onScroll = () => {
+      setAtTop(el.scrollTop <= 50)
+      sessionStorage.setItem('feedScroll', el.scrollTop)
+    }
     el.addEventListener('scroll', onScroll, { passive: true })
     return () => el.removeEventListener('scroll', onScroll)
   }, [])
