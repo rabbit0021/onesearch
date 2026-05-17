@@ -10,7 +10,7 @@ function AppRoutes() {
   const { pathname } = useLocation()
   return (
     <>
-      {pathname !== '/admin' && <Home />}
+      {pathname !== '/admin' && !pathname.startsWith('/read') && <Home />}
       <Suspense fallback={null}>
         <Routes>
           <Route path="/read/:id" element={<ReaderPage />} />

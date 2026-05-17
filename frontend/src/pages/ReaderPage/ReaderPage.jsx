@@ -165,6 +165,12 @@ export default function ReaderPage() {
   const readerBodyRef = useRef(null)
   const overflowRef = useRef(null)
 
+  useEffect(() => {
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = prev }
+  }, [])
+
   useEffect(() => { localStorage.setItem('reader-font-level', fontLevel) }, [fontLevel])
   useEffect(() => { localStorage.setItem('reader-font-family', fontFamily) }, [fontFamily])
 
