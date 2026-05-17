@@ -130,6 +130,15 @@ export async function getMostLikedAllTimeFeed(limit = 20) {
   return res.json()
 }
 
+export async function getContinueReading(deviceId, email) {
+  const params = new URLSearchParams()
+  if (deviceId) params.set('device_id', deviceId)
+  if (email) params.set('email', email)
+  const res = await fetch(`/feed/continue-reading?${params}`)
+  if (!res.ok) return []
+  return res.json()
+}
+
 export async function getRecommendedFeed(limit = 15) {
   const res = await fetch(`/feed/recommended?limit=${limit}`)
   if (!res.ok) throw new Error('Failed to fetch recommended feed')

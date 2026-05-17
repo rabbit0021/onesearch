@@ -119,7 +119,7 @@ export function timeAgo(iso) {
   return `${months}mo ago`
 }
 
-export default function BlogCard({ post }) {
+export default function BlogCard({ post, readProgress }) {
   const navigate = useNavigate()
   const { darkMode } = useTheme()
   const palette = darkMode ? PALETTES.wizard : PALETTES.wizard
@@ -242,6 +242,12 @@ export default function BlogCard({ post }) {
         ) : null}
         <span className={styles.topicLabel}>{post.topic}</span>
       </div>
+
+      {readProgress != null && (
+        <div className={styles.readProgress}>
+          <div className={styles.readProgressBar} style={{ width: `${readProgress}%` }} />
+        </div>
+      )}
 
       <div className={styles.body}>
         <div className={styles.meta}>

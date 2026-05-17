@@ -1128,6 +1128,49 @@ def record_read_event(post_id):
         conn.close()
 
 
+@app.route("/feed/continue-reading", methods=["GET"])
+def continue_reading_feed():
+    device_id = request.args.get('device_id', '').strip()
+    email = request.args.get('email', '').strip().lower()
+    if not device_id and not email:
+        return jsonify([])
+    conn = app.db.get_connection()
+    try:
+        c = conn.cursor()
+        conditions, params = [], []
+        if device_id:
+            conditions.append("re.device_id = ?")
+            params.append(device_id)
+        if email:
+            conditions.append("re.user_email = ?")
+            params.append(email)
+        where = " OR ".join(conditions)
+        c.execute(f"""
+            SELECT po.id, po.title, po.url, po.published_at, po.topic, po.tags,
+                   pu.publisher_name AS publisher,
+                   COALESCE(lc.like_count, 0) AS like_count,
+                   COALESCE(vc.view_count, 0) AS view_count,
+                   COALESCE(f.fire_count, 0) AS fire_count,
+                   MAX(re.max_depth) AS max_depth,
+                   MAX(re.last_read_at) AS last_read_at
+            FROM reading_events re
+            JOIN posts po ON po.id = re.post_id
+            JOIN publishers pu ON pu.id = po.publisher_id
+            LEFT JOIN (SELECT post_id, COUNT(*) AS like_count FROM post_likes GROUP BY post_id) lc ON lc.post_id = po.id
+            LEFT JOIN (SELECT post_id, COUNT(*) AS view_count FROM views GROUP BY post_id) vc ON vc.post_id = po.id
+            LEFT JOIN fire f ON f.post_id = po.id
+            WHERE ({where}) AND re.max_depth >= 2 AND re.max_depth < 95
+            GROUP BY po.id
+            ORDER BY last_read_at DESC
+            LIMIT 10
+        """, params)
+        rows = c.fetchall()
+        cols = [d[0] for d in c.description]
+        return jsonify([dict(zip(cols, r)) for r in rows])
+    finally:
+        conn.close()
+
+
 @app.route("/posts/<int:post_id>/like", methods=["POST"])
 def like_post(post_id):
     data = request.get_json(silent=True) or {}

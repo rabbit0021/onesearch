@@ -63,7 +63,10 @@
   --fs-3xl:  2rem;      /* display / hero */ 
 
   --overlay: rgba(0, 0, 0, 0.53);
-}
+
+  --progress-bar-bg: #adaba2;
+  --progress-bar-fill: #60bc83;
+} 
 
 [data-theme="dark"] {
   --bg-page: rgb(18, 18, 18);
@@ -112,6 +115,9 @@
   --arcade-highlight: #333333;     
   --arcade-shadow-mid: #000000;     
   --arcade-shadow-deep: #000000;
+
+  --progress-bar-bg: #4d4d4a;
+  --progress-bar-fill: #105b2d;
 }
 
 *,

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { getFeed, getSuggestedFeed, getMostLikedFeed, getMostLikedAllTimeFeed, getIndividualsFeed, getRecommendedFeed } from '../../../api'
+import { getFeed, getSuggestedFeed, getMostLikedFeed, getMostLikedAllTimeFeed, getIndividualsFeed, getRecommendedFeed, getContinueReading, getOrCreateDeviceId } from '../../../api'
 import { getJiraStatus, getJiraIssues } from '../../../api/jira'
 import BlogCard, { TOPIC_COLORS } from '../BlogCard/BlogCard'
 import styles from './BlogFeed.module.css'
@@ -34,6 +34,15 @@ function SkeletonScrollRow({ count = 6 }) {
           <SkeletonCard />
         </div>
       ))}
+    </div>
+  )
+}
+
+function SkeletonSection({ count = 6 }) {
+  return (
+    <div className={styles.section}>
+      <div className={styles.skHeading} />
+      <SkeletonScrollRow count={count} />
     </div>
   )
 }
@@ -74,6 +83,8 @@ export default function BlogFeed() {
   const [mostLikedAllTime, setMostLikedAllTime] = useState(_cacheValid() ? _cache.mostLikedAllTime || [] : [])
   const [individualsPosts, setIndividualsPosts] = useState(_cacheValid() ? _cache.individualsPosts || [] : [])
   const [recommended, setRecommended] = useState(_cacheValid() ? _cache.recommended || [] : [])
+  const [continueReading, setContinueReading] = useState([])
+  const [continueLoading, setContinueLoading] = useState(true)
 
   const [search, setSearch] = useState('')
   const [publisher, setPublisher] = useState('')
@@ -93,6 +104,16 @@ export default function BlogFeed() {
     if (!valid || !_cache.mostLikedAllTime) getMostLikedAllTimeFeed(15).then(d => { _cache.mostLikedAllTime = d; setMostLikedAllTime(d) }).catch(() => { })
     if (!valid || !_cache.individualsPosts) getIndividualsFeed(15).then(d => { _cache.individualsPosts = d; setIndividualsPosts(d) }).catch(() => { })
     if (!valid || !_cache.recommended) getRecommendedFeed(15).then(d => { _cache.recommended = d; setRecommended(d) }).catch(() => { })
+
+    const deviceId = getOrCreateDeviceId()
+    const email = localStorage.getItem('onesearch_like_email') || ''
+    getContinueReading(deviceId, email)
+      .then(d => setContinueReading(d))
+      .catch(() => {})
+      .finally(() => {
+        if (import.meta.env.DEV) setTimeout(() => setContinueLoading(false), 300)
+        else setContinueLoading(false)
+      })
 
     if (valid) return // cache still fresh, skip fetch
 
@@ -119,7 +140,10 @@ export default function BlogFeed() {
       getFeed(100)
         .then(d => { _cache.posts = d; _cache.ts = Date.now(); setPosts(d) })
         .catch(e => setError(e.message))
-        .finally(() => setLoading(false))
+        .finally(() => {
+          if (import.meta.env.DEV) setTimeout(() => setLoading(false), 300)
+          else setLoading(false)
+        })
     }
     loadFeed()
   }, [])
@@ -349,61 +373,77 @@ export default function BlogFeed() {
       {/* ── Scroll sections (always visible when no filters active) ── */}
       {!hasFilters && (
         <>
-          <div className={styles.section}>
-            <p className={styles.heading}>Trending Blog Posts</p>
-            {loading || filteredMostLiked.length === 0
-              ? <SkeletonScrollRow />
-              : <div className={styles.scrollRow}>
+          {continueLoading
+            ? <SkeletonSection count={4} />
+            : continueReading.length > 0 && (
+              <div className={styles.section}>
+                <p className={styles.heading}>Continue Reading</p>
+                <div className={styles.scrollRow}>
+                  {continueReading.map(post => (
+                    <div key={post.id} className={styles.scrollCard}>
+                      <BlogCard post={post} jiraConnected={jiraConnected} readProgress={post.max_depth} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
+          }
+
+          {loading
+            ? <SkeletonSection />
+            : <div className={styles.section}>
+                <p className={styles.heading}>Trending Blog Posts</p>
+                <div className={styles.scrollRow}>
                   {filteredMostLiked.map(post => (
                     <div key={post.id} className={styles.scrollCard}>
                       <BlogCard post={post} jiraConnected={jiraConnected} />
                     </div>
                   ))}
                 </div>
-            }
-          </div>
+              </div>
+          }
 
-          <div className={styles.section}>
-            <p className={styles.heading}>Recently from Individuals</p>
-            {loading || filteredIndividualsPosts.length === 0
-              ? <SkeletonScrollRow />
-              : <div className={styles.scrollRow}>
+          {loading
+            ? <SkeletonSection />
+            : <div className={styles.section}>
+                <p className={styles.heading}>Recently from Individuals</p>
+                <div className={styles.scrollRow}>
                   {filteredIndividualsPosts.map(post => (
                     <div key={post.id} className={styles.scrollCard}>
                       <BlogCard post={post} jiraConnected={jiraConnected} />
                     </div>
                   ))}
                 </div>
-            }
-          </div>
+              </div>
+          }
 
-          <div className={styles.section}>
-            <p className={styles.heading}>Recommended by OneSearch</p>
-            {loading || recommended.length === 0
-              ? <SkeletonScrollRow />
-              : <div className={styles.scrollRow}>
+          {loading
+            ? <SkeletonSection />
+            : <div className={styles.section}>
+                <p className={styles.heading}>Recommended by OneSearch</p>
+                <div className={styles.scrollRow}>
                   {recommended.map(post => (
                     <div key={post.id} className={styles.scrollCard}>
                       <BlogCard post={post} jiraConnected={jiraConnected} />
                     </div>
                   ))}
                 </div>
-            }
-          </div>
+              </div>
+          }
 
-          <div className={styles.section}>
-            <p className={styles.heading}>All Time Favourites</p>
-            {loading || filteredMostLikedAllTime.length === 0
-              ? <SkeletonScrollRow />
-              : <div className={styles.scrollRow}>
+          {loading
+            ? <SkeletonSection />
+            : <div className={styles.section}>
+                <p className={styles.heading}>All Time Favourites</p>
+                <div className={styles.scrollRow}>
                   {filteredMostLikedAllTime.map(post => (
                     <div key={post.id} className={styles.scrollCard}>
                       <BlogCard post={post} jiraConnected={jiraConnected} />
                     </div>
                   ))}
                 </div>
-            }
-          </div>
+              </div>
+          }
         </>
       )}
 
