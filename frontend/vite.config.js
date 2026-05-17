@@ -36,5 +36,14 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react':  ['react', 'react-dom', 'react-router-dom'],
+          'vendor-hljs':   ['highlight.js'],
+          'vendor-gestures': ['react-zoom-pan-pinch'],
+        },
+      },
+    },
   },
 })
