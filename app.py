@@ -973,16 +973,20 @@ def _extract_article_content(url):
             else:
                 fig.insert(0, media_node)
 
-    # Convert prose <pre> tags (no <code> child) into paragraphs
+    # Convert prose <pre> tags (no <code> child) into paragraphs,
+    # preserving inline HTML like <a> tags via decode_contents()
     for pre in soup.find_all('pre'):
         if not pre.find('code'):
-            text = pre.get_text()
+            inner_html = pre.decode_contents()
             new_div = soup.new_tag('div')
-            for para in text.split('\n\n'):
-                para = para.strip()
-                if para:
+            for chunk in inner_html.split('\n\n'):
+                chunk = chunk.strip()
+                if chunk:
                     p = soup.new_tag('p')
-                    p.string = para
+                    parsed = BeautifulSoup(chunk.replace('\n', ' '), 'html.parser')
+                    body = parsed.body or parsed
+                    for child in list(body.children):
+                        p.append(child)
                     new_div.append(p)
             pre.replace_with(new_div)
 

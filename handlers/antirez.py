@@ -5,7 +5,6 @@ class AntirezScraper(BaseScraper):
         return "http://antirez.com/rss"
 
     def clean_article(self, soup):
-        # Remove the header metadata line injected by antirez.com:
-        # <span class="info"><span class="username"><a href="/user/antirez">antirez</a></span> 13 days ago. 140118 views.  </span>
+        # Remove the header metadata line injected by antirez.com
         for span in soup.find_all('span', class_='info'):
             span.decompose()
