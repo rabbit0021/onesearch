@@ -1,7 +1,9 @@
 .page {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
   display: flex;
   flex-direction: column;
-  height: 100vh;
   background: var(--bg-page);
   color: var(--text-base);
   overflow: hidden;
@@ -234,7 +236,7 @@
   font-size: var(--fs-lg);
   line-height: 1.8;
   color: var(--text-base);
-  font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif
+  font-family: 'Lucida Grande', 'Lato', sans-serif;
 }
 
 /* Paragraphs */

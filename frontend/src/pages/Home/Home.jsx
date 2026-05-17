@@ -39,33 +39,12 @@ export default function Home() {
   const [hasDot, setHasDot] = useState(() => localStorage.getItem('sidebar_seen') !== '1')
   const toggleRef = useRef(null)
 
-  const formRef = useRef(null)
-  const feedWrapperRef = useRef(null)
   const [atTop, setAtTop] = useState(true)
 
   useEffect(() => {
-    const el = feedWrapperRef.current
-    if (!el) return
-
-    // Restore scroll position after content has painted
-    const saved = sessionStorage.getItem('feedScroll')
-    if (saved) {
-      const target = parseInt(saved, 10)
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          el.scrollTop = target
-          // Second attempt in case layout shifted after images/cards loaded
-          setTimeout(() => { el.scrollTop = target }, 100)
-        })
-      })
-    }
-
-    const onScroll = () => {
-      setAtTop(el.scrollTop <= 50)
-      sessionStorage.setItem('feedScroll', el.scrollTop)
-    }
-    el.addEventListener('scroll', onScroll, { passive: true })
-    return () => el.removeEventListener('scroll', onScroll)
+    const onScroll = () => setAtTop(window.scrollY <= 50)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
   function handleSourceChange(id, checked) {
@@ -142,7 +121,7 @@ export default function Home() {
                 <ThemeSwitcher />
               </div>
             </div>
-            <form ref={formRef} className={styles.form} onSubmit={handleSubmit} noValidate>
+            <form className={styles.form} onSubmit={handleSubmit} noValidate>
               <div className={styles.text}>
                 <h1 className={styles.title}>Subscribe to what you need</h1>
                 <p className={styles.intro}>
@@ -181,8 +160,8 @@ export default function Home() {
             </form>
           </div>
 
-          <div className={styles.feedWrapper} ref={feedWrapperRef}>
-            <BlogFeed formRef={formRef} />
+          <div className={styles.feedWrapper}>
+            <BlogFeed />
 
             {/* <JiraIssuesSummary /> */}
           </div>

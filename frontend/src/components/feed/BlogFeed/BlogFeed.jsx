@@ -65,7 +65,7 @@ function _clearCache() {
   _cache.jiraConnected = false; _cache.ts = null
 }
 
-export default function BlogFeed({ formRef }) {
+export default function BlogFeed() {
   const [posts, setPosts] = useState(_cacheValid() ? _cache.posts : [])
   const [loading, setLoading] = useState(!_cacheValid())
   const [error, setError] = useState(null)
@@ -125,11 +125,6 @@ export default function BlogFeed({ formRef }) {
   }, [])
 
 
-  useEffect(() => {
-    const handleScroll = () => {}
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [formRef])
 
   const publishers = useMemo(
     () => [...new Set([...posts, ...mostLiked, ...mostLikedAllTime, ...individualsPosts].map(p => p.publisher).filter(Boolean))].sort(),

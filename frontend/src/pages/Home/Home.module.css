@@ -39,8 +39,7 @@
 }
 
 .page {
-  height: 100vh;
-  overflow: hidden;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   padding-left: 10px;
@@ -49,21 +48,18 @@
 
 .container {
   flex: 1;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
   max-width: 100%;
   margin: 0 auto;
   padding: .1rem;
-  min-height: 0;
 }
 
 .layout {
   display: flex;
   gap: 1.5rem;
   flex: 1;
-  overflow: hidden;
-  min-height: 0;
+  align-items: flex-start;
   padding-top: 0;
 }
 
@@ -72,10 +68,12 @@
   display: flex;
   flex-direction: column;
   margin-top: 20px;
+  position: sticky;
+  top: 0;
+  max-height: 100vh;
   overflow-y: auto;
-  flex: 0 0 35%;
-  padding: .5rem;
   overflow-x: hidden;
+  padding: .5rem;
 }
 
 .form {
@@ -101,26 +99,12 @@
 
 .feedWrapper {
   flex: 1;
-  overflow-y: auto;
   min-width: 0;
   background-color: var(--bg-feed);
   padding-left: 5px;
   padding-right: 5px;
   padding-top: 70px;
   border-radius: 5px;
-}
-
-.feedWrapper::-webkit-scrollbar {
-  width: 0px;
-}
-
-.feedWrapper::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.feedWrapper::-webkit-scrollbar-thumb {
-  background: var(--color-primary);
-  border-radius: 2px;
 }
 
 .sidebar {
@@ -229,14 +213,17 @@
   .layout {
     flex-direction: column;
     flex: none;
-    
+    align-items: stretch;
+  }
+
+  .formWrapper {
+    position: static;
+    max-height: none;
+    overflow-y: visible;
   }
 
   .form{
     margin-left: -15px;
-  }
-  
-  .container{
   }
 
   .feedWrapper{

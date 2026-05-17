@@ -11,9 +11,11 @@ import styles from './ReaderPage.module.css'
 // Override hljs background so our CSS variable shows through
 const HLJS_BG_OVERRIDE = '\n.hljs { background: transparent !important; }\n'
 
-function readingTime(html) {
+const DEFAULT_READING_SPEED = 200 // words per minute — override per-user when personalisation is added
+
+function readingTime(html, wpm = DEFAULT_READING_SPEED) {
   const words = html.replace(/<[^>]+>/g, ' ').trim().split(/\s+/).filter(Boolean).length
-  const mins = Math.max(1, Math.round(words / 200))
+  const mins = Math.max(1, Math.round(words / wpm))
   return `${mins} min read`
 }
 
@@ -28,6 +30,12 @@ export default function ReaderPage() {
   const [error, setError] = useState(null)
   const [readTime, setReadTime] = useState(null)
   const contentRef = useRef(null)
+  const readerBodyRef = useRef(null)
+
+  // Always start at top — browser may restore scroll from a previous visit
+  useEffect(() => {
+    if (readerBodyRef.current) readerBodyRef.current.scrollTop = 0
+  }, [])
 
   // Swap highlight.js theme when dark/light mode changes
   useEffect(() => {
@@ -97,7 +105,7 @@ export default function ReaderPage() {
       </div>
 
       {/* Scrollable reader area */}
-      <div className={styles.readerBody}>
+      <div className={styles.readerBody} ref={readerBodyRef}>
         <div className={styles.readerInner}>
           <h1 className={styles.title}>{post.title}</h1>
 
