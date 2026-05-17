@@ -9,9 +9,17 @@ HEADERS = {'User-Agent': 'Mozilla/5.0'}
 
 logger = get_logger("base-handler")
 
-class BaseScraper:        
+class BaseScraper:
     def get_feed_url(self):
         return ""
+
+    def clean_article(self, soup):
+        """
+        Publisher-specific post-processing of extracted article HTML.
+        Override in subclasses to strip publisher-specific UI artifacts.
+        soup: BeautifulSoup object (mutate in-place, return nothing).
+        """
+        pass
     
     def scrape(self):
         feed_url = self.get_feed_url()

@@ -573,6 +573,20 @@ class SQLiteDatabase:
         row = c.fetchone()
         return row["url"] if row else None
 
+    def get_post_info(self, conn, post_id):
+        """Returns (url, publisher_name) for a post, or (None, None) if not found."""
+        c = conn.cursor()
+        c.execute("""
+            SELECT po.url, pu.publisher_name
+            FROM posts po
+            JOIN publishers pu ON po.publisher_id = pu.id
+            WHERE po.id = ?
+        """, (post_id,))
+        row = c.fetchone()
+        if row:
+            return row["url"], row["publisher_name"]
+        return None, None
+
     def get_like_counts_by_urls(self, conn, urls):
         """Returns {url: like_count} for the given list of post URLs."""
         if not urls:

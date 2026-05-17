@@ -818,6 +818,13 @@ _LAZY_SRC_ATTRS    = ['data-src', 'data-lazy-src', 'data-original', 'data-lazy',
 _LAZY_SRCSET_ATTRS = ['data-srcset', 'data-lazy-srcset', 'data-original-set']
 
 
+# ── Per-publisher post-processors ─────────────────────────────────────────────
+# Each key is a hostname substring (e.g. 'antirez.com').
+# Each value is a callable: fn(soup: BeautifulSoup) -> None  (mutates in-place)
+# To add a new publisher, just add an entry here.
+
+
+
 def _resolve_lazy_images(soup):
     """Promote data-src / data-srcset to real src/srcset so readability keeps images."""
     for img in soup.find_all('img'):
@@ -973,9 +980,12 @@ def _extract_article_content(url):
 
 @app.route("/posts/<int:post_id>/content", methods=["GET"])
 def get_post_content(post_id):
+    from handlers.factory import ScraperFactory
+    from bs4 import BeautifulSoup
+
     conn = app.db.get_connection()
     try:
-        url = app.db.get_post_url(conn, post_id)
+        url, publisher_name = app.db.get_post_info(conn, post_id)
         if not url:
             return jsonify({"error": "Post not found"}), 404
     finally:
@@ -988,6 +998,14 @@ def get_post_content(post_id):
 
     if not content:
         return jsonify({"error": "Could not extract article content"}), 422
+
+    # Publisher-specific cleanup via the handler
+    if publisher_name:
+        scraper = ScraperFactory.get_scraper(publisher_name)
+        if scraper:
+            soup = BeautifulSoup(content, 'html.parser')
+            scraper.clean_article(soup)
+            content = str(soup)
 
     return jsonify({"content": content, "url": url})
 

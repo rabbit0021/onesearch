@@ -276,7 +276,7 @@
 }
 
 .title {
-  font-size: var(--fs-lg);
+  font-size: var(--fs-lm);
   color: var(--card-title);
   margin: 0;
   line-height: 1.4;
