@@ -925,6 +925,33 @@ def _extract_article_content(url):
 
     soup = BeautifulSoup(content, 'html.parser')
 
+    # ── Restore SVG width/height stripped by readability ──
+    # Note: html.parser lowercases all attributes, so viewBox → viewbox
+    def _svg_viewbox(el):
+        return el.get('viewbox') or el.get('viewBox')
+
+    orig_svgs = {_svg_viewbox(s): s for s in pre_soup.find_all('svg') if _svg_viewbox(s)}
+    for svg in soup.find_all('svg'):
+        vb = _svg_viewbox(svg)
+        if not vb:
+            continue
+        # Try restoring from original HTML first
+        orig = orig_svgs.get(vb)
+        if orig:
+            if orig.get('width') and not svg.get('width'):
+                svg['width'] = orig['width']
+            if orig.get('height') and not svg.get('height'):
+                svg['height'] = orig['height']
+        # Fallback: derive dimensions from viewBox (e.g. "0 0 26 37" → 26×37)
+        if not svg.get('width') or not svg.get('height'):
+            parts = vb.split()
+            if len(parts) == 4:
+                try:
+                    svg['width'] = str(int(float(parts[2])))
+                    svg['height'] = str(int(float(parts[3])))
+                except ValueError:
+                    pass
+
     # Absolutize all relative src / href / srcset in readability output
     for tag, attr in [('img', 'src'), ('a', 'href'), ('source', 'src'), ('video', 'src'), ('audio', 'src')]:
         for el in soup.find_all(tag):

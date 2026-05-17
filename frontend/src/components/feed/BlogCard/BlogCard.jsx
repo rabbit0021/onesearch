@@ -56,6 +56,22 @@ const PALETTES = {
     'Product Management':         '#4A3000',
     'General':                    '#2D3748',
   },
+  // Wizard grays — --bg-wizard at varying opacities
+  wizard: {
+    'Software Engineering':       'color-mix(in srgb, var(--bg-card-thumbnail) 80%, transparent)',
+    'Frontend Engineering':       'color-mix(in srgb, var(--bg-card-thumbnail) 65%, transparent)',
+    'Backend Engineering':        'color-mix(in srgb, var(--bg-card-thumbnail) 20%, transparent)',
+    'Mobile Engineering':         'color-mix(in srgb, var(--bg-card-thumbnail) 40%, transparent)',
+    'Platform & Infrastructure':  'color-mix(in srgb, var(--bg-card-thumbnail) 30%, transparent)',
+    'Data Engineering':           'color-mix(in srgb, var(--bg-card-thumbnail) 70%, transparent)',
+    'Data Science':               'color-mix(in srgb, var(--bg-card-thumbnail) 55%, transparent)',
+    'Machine Learning & AI':      'color-mix(in srgb, var(--bg-card-thumbnail) 45%, transparent)',
+    'Data Analytics':             'color-mix(in srgb, var(--bg-card-thumbnail) 35%, transparent)',
+    'Security Engineering':       'color-mix(in srgb, var(--bg-card-thumbnail) 25%, transparent)',
+    'QA & Testing':               'color-mix(in srgb, var(--bg-card-thumbnail) 60%, transparent)',
+    'Product Management':         'color-mix(in srgb, var(--bg-card-thumbnail) 75%, transparent)',
+    'General':                    'color-mix(in srgb, var(--bg-card-thumbnail) 20%, transparent)',
+  },
   // Soft pastels — light, airy, smooth
   soft: {
     'Software Engineering':       '#93C5FD',
@@ -106,7 +122,7 @@ export function timeAgo(iso) {
 export default function BlogCard({ post }) {
   const navigate = useNavigate()
   const { darkMode } = useTheme()
-  const palette = darkMode ? PALETTES.jewel : PALETTES.soft
+  const palette = darkMode ? PALETTES.wizard : PALETTES.wizard
   const color = palette[post.topic] || palette['General']
   const favicon = faviconUrl(post.url)
   const individualMeta = INDIVIDUALS_META[post.publisher?.toLowerCase()]

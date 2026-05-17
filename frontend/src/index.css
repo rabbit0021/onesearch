@@ -11,6 +11,8 @@
   --bg-wizard-option: rgb(220, 220, 217);
   --bg-feed:rgb(244, 243, 241);
 
+  --bg-card-thumbnail:rgb(220, 220, 217);
+
   --text-base: #6c6b6b;
   --text-strong: #000000;
   --text-secondary: #737985; /* headings */
@@ -69,6 +71,8 @@
   --bg-wizard: rgb(30, 30, 27);
   --bg-wizard-option: rgb(20, 20, 17);
   --bg-feed:rgb(25, 25, 25);
+
+  --bg-card-thumbnail:rgb(76, 76, 72);
 
   --text-base: #e0dcd4;
   --text-strong: #f0ece4;

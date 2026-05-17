@@ -274,6 +274,16 @@
 .articleContent h5,
 .articleContent h6 { font-size: var(--fs-base); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); }
 
+/* Hide decorative heading anchor icons (e.g. Cloudflare's aria-hidden svg links) */
+.articleContent a[aria-hidden="true"] {
+  display: none;
+}
+
+/* Prevent SVGs from overflowing their container */
+.articleContent svg {
+  max-width: 100%;
+}
+
 /* Links */
 .articleContent a {
   color: var(--color-primary);
