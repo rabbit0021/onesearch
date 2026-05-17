@@ -857,13 +857,18 @@
   position: fixed;
   inset: 0;
   z-index: 500;
-  background: rgba(113, 113, 113, 0.85);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2.5rem;
   animation: lightboxFadeIn 0.2s ease both;
+}
+
+.lightboxBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.88);
   cursor: zoom-out;
+  z-index: 0;
 }
 
 .lightboxImg {
@@ -898,6 +903,7 @@
   position: absolute;
   top: 1rem;
   right: 1rem;
+  z-index: 2;
   background: none;
   border: none;
   color: #fff;

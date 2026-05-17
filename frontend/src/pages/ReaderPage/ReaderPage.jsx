@@ -7,6 +7,7 @@ import ThemeSwitcher from '../../components/layout/ThemeSwitcher/ThemeSwitcher'
 import hljs from 'highlight.js/lib/common'
 import lightThemeCss from 'highlight.js/styles/github.min.css?inline'
 import darkThemeCss from 'highlight.js/styles/github-dark-dimmed.min.css?inline'
+import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
 import styles from './ReaderPage.module.css'
 
 // Override hljs background so our CSS variable shows through
@@ -35,110 +36,64 @@ function readingTime(html, wpm = DEFAULT_READING_SPEED) {
 }
 
 function Lightbox({ src, onClose }) {
-  const [scale, setScale] = useState(1)
-  const [pos, setPos] = useState({ x: 0, y: 0 })
-  const dragging = useRef(false)
-  const dragStart = useRef({ mx: 0, my: 0, px: 0, py: 0 })
-  const lastDist = useRef(null)
-
   useEffect(() => {
     const onKey = (e) => { if (e.key === 'Escape') onClose() }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
   }, [onClose])
 
-  // Reset when image changes
-  useEffect(() => { setScale(1); setPos({ x: 0, y: 0 }) }, [src])
-
-  const clampPos = (x, y, s) => ({ x, y }) // allow free pan
-
-  const onWheel = (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    const delta = e.deltaY < 0 ? 1.15 : 0.87
-    setScale(s => Math.min(8, Math.max(1, s * delta)))
-  }
-
-  const onMouseDown = (e) => {
-    if (scale <= 1) return
-    e.stopPropagation()
-    dragging.current = true
-    dragStart.current = { mx: e.clientX, my: e.clientY, px: pos.x, py: pos.y }
-  }
-  const onMouseMove = (e) => {
-    if (!dragging.current) return
-    setPos({
-      x: dragStart.current.px + e.clientX - dragStart.current.mx,
-      y: dragStart.current.py + e.clientY - dragStart.current.my,
-    })
-  }
-  const onMouseUp = () => { dragging.current = false }
-
-  // Touch pinch zoom
-  const onTouchStart = (e) => {
-    if (e.touches.length === 2) {
-      lastDist.current = Math.hypot(
-        e.touches[0].clientX - e.touches[1].clientX,
-        e.touches[0].clientY - e.touches[1].clientY
-      )
-    } else if (e.touches.length === 1 && scale > 1) {
-      dragging.current = true
-      dragStart.current = { mx: e.touches[0].clientX, my: e.touches[0].clientY, px: pos.x, py: pos.y }
-    }
-  }
-  const onTouchMove = (e) => {
-    if (e.touches.length === 2) {
-      e.preventDefault()
-      const dist = Math.hypot(
-        e.touches[0].clientX - e.touches[1].clientX,
-        e.touches[0].clientY - e.touches[1].clientY
-      )
-      if (lastDist.current) {
-        const delta = dist / lastDist.current
-        setScale(s => Math.min(8, Math.max(1, s * delta)))
-      }
-      lastDist.current = dist
-    } else if (e.touches.length === 1 && dragging.current) {
-      setPos({
-        x: dragStart.current.px + e.touches[0].clientX - dragStart.current.mx,
-        y: dragStart.current.py + e.touches[0].clientY - dragStart.current.my,
-      })
-    }
-  }
-  const onTouchEnd = () => { dragging.current = false; lastDist.current = null }
-
-  const handleOverlayClick = () => { if (scale <= 1) onClose() }
-
   return (
-    <div
-      className={styles.lightboxOverlay}
-      onClick={handleOverlayClick}
-      onMouseMove={onMouseMove}
-      onMouseUp={onMouseUp}
-      onMouseLeave={onMouseUp}
-    >
+    <div className={styles.lightboxOverlay}>
+      {/* Separate backdrop so panning never triggers close */}
+      <div className={styles.lightboxBackdrop} onClick={onClose} />
       <button className={styles.lightboxClose} onClick={onClose} aria-label="Close">×</button>
-      <img
-        src={src}
-        className={styles.lightboxImg}
-        alt=""
-        style={{
-          transform: `translate(${pos.x}px, ${pos.y}px) scale(${scale})`,
-          cursor: scale > 1 ? (dragging.current ? 'grabbing' : 'grab') : 'zoom-in',
-          transition: dragging.current ? 'none' : 'transform 0.15s ease',
-        }}
-        onClick={e => e.stopPropagation()}
-        onWheel={onWheel}
-        onMouseDown={onMouseDown}
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
-      />
-      {scale > 1 && (
-        <button className={styles.lightboxReset} onClick={() => { setScale(1); setPos({ x: 0, y: 0 }) }}>
-          Reset zoom
-        </button>
-      )}
+      <TransformWrapper
+        initialScale={1}
+        minScale={0.5}
+        maxScale={8}
+        limitToBounds
+        centerOnInit
+        centerZoomedOut
+        wheel={{ step: 0.05, smoothStep: 0.002 }}
+        pinch={{ step: 5, allowPanning: true }}
+        panning={{ allowLeftClickPan: true, velocityDisabled: true }}
+        doubleClick={{ mode: 'zoomIn', step: 0.7 }}
+      >
+        {({ state, resetTransform }) => (
+          <>
+            <TransformComponent
+              wrapperStyle={{
+                width: 'calc(100vw - 5rem)',
+                height: 'calc(100vh - 5rem)',
+                position: 'relative',
+                zIndex: 1,
+              }}
+              contentStyle={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <img
+                src={src}
+                className={styles.lightboxImg}
+                alt=""
+                style={{ cursor: state.scale > 1 ? 'grab' : 'zoom-in' }}
+              />
+            </TransformComponent>
+            {state.scale > 1 && (
+              <button
+                className={styles.lightboxReset}
+                onClick={e => { e.stopPropagation(); resetTransform() }}
+              >
+                Reset zoom
+              </button>
+            )}
+          </>
+        )}
+      </TransformWrapper>
     </div>
   )
 }
