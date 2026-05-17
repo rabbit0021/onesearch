@@ -42,7 +42,7 @@
   background: rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(16px) saturate(1.4);
   -webkit-backdrop-filter: blur(16px) saturate(1.4);
-  z-index: 3;
+  z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -354,7 +354,7 @@
   top: calc(100% + 4px);
   left: 0;
   right: 0;
-  z-index: 200;
+  z-index: 1000;
   background: var(--bg-input);
   border: 1px solid var(--border-mid);
   border-radius: 6px;

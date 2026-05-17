@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { getIndividuals, getIndividualStats } from '../../../api'
 import { INDIVIDUALS_META } from '../../../data/individuals'
 import ImageLightbox from '../../ui/ImageLightbox/ImageLightbox'
@@ -149,7 +150,7 @@ export default function IndividualsSelector({ selected, onChange, disabled }) {
         />
       )}
 
-      {browseOpen && (
+      {browseOpen && createPortal(
         <div className={styles.browseOverlay} onClick={() => setBrowseOpen(false)}>
           <div className={styles.browseModal} onClick={e => e.stopPropagation()}>
             <div className={styles.browseHeader}>
@@ -237,7 +238,7 @@ export default function IndividualsSelector({ selected, onChange, disabled }) {
             </div>
           </div>
         </div>
-      )}
+      , document.body)}
     </div>
   )
 }
