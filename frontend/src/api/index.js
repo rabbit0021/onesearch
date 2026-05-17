@@ -237,6 +237,12 @@ export function getOrCreateDeviceId() {
   return id
 }
 
+export async function getPostContent(postId) {
+  const res = await fetch(`/posts/${postId}/content`)
+  if (!res.ok) throw new Error('Failed to fetch content')
+  return res.json()
+}
+
 export async function recordView(postId, userIdentifier, deviceId) {
   await fetch(`/posts/${postId}/view`, {
     method: 'POST',

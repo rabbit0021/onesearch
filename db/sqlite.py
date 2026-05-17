@@ -567,6 +567,12 @@ class SQLiteDatabase:
         rows = c.fetchall()
         return [dict(row) for row in rows]
 
+    def get_post_url(self, conn, post_id):
+        c = conn.cursor()
+        c.execute("SELECT url FROM posts WHERE id = ?", (post_id,))
+        row = c.fetchone()
+        return row["url"] if row else None
+
     def get_like_counts_by_urls(self, conn, urls):
         """Returns {url: like_count} for the given list of post URLs."""
         if not urls:

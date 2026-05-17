@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { likePost, getIndividualStats, recordView, getOrCreateDeviceId } from '../../../api'
 import EmailDialog, { getSavedEmail } from '../../ui/EmailDialog/EmailDialog'
 import ImageLightbox from '../../ui/ImageLightbox/ImageLightbox'
@@ -103,6 +104,7 @@ export function timeAgo(iso) {
 }
 
 export default function BlogCard({ post }) {
+  const navigate = useNavigate()
   const { darkMode } = useTheme()
   const palette = darkMode ? PALETTES.jewel : PALETTES.soft
   const color = palette[post.topic] || palette['General']
@@ -139,13 +141,15 @@ export default function BlogCard({ post }) {
   const [showLightbox, setShowLightbox] = useState(false)
   const [individualLikeCount, setIndividualLikeCount] = useState(null)
 
-  function handleCardClick() {
+  function handleCardClick(e) {
+    e.preventDefault()
     const email = getSavedEmail()
     const userIdentifier = email || 'anonymous'
     const deviceId = getOrCreateDeviceId()
     recordView(post.id, userIdentifier, deviceId).then(() => {
       setViewCount(c => Math.max(c + 1, displayCount))
     }).catch(() => {})
+    navigate(`/read/${post.id}`, { state: { post } })
   }
 
   async function submitLike(email) {
@@ -185,12 +189,13 @@ export default function BlogCard({ post }) {
         onClose={() => setShowLightbox(false)}
       />
     )}
-    <a
-      href={post.url}
-      target="_blank"
-      rel="noopener noreferrer"
+    <div
       className={`${styles.card} ${match ? styles.cardMatched : ''}`}
       onClick={handleCardClick}
+      role="link"
+      tabIndex={0}
+      onKeyDown={e => e.key === 'Enter' && handleCardClick(e)}
+      style={{ cursor: 'pointer' }}
     >
       <div className={styles.thumbnail} style={{ background: color }}>
         {individualThumb ? (
@@ -290,7 +295,7 @@ export default function BlogCard({ post }) {
           </div>
         )}
       </div>
-    </a>
+    </div>
     </>
   )
 }

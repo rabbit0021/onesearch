@@ -10,6 +10,7 @@ import logging
 import random
 import re
 import smtplib
+from functools import lru_cache
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from handlers import ScraperFactory
@@ -810,6 +811,185 @@ def verify_email_confirm():
         _otp_store[email]['verified'] = True
 
     return jsonify({"ok": True})
+
+
+_LAZY_SRC_ATTRS    = ['data-src', 'data-lazy-src', 'data-original', 'data-lazy',
+                       'data-url', 'data-image-src', 'data-hi-res-src', 'data-delayed-url']
+_LAZY_SRCSET_ATTRS = ['data-srcset', 'data-lazy-srcset', 'data-original-set']
+
+
+def _resolve_lazy_images(soup):
+    """Promote data-src / data-srcset to real src/srcset so readability keeps images."""
+    for img in soup.find_all('img'):
+        # src
+        if not img.get('src') or img['src'].startswith('data:'):
+            for attr in _LAZY_SRC_ATTRS:
+                val = img.get(attr)
+                if val:
+                    img['src'] = val
+                    break
+        # srcset
+        if not img.get('srcset'):
+            for attr in _LAZY_SRCSET_ATTRS:
+                val = img.get(attr)
+                if val:
+                    img['srcset'] = val
+                    break
+
+    # <picture><source> elements
+    for source in soup.find_all('source'):
+        if not source.get('srcset'):
+            for attr in _LAZY_SRCSET_ATTRS:
+                val = source.get(attr)
+                if val:
+                    source['srcset'] = val
+                    break
+        if not source.get('src'):
+            for attr in _LAZY_SRC_ATTRS:
+                val = source.get(attr)
+                if val:
+                    source['src'] = val
+                    break
+
+
+def _absolutize_srcset(el, base_url):
+    """Make every URL inside a srcset attribute absolute."""
+    from urllib.parse import urljoin
+    srcset = el.get('srcset', '')
+    if not srcset:
+        return
+    parts = []
+    for entry in srcset.split(','):
+        entry = entry.strip()
+        if not entry:
+            continue
+        pieces = entry.split()
+        if pieces and not pieces[0].startswith(('http://', 'https://', 'data:')):
+            pieces[0] = urljoin(base_url, pieces[0])
+        parts.append(' '.join(pieces))
+    el['srcset'] = ', '.join(parts)
+
+
+@lru_cache(maxsize=128)
+def _extract_article_content(url):
+    """Fetch and extract article content. Cached by URL (LRU, max 128 entries)."""
+    import requests as req
+    import urllib3
+    from readability import Document
+    from bs4 import BeautifulSoup
+    from urllib.parse import urljoin
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+    response = req.get(url, verify=False, timeout=20, headers={
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    })
+    response.raise_for_status()
+    html = response.text
+
+    # ── Pre-process: fix lazy-loaded images BEFORE readability strips them ──
+    pre_soup = BeautifulSoup(html, 'html.parser')
+    _resolve_lazy_images(pre_soup)
+
+    # Absolutize URLs in pre_soup NOW so collected images are already absolute
+    for tag, attr in [('img', 'src'), ('source', 'src'), ('video', 'src'), ('audio', 'src')]:
+        for el in pre_soup.find_all(tag):
+            val = el.get(attr)
+            if val and not val.startswith(('http://', 'https://', 'data:', '#')):
+                el[attr] = urljoin(url, val)
+    for el in pre_soup.find_all(['img', 'source']):
+        _absolutize_srcset(el, url)
+
+    # ── Collect figure media from original HTML (readability strips images from figures) ──
+    orig_figure_media = []
+    for fig in pre_soup.find_all('figure'):
+        pic = fig.find('picture')
+        img_tag = fig.find('img')
+        if pic:
+            orig_figure_media.append(str(pic))
+        elif img_tag:
+            orig_figure_media.append(str(img_tag))
+
+    html = str(pre_soup)
+
+    doc = Document(html)
+    content = doc.summary(html_partial=True)
+    if not content:
+        return None
+
+    soup = BeautifulSoup(content, 'html.parser')
+
+    # Absolutize all relative src / href / srcset in readability output
+    for tag, attr in [('img', 'src'), ('a', 'href'), ('source', 'src'), ('video', 'src'), ('audio', 'src')]:
+        for el in soup.find_all(tag):
+            val = el.get(attr)
+            if val and not val.startswith(('http://', 'https://', 'data:', '#', 'mailto:')):
+                el[attr] = urljoin(url, val)
+
+    for el in soup.find_all(['img', 'source']):
+        _absolutize_srcset(el, url)
+
+    # ── Re-inject images into figures that readability emptied ──
+    empty_figs = [f for f in soup.find_all('figure') if not f.find('img')]
+    for i, fig in enumerate(empty_figs):
+        if i < len(orig_figure_media):
+            media_node = BeautifulSoup(orig_figure_media[i], 'html.parser')
+            figcap = fig.find('figcaption')
+            if figcap:
+                figcap.insert_before(media_node)
+            else:
+                fig.insert(0, media_node)
+
+    # Convert prose <pre> tags (no <code> child) into paragraphs
+    for pre in soup.find_all('pre'):
+        if not pre.find('code'):
+            text = pre.get_text()
+            new_div = soup.new_tag('div')
+            for para in text.split('\n\n'):
+                para = para.strip()
+                if para:
+                    p = soup.new_tag('p')
+                    p.string = para
+                    new_div.append(p)
+            pre.replace_with(new_div)
+
+    # ── Strip UI-only accessibility artifacts (Medium, Substack, etc.) ──
+    import re as _re
+    _UI_TEXT = _re.compile(
+        r'press enter|click to view|full size|zoom in',
+        _re.IGNORECASE
+    )
+    # collect first, then modify — avoids tree-iteration side effects
+    for span in list(soup.find_all('span')):
+        txt = span.get_text(strip=True)
+        if txt and _UI_TEXT.search(txt) and not span.find(['img', 'picture', 'video']):
+            span.decompose()
+
+    # Unwrap <div role="button"> wrappers around images (keep children)
+    for div in list(soup.find_all('div', attrs={'role': 'button'})):
+        div.unwrap()
+
+    return str(soup)
+
+
+@app.route("/posts/<int:post_id>/content", methods=["GET"])
+def get_post_content(post_id):
+    conn = app.db.get_connection()
+    try:
+        url = app.db.get_post_url(conn, post_id)
+        if not url:
+            return jsonify({"error": "Post not found"}), 404
+    finally:
+        conn.close()
+
+    try:
+        content = _extract_article_content(url)
+    except Exception as e:
+        return jsonify({"error": f"Could not fetch article: {str(e)}"}), 502
+
+    if not content:
+        return jsonify({"error": "Could not extract article content"}), 422
+
+    return jsonify({"content": content, "url": url})
 
 
 @app.route("/posts/<int:post_id>/view", methods=["POST"])
