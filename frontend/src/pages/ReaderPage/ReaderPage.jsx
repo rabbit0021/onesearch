@@ -181,6 +181,14 @@ function DevOverlay({ timeSpent, maxDepth, isActiveRef, openedOriginal }) {
   )
 }
 
+const TTS_RATES = [0.75, 1, 1.25, 1.5, 1.75, 2]
+
+function extractText(html) {
+  const tmp = document.createElement('div')
+  tmp.innerHTML = html
+  return tmp.textContent || tmp.innerText || ''
+}
+
 export default function ReaderPage() {
   const { state } = useLocation()
   const navigate = useNavigate()
@@ -204,6 +212,99 @@ export default function ReaderPage() {
   const [atTop, setAtTop] = useState(true)
   const [lightboxSrc, setLightboxSrc] = useState(null)
   const [resumeOverlay, setResumeOverlay] = useState(false) // true=visible, 'fading'=fading out
+
+  // ── Text-to-speech ──
+  const [ttsState, setTtsState]     = useState('idle') // 'idle' | 'playing' | 'paused'
+  const [ttsRate, setTtsRate]       = useState(() => parseFloat(localStorage.getItem('reader-tts-rate')  || '1'))
+  const [ttsPitch, setTtsPitch]     = useState(() => parseFloat(localStorage.getItem('reader-tts-pitch') || '1.05'))
+  const [ttsVoices, setTtsVoices]   = useState([])
+  const [ttsVoiceURI, setTtsVoiceURI] = useState(() => localStorage.getItem('reader-tts-voice') || '')
+  const ttsRateRef    = useRef(ttsRate)
+  const ttsPitchRef   = useRef(ttsPitch)
+  const ttsVoiceURIRef = useRef(ttsVoiceURI)
+
+  // Curated reading voices with friendly display names, in priority order
+  const CURATED_VOICES = [
+    { name: 'Samantha',                          label: 'Samantha'      }, // macOS — warm, natural
+    { name: 'Karen',                             label: 'Karen'         }, // macOS Australian
+    { name: 'Moira',                             label: 'Moira'         }, // macOS Irish
+    { name: 'Tessa',                             label: 'Tessa'         }, // macOS South African
+    { name: 'Fiona',                             label: 'Fiona'         }, // macOS Scottish
+    { name: 'Victoria',                          label: 'Victoria'      }, // macOS
+    { name: 'Ava',                               label: 'Ava'           }, // macOS enhanced
+    { name: 'Allison',                           label: 'Allison'       }, // macOS
+    { name: 'Susan',                             label: 'Susan'         }, // macOS
+    { name: 'Microsoft Jenny Online (Natural)',  label: 'Jenny'         }, // Windows 11 neural
+    { name: 'Microsoft Aria Online (Natural)',   label: 'Aria'          }, // Windows 11 neural
+    { name: 'Microsoft Zira Desktop - English (United States)', label: 'Zira' },
+    { name: 'Microsoft Zira',                    label: 'Zira'          }, // Windows fallback
+    { name: 'Microsoft David Desktop - English (United States)', label: 'David' },
+    { name: 'Microsoft David',                   label: 'David'         }, // Windows male fallback
+    { name: 'Google US English',                 label: 'Google US'     }, // Chrome
+    { name: 'Google UK English Female',          label: 'Google UK'     }, // Chrome
+  ]
+
+  function pickDefaultVoice(voices) {
+    for (const { name } of CURATED_VOICES) {
+      const v = voices.find(v => v.name === name)
+      if (v) return v
+    }
+    return voices[0] || null
+  }
+
+  useEffect(() => {
+    function loadVoices() {
+      const all = window.speechSynthesis.getVoices()
+      if (!all.length) return
+      // Keep only curated voices that are available on this device
+      const curated = CURATED_VOICES
+        .map(({ name, label }) => {
+          const v = all.find(v => v.name === name)
+          return v ? { ...v, label } : null
+        })
+        .filter(Boolean)
+      // If none matched (rare), fall back to all English voices
+      const list = curated.length
+        ? curated
+        : all.filter(v => v.lang.startsWith('en'))
+      setTtsVoices(list)
+      if (!localStorage.getItem('reader-tts-voice')) {
+        const def = pickDefaultVoice(list)
+        if (def) { setTtsVoiceURI(def.voiceURI); ttsVoiceURIRef.current = def.voiceURI }
+      }
+    }
+    loadVoices()
+    window.speechSynthesis.addEventListener('voiceschanged', loadVoices)
+    return () => window.speechSynthesis.removeEventListener('voiceschanged', loadVoices)
+  }, [])
+
+  useEffect(() => { ttsRateRef.current = ttsRate;       localStorage.setItem('reader-tts-rate',  ttsRate)  }, [ttsRate])
+  useEffect(() => { ttsPitchRef.current = ttsPitch;     localStorage.setItem('reader-tts-pitch', ttsPitch) }, [ttsPitch])
+  useEffect(() => { ttsVoiceURIRef.current = ttsVoiceURI; localStorage.setItem('reader-tts-voice', ttsVoiceURI) }, [ttsVoiceURI])
+
+  useEffect(() => () => { window.speechSynthesis?.cancel() }, [])
+
+  function ttsPlay(overrides = {}) {
+    if (!content) return
+    const r = overrides.rate  ?? ttsRateRef.current
+    const p = overrides.pitch ?? ttsPitchRef.current
+    const uri = overrides.voiceURI ?? ttsVoiceURIRef.current
+    window.speechSynthesis.cancel()
+    const utterance = new SpeechSynthesisUtterance(extractText(content))
+    utterance.rate   = r
+    utterance.pitch  = p
+    utterance.volume = 1
+    const voice = window.speechSynthesis.getVoices().find(v => v.voiceURI === uri)
+    if (voice) utterance.voice = voice
+    utterance.onend  = () => setTtsState('idle')
+    utterance.onerror = () => setTtsState('idle')
+    window.speechSynthesis.speak(utterance)
+    setTtsState('playing')
+  }
+
+  function ttsPause()  { window.speechSynthesis.pause();  setTtsState('paused')  }
+  function ttsResume() { window.speechSynthesis.resume(); setTtsState('playing') }
+  function ttsStop()   { window.speechSynthesis.cancel(); setTtsState('idle')    }
 
   // ── Engagement tracking ──
   const [timeSpent, setTimeSpent] = useState(0)
@@ -413,6 +514,94 @@ export default function ReaderPage() {
     </button>
   )
 
+  const TTS_PITCHES = [
+    { value: 0.8,  label: 'Low'    },
+    { value: 0.9,  label: 'Soft'   },
+    { value: 1.0,  label: 'Normal' },
+    { value: 1.05, label: 'Warm'   },
+    { value: 1.1,  label: 'Bright' },
+    { value: 1.2,  label: 'High'   },
+  ]
+
+  const ttsControls = content && (
+    <div className={styles.ttsGroup}>
+      {/* Voice picker — always visible */}
+      {ttsVoices.length > 0 && (
+        <select
+          className={styles.ttsRateSelect}
+          style={{ maxWidth: 110 }}
+          value={ttsVoiceURI}
+          title="Voice"
+          onChange={e => {
+            setTtsVoiceURI(e.target.value)
+            if (ttsState === 'playing') ttsPlay({ voiceURI: e.target.value })
+          }}
+        >
+          {ttsVoices.map(v => (
+            <option key={v.voiceURI} value={v.voiceURI}>{v.label || v.name}</option>
+          ))}
+        </select>
+      )}
+
+      {/* Pitch picker */}
+      <select
+        className={styles.ttsRateSelect}
+        value={ttsPitch}
+        title="Pitch"
+        onChange={e => {
+          const p = parseFloat(e.target.value)
+          setTtsPitch(p)
+          if (ttsState === 'playing') ttsPlay({ pitch: p })
+        }}
+      >
+        {TTS_PITCHES.map(({ value, label }) => (
+          <option key={value} value={value}>{label}</option>
+        ))}
+      </select>
+
+      {/* Speed picker */}
+      <select
+        className={styles.ttsRateSelect}
+        value={ttsRate}
+        title="Speed"
+        onChange={e => {
+          const r = parseFloat(e.target.value)
+          setTtsRate(r)
+          if (ttsState === 'playing') ttsPlay({ rate: r })
+        }}
+      >
+        {TTS_RATES.map(r => <option key={r} value={r}>{r}×</option>)}
+      </select>
+
+      {/* Play / Pause / Stop */}
+      {ttsState === 'idle' ? (
+        <button className={styles.ttsPlayBtn} onClick={() => ttsPlay()} title="Listen">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          Listen
+        </button>
+      ) : (
+        <>
+          {ttsState === 'playing'
+            ? <button className={styles.ttsIconBtn} onClick={ttsPause} title="Pause">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+              </button>
+            : <button className={styles.ttsIconBtn} onClick={ttsResume} title="Resume">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              </button>
+          }
+          <button className={styles.ttsIconBtn} onClick={ttsStop} title="Stop">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+          </button>
+          {ttsState === 'playing' && (
+            <div className={styles.ttsWave} aria-hidden="true">
+              <span/><span/><span/>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  )
+
   return (
     <div className={styles.page}>
       {/* Top bar — on desktop the reader controls live here */}
@@ -437,6 +626,7 @@ export default function ReaderPage() {
           {fontFamilyControls}
           <div className={styles.toolSep} />
           {resetControl}
+          {ttsControls && <><div className={styles.toolSep} />{ttsControls}</>}
         </div>
         <a href={post.url} target="_blank" rel="noopener noreferrer" className={styles.openBtn} onClick={() => { setOpenedOriginal(true); openedOriginalRef.current = true }}>
           Open original ↗
@@ -473,6 +663,12 @@ export default function ReaderPage() {
               <div className={styles.toolsPanelRow}>
                 {resetControl}
               </div>
+              {ttsControls && (
+                <>
+                  <div className={styles.toolsPanelDivider} />
+                  <div className={styles.toolsPanelRow}>{ttsControls}</div>
+                </>
+              )}
             </div>
           )}
         </div>
