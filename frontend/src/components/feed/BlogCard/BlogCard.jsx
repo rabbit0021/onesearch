@@ -221,14 +221,14 @@ export default function BlogCard({ post, readProgress }) {
               alt={post.publisher}
               className={styles.individualAvatar}
               onError={e => { e.currentTarget.style.display = 'none' }}
-              onClick={e => {
-                e.preventDefault()
-                e.stopPropagation()
-                setShowLightbox(true)
-                getIndividualStats().then(stats => {
-                  setIndividualLikeCount(stats[post.publisher?.toLowerCase()] ?? 0)
-                }).catch(() => {})
-              }}
+              // onClick={e => {
+              //   e.preventDefault()
+              //   e.stopPropagation()
+              //   setShowLightbox(true)
+              //   getIndividualStats().then(stats => {
+              //     setIndividualLikeCount(stats[post.publisher?.toLowerCase()] ?? 0)
+              //   }).catch(() => {})
+              // }}
               style={{ cursor: 'pointer' }}
             />
           </div>

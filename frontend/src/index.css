@@ -64,8 +64,9 @@
 
   --overlay: rgba(0, 0, 0, 0.53);
 
-  --progress-bar-bg: #adaba2;
-  --progress-bar-fill: #78c980;
+  --progress-bar-bg: #ecece1;
+  --progress-bar-fill1: #bfbeba;
+  --progress-bar-fill2: #82c489;
 } 
 
 [data-theme="dark"] {
@@ -116,8 +117,9 @@
   --arcade-shadow-mid: #000000;     
   --arcade-shadow-deep: #000000;
 
-  --progress-bar-bg: #4d4d4a;
-  --progress-bar-fill: #105b2d;
+  --progress-bar-bg: #363631;
+  --progress-bar-fill1: #61615e;  
+  --progress-bar-fill2: #105b2d;
 }
 
 *,

@@ -231,7 +231,7 @@
 }
 .readProgressBar {
   height: 100%;
-  background: var(--progress-bar-fill);
+  background: linear-gradient(to right, var(--progress-bar-fill1), var(--progress-bar-fill2));
 }
 
 /* ── Card body ── */

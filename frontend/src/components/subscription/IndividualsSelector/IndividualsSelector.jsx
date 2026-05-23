@@ -139,7 +139,7 @@ export default function IndividualsSelector({ selected, onChange, disabled }) {
         )}
       </div>
 
-      {lightbox && (
+      {lightbox && createPortal(
         <ImageLightbox
           image={lightbox.image}
           name={lightbox.name}
@@ -147,7 +147,8 @@ export default function IndividualsSelector({ selected, onChange, disabled }) {
           website={lightbox.website}
           likeCount={lightbox.likeCount}
           onClose={() => setLightbox(null)}
-        />
+        />,
+        document.body
       )}
 
       {browseOpen && createPortal(
