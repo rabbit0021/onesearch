@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { timeAgo, faviconUrl, fireToStars } from '../../components/feed/BlogCard/BlogCard'
-import { getPostContent, sendReadEvent, getReadEvent, getOrCreateDeviceId } from '../../api'
+import { getPostContent, sendReadEvent, getReadEvent, getOrCreateDeviceId, askArticle } from '../../api'
 import { useTheme } from '../../context/ThemeContext'
 import { useToast } from '../../context/ToastContext'
 import ThemeSwitcher from '../../components/layout/ThemeSwitcher/ThemeSwitcher'
@@ -207,6 +207,11 @@ export default function ReaderPage() {
   const [atTop, setAtTop] = useState(true)
   const [lightboxSrc, setLightboxSrc] = useState(null)
   const [resumeOverlay, setResumeOverlay] = useState(false) // true=visible, 'fading'=fading out
+  const [chatOpen, setChatOpen]   = useState(false)
+  const [chatMsgs, setChatMsgs]   = useState([])
+  const [chatInput, setChatInput] = useState('')
+  const [chatLoading, setChatLoading] = useState(false)
+  const chatBottomRef = useRef(null)
 
   // Refs needed by the reader hook — declared here so they're available to both
   // the hook and the rest of the component (scroll tracking, content rendering).
@@ -424,6 +429,27 @@ export default function ReaderPage() {
     </button>
   )
 
+  // Auto-scroll chat to bottom on new messages
+  useEffect(() => {
+    chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [chatMsgs, chatLoading])
+
+  async function sendChatMessage() {
+    const q = chatInput.trim()
+    if (!q || chatLoading) return
+    setChatInput('')
+    setChatMsgs(m => [...m, { role: 'user', text: q }])
+    setChatLoading(true)
+    try {
+      const { answer } = await askArticle(post.id, q)
+      setChatMsgs(m => [...m, { role: 'bot', text: answer }])
+    } catch {
+      setChatMsgs(m => [...m, { role: 'bot', text: 'Something went wrong. Please try again.' }])
+    } finally {
+      setChatLoading(false)
+    }
+  }
+
   const listenBtn = content && (
     <button className={styles.listenBtn} onClick={ttsPlay} title="Listen to this article">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
@@ -456,6 +482,21 @@ export default function ReaderPage() {
           <div className={styles.toolSep} />
           {resetControl}
           {listenBtn && <><div className={styles.toolSep} />{listenBtn}</>}
+          {content && (
+            <>
+              <div className={styles.toolSep} />
+              <button
+                className={`${styles.chatToggleBtn} ${chatOpen ? styles.chatToggleActive : ''}`}
+                onClick={() => setChatOpen(o => !o)}
+                title="Ask about this article"
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                Ask
+              </button>
+            </>
+          )}
         </div>
         <a href={post.url} target="_blank" rel="noopener noreferrer" className={styles.openBtn} onClick={() => { setOpenedOriginal(true); openedOriginalRef.current = true }}>
           Open original ↗
@@ -496,6 +537,22 @@ export default function ReaderPage() {
                 <>
                   <div className={styles.toolsPanelDivider} />
                   <div className={styles.toolsPanelRow}>{listenBtn}</div>
+                </>
+              )}
+              {content && (
+                <>
+                  <div className={styles.toolsPanelDivider} />
+                  <div className={styles.toolsPanelRow}>
+                    <button
+                      className={`${styles.chatToggleBtn} ${chatOpen ? styles.chatToggleActive : ''}`}
+                      onClick={() => { setChatOpen(o => !o); setToolsOpen(false) }}
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                      </svg>
+                      Ask article
+                    </button>
+                  </div>
                 </>
               )}
             </div>
@@ -688,18 +745,6 @@ export default function ReaderPage() {
                     </svg>
                   </button>
                 </div>
-                {voiceCommandsSupported && (
-                  <div className={styles.listenVoiceRow}>
-                    <span className={`${styles.listenMicDot} ${listening ? styles.listenMicActive : ''}`} />
-                    <span className={styles.listenVoiceHint}>
-                      {lastCommand
-                        ? lastCommand.label
-                        : ttsState === 'playing'
-                          ? 'pause to use voice commands'
-                          : 'say "resume", "stop", "repeat"…'}
-                    </span>
-                  </div>
-                )}
               </>
             )}
           </div>
@@ -708,6 +753,45 @@ export default function ReaderPage() {
 
       {/* Dev-only engagement metrics overlay */}
       {import.meta.env.DEV && <DevOverlay timeSpent={timeSpent} maxDepth={maxDepth} isActiveRef={isActiveRef} openedOriginal={openedOriginal} />}
+
+      {/* Article chat panel */}
+      <div className={`${styles.chatPanel} ${chatOpen ? styles.chatPanelOpen : ''}`}>
+        <div className={styles.chatPanelHeader}>
+          <span className={styles.chatPanelTitle}>Ask about this article</span>
+          <button className={styles.chatPanelClose} onClick={() => setChatOpen(false)} aria-label="Close">×</button>
+        </div>
+
+        <div className={styles.chatMessages}>
+          {chatMsgs.length === 0 && (
+            <p className={styles.chatEmpty}>Ask anything about this article — key points, definitions, summaries…</p>
+          )}
+          {chatMsgs.map((m, i) => (
+            <div key={i} className={`${styles.chatMsg} ${m.role === 'user' ? styles.chatMsgUser : styles.chatMsgBot}`}>
+              <div className={styles.chatBubble}>{m.text}</div>
+            </div>
+          ))}
+          {chatLoading && (
+            <div className={`${styles.chatMsg} ${styles.chatMsgBot}`}>
+              <div className={styles.chatTyping}><span/><span/><span/></div>
+            </div>
+          )}
+          <div ref={chatBottomRef} />
+        </div>
+
+        <div className={styles.chatInputRow}>
+          <textarea
+            className={styles.chatInput}
+            rows={1}
+            placeholder="Ask a question…"
+            value={chatInput}
+            onChange={e => setChatInput(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage() } }}
+          />
+          <button className={styles.chatSendBtn} onClick={sendChatMessage} disabled={!chatInput.trim() || chatLoading} aria-label="Send">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+          </button>
+        </div>
+      </div>
     </div>
   )
 }

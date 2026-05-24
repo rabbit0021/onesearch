@@ -3,6 +3,16 @@
  * To change an endpoint or add auth headers globally, edit this file.
  */
 
+export async function askArticle(postId, question) {
+  const res = await fetch(`/api/chat/${postId}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question }),
+  })
+  if (!res.ok) throw new Error('Chat request failed')
+  return res.json()  // { answer: string }
+}
+
 export async function getTechTeams(search = '') {
   const res = await fetch(`/techteams?search=${encodeURIComponent(search)}`)
   if (!res.ok) throw new Error('Failed to fetch tech teams')

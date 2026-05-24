@@ -248,26 +248,22 @@ export function useArticleReader({ contentRef, scrollContainerRef, highlightClas
     const audio = new Audio(audioUrl)
     audioRef.current = audio
 
-    // Find the timing index for the start char
-    const startChar  = getStartChar(nodes)
-    const startTiming = timings.findIndex(t => (wordCharMapRef.current[t.wordIndex] ?? 0) >= startChar)
-    const startTime   = startTiming > 0 ? timings[startTiming].time : 0
-    audio.currentTime = startTime
+    // Always start from the beginning — scroll to top so highlight tracks correctly
+    if (scrollContainerRef.current) scrollContainerRef.current.scrollTop = 0
 
     let lastWordIdx = -1
     timingIntervalRef.current = setInterval(() => {
-      const ct      = audio.currentTime
-      // Find last timing whose time <= ct
-      const tArr    = wordTimingsRef.current
-      let lo = 0, hi = tArr.length - 1, found = -1
-      while (lo <= hi) {
-        const mid = (lo + hi) >> 1
-        if (tArr[mid].time <= ct) { found = mid; lo = mid + 1 } else hi = mid - 1
-      }
-      if (found < 0 || tArr[found].wordIndex === lastWordIdx) return
-      lastWordIdx = tArr[found].wordIndex
-      const charPos = wordCharMapRef.current[lastWordIdx] ?? 0
-      highlightAndScrollToChar(charPos, tArr[found].word?.length || 1)
+        const ct   = audio.currentTime
+        const tArr = wordTimingsRef.current
+        let lo = 0, hi = tArr.length - 1, found = -1
+        while (lo <= hi) {
+          const mid = (lo + hi) >> 1
+          if (tArr[mid].time <= ct) { found = mid; lo = mid + 1 } else hi = mid - 1
+        }
+        if (found < 0 || tArr[found].wordIndex === lastWordIdx) return
+        lastWordIdx = tArr[found].wordIndex
+        const charPos = wordCharMapRef.current[lastWordIdx] ?? 0
+        highlightAndScrollToChar(charPos, tArr[found].word?.length || 1)
     }, 80)
 
     const cleanup = () => {

@@ -30,6 +30,7 @@ export function useVoiceCommands({ ttsState }) {
 
   function startRecognition() {
     if (recognitionRef.current) return
+    if (document.visibilityState !== 'visible') return  // don't fight other tabs
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition
     if (!SR) return
 
@@ -56,8 +57,8 @@ export function useVoiceCommands({ ttsState }) {
     r.onend = () => {
       recognitionRef.current = null
       setListening(false)
-      // Only restart if this session is still current (not stopped intentionally)
-      if (shouldListenRef.current && genRef.current === myGen) {
+      // Only restart if this session is still current, tab is visible, and we should be listening
+      if (shouldListenRef.current && genRef.current === myGen && document.visibilityState === 'visible') {
         restartTimerRef.current = setTimeout(startRecognition, 300)
       }
     }
@@ -73,6 +74,7 @@ export function useVoiceCommands({ ttsState }) {
     }
   }
 
+  // Start/stop based on TTS state
   useEffect(() => {
     const active = ttsState === 'idle' || ttsState === 'paused'
     shouldListenRef.current = active
@@ -83,6 +85,26 @@ export function useVoiceCommands({ ttsState }) {
     }
     return stopRecognition
   }, [ttsState])
+
+  // Pause recognition when tab is hidden, resume when visible again
+  useEffect(() => {
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        if (shouldListenRef.current) startRecognition()
+      } else {
+        // Stop without changing shouldListenRef so it restarts on focus
+        clearTimeout(restartTimerRef.current)
+        genRef.current++
+        if (recognitionRef.current) {
+          try { recognitionRef.current.abort() } catch (_) {}
+          recognitionRef.current = null
+        }
+        setListening(false)
+      }
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => document.removeEventListener('visibilitychange', onVisibility)
+  }, [])
 
   return { lastCommand, listening }
 }

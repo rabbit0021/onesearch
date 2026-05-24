@@ -1321,6 +1321,21 @@ def most_liked_all_time_feed():
         conn.close()
 
 
+@app.route("/api/chat/<int:post_id>", methods=["POST"])
+def chat_with_article(post_id):
+    data = request.get_json(silent=True) or {}
+    question = (data.get("question") or "").strip()
+    if not question:
+        return jsonify({"error": "question required"}), 400
+
+    # TODO: replace with real LLM call
+    answer = (
+        f'This is a mock answer to: "{question}"\n\n'
+        "Real answers coming soon — Gemini integration in progress."
+    )
+    return jsonify({"answer": answer})
+
+
 if __name__ == "__main__":
     if os.getenv("FLASK_ENV") == "Production":
         app.run()
