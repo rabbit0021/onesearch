@@ -1250,3 +1250,38 @@
   .readerDock { display: none; }
 }
 
+/* ── Voice command feedback ─────────────────────────────────────────── */
+.listenVoiceRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.listenMicDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+  flex-shrink: 0;
+  transition: background 0.3s;
+}
+
+.listenMicActive {
+  background: #4ade80;
+  box-shadow: 0 0 6px #4ade80;
+  animation: micPulse 1.8s ease-in-out infinite;
+}
+
+.listenVoiceHint {
+  font-size: 11px;
+  color: var(--text-base);
+  letter-spacing: 0.01em;
+  font-style: italic;
+}
+
+@keyframes micPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+

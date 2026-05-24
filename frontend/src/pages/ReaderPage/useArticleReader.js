@@ -171,14 +171,16 @@ export function useArticleReader({ contentRef, scrollContainerRef, highlightClas
   // Maps wordIndex → charStart in fullText by sequentially matching word text.
 
   function buildWordCharMap(fullText, timings) {
-    const map = []
+    // Keyed by wordIndex (not timing array position) so lookup with
+    // tArr[found].wordIndex works correctly across chunks.
+    const map = {}
     let searchFrom = 0
-    for (const { word } of timings) {
+    for (const { word, wordIndex } of timings) {
       const idx = fullText.indexOf(word, searchFrom)
       if (idx === -1) {
-        map.push(searchFrom)
+        map[wordIndex] = searchFrom
       } else {
-        map.push(idx)
+        map[wordIndex] = idx
         searchFrom = idx + word.length
       }
     }
@@ -398,5 +400,29 @@ export function useArticleReader({ contentRef, scrollContainerRef, highlightClas
     setSt('idle')
   }
 
-  return { state, play, pause, resume, stop }
+  function seekBy(secs) {
+    if (audioRef.current)
+      audioRef.current.currentTime = Math.max(0, audioRef.current.currentTime + secs)
+  }
+
+  function adjustVolume(delta) {
+    if (audioRef.current)
+      audioRef.current.volume = Math.max(0.05, Math.min(1, audioRef.current.volume + delta))
+  }
+
+  function adjustRate(delta) {
+    if (audioRef.current)
+      audioRef.current.playbackRate = Math.max(0.5, Math.min(2.0, audioRef.current.playbackRate + delta))
+  }
+
+  // Soft pause/resume — stops/starts audio WITHOUT changing React state so
+  // speech recognition effect does not restart mid-command.
+  function softPause() {
+    audioRef.current?.pause()
+  }
+  function softResume() {
+    audioRef.current?.play().catch(() => {})
+  }
+
+  return { state, play, pause, resume, stop, seekBy, adjustVolume, adjustRate, softPause, softResume }
 }

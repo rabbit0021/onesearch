@@ -11,6 +11,7 @@ import darkThemeCss from 'highlight.js/styles/github-dark-dimmed.min.css?inline'
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
 import styles from './ReaderPage.module.css'
 import { useArticleReader } from './useArticleReader'
+import { useVoiceCommands, voiceCommandsSupported } from './useVoiceCommands'
 
 // Override hljs background so our CSS variable shows through
 const HLJS_BG_OVERRIDE = '\n.hljs { background: transparent !important; }\n'
@@ -214,8 +215,10 @@ export default function ReaderPage() {
   const overflowRef   = useRef(null)
 
   // ── Text-to-speech ──
-  const { state: ttsState, play: ttsPlay, pause: ttsPause, resume: ttsResume, stop: ttsStop } =
+  const { state: ttsState, play: ttsPlay, pause: ttsPause, resume: ttsResume, stop: ttsStop, seekBy: ttsSeekBy, adjustVolume: ttsAdjustVolume, adjustRate: ttsAdjustRate } =
     useArticleReader({ contentRef, scrollContainerRef: readerBodyRef, highlightClass: styles.ttsHighlight, postId: post?.id })
+
+  const { lastCommand, listening } = useVoiceCommands({ ttsState })
 
   // ── Engagement tracking ──
   const [timeSpent, setTimeSpent] = useState(0)
@@ -382,7 +385,7 @@ export default function ReaderPage() {
     return (
       <div className={styles.errorWrap}>
         <p className={styles.errorMsg}>Post not found.</p>
-        <button className={styles.backBtn} onClick={() => navigate(-1)}>← Back</button>
+        <button className={styles.backBtn} onClick={() => { ttsStop(); navigate(-1) }}>← Back</button>
       </div>
     )
   }
@@ -432,7 +435,7 @@ export default function ReaderPage() {
     <div className={styles.page}>
       {/* Top bar — on desktop the reader controls live here */}
       <div className={styles.topBar}>
-        <button className={styles.backBtn} onClick={() => navigate(-1)}>← Back</button>
+        <button className={styles.backBtn} onClick={() => { ttsStop(); navigate(-1) }}>← Back</button>
         <div className={styles.topMeta}>
           {favicon && (
             <img src={favicon} alt="" className={styles.favicon}
@@ -685,6 +688,18 @@ export default function ReaderPage() {
                     </svg>
                   </button>
                 </div>
+                {voiceCommandsSupported && (
+                  <div className={styles.listenVoiceRow}>
+                    <span className={`${styles.listenMicDot} ${listening ? styles.listenMicActive : ''}`} />
+                    <span className={styles.listenVoiceHint}>
+                      {lastCommand
+                        ? lastCommand.label
+                        : ttsState === 'playing'
+                          ? 'pause to use voice commands'
+                          : 'say "resume", "stop", "repeat"…'}
+                    </span>
+                  </div>
+                )}
               </>
             )}
           </div>
