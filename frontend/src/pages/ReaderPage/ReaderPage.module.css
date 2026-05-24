@@ -3,10 +3,8 @@
   position: fixed;
   bottom: 1.25rem;
   left: 1.25rem;
-  z-index: 999;
   background: rgba(0, 0, 0, 0.2);
   color: var(--text-base);
-  font-family: 'Fira Code', monospace;
   font-size: var(--fs-std);
   border-radius: 8px;
   padding: 10px 14px;
@@ -54,7 +52,6 @@
 .page {
   position: fixed;
   inset: 0;
-  z-index: 100;
   display: flex;
   flex-direction: column;
   background: var(--bg-page);
@@ -219,7 +216,7 @@
   position: absolute;
   top: calc(100% + 4px);
   right: 0;
-  z-index: 200;
+  z-index: 1;
   background: var(--filter-bg);
   border: 1px solid var(--filter-border);
   border-radius: 6px;
@@ -299,6 +296,7 @@
 .fontSelectWrap {
   position: relative;
   flex-shrink: 0;
+  z-index: 1
 }
 
 .fontSelectTrigger {
@@ -322,7 +320,6 @@
   position: absolute;
   top: calc(100% + 4px);
   left: 0;
-  z-index: 300;
   background: var(--filter-bg);
   border: 1px solid var(--filter-border);
   border-radius: 6px;
@@ -532,7 +529,7 @@
    Article content typography
    ══════════════════════════════════════════ */
 .articleContent {
-  font-size: var(--fs-lm);
+  /* font-size: var(--fs-lm); */
   line-height: 1.4;
   color: var(--reader-text-base);
   font-family: 'Lucida Grande', 'Lato', sans-serif;
@@ -545,7 +542,7 @@
 
 /* First paragraph lead-in */
 .articleContent > p:first-of-type {
-  font-size: var(--fs-lm);
+  /* font-size: var(--fs-lm); */
   color: var(--text-base);
   opacity: 0.9;
 }
@@ -911,7 +908,6 @@
 .lightboxOverlay {
   position: fixed;
   inset: 0;
-  z-index: 500;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -923,7 +919,6 @@
   inset: 0;
   background: rgba(0, 0, 0, 0.88);
   cursor: zoom-out;
-  z-index: 0;
 }
 
 .lightboxImg {
@@ -958,7 +953,6 @@
   position: absolute;
   top: 1rem;
   right: 1rem;
-  z-index: 2;
   background: none;
   border: none;
   color: #fff;
@@ -977,7 +971,6 @@
   inset: 0;
   background: rgba(128, 128, 128, 0.35);
   pointer-events: none;
-  z-index: 200;
 }
 
 .resumeFadeOut {
@@ -998,7 +991,6 @@
   position: fixed;
   bottom: 1.25rem;
   right: 1.25rem;
-  z-index: 200;
   animation: dockFadeIn 0.3s ease both;
 }
 
@@ -1044,14 +1036,22 @@
 
 .dockSub { opacity: 0.7; }
 
-/* ── Text-to-speech controls ── */
-.ttsGroup {
-  display: flex;
-  align-items: center;
-  gap: 2px;
+/* ── TTS word highlight ── */
+/* Modern browsers: CSS Custom Highlight API — no DOM mutation */
+::highlight(tts-word) {
+  background-color: color-mix(in srgb, var(--color-primary) 35%, transparent);
+  color: inherit;
+}
+/* Fallback: mark element injected for older browsers */
+.ttsHighlight {
+  background: color-mix(in srgb, var(--color-primary) 28%, transparent);
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 1px;
 }
 
-.ttsPlayBtn {
+/* ── Listen button (toolbar) ── */
+.listenBtn {
   display: flex;
   align-items: center;
   gap: 5px;
@@ -1059,67 +1059,134 @@
   border: 1px solid var(--filter-border);
   color: var(--text-muted);
   font-size: var(--fs-xs);
-  padding: 3px 8px;
+  padding: 3px 10px;
   border-radius: 4px;
   cursor: pointer;
   white-space: nowrap;
   transition: color 0.15s, border-color 0.15s;
   letter-spacing: 0.02em;
 }
-.ttsPlayBtn:hover { color: var(--color-primary); border-color: var(--color-primary); }
+.listenBtn:hover { color: var(--color-primary); border-color: var(--color-primary); }
 
-.ttsIconBtn {
+/* ── Listen overlay ── */
+@keyframes listenFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.listenOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 2.5rem;
+  animation: listenFadeIn 0.25s ease both;
+  pointer-events: auto;
+  z-index: 2;
+}
+
+.listenCard {
+  pointer-events: auto;
+  background: var(--filter-bg);
+  border: 1px solid var(--filter-border);
+  border-radius: 10px;
+  padding: 1.5rem 2rem 1.75rem;
+  width: min(460px, calc(100vw - 2.5rem));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.1rem;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.22);
+}
+
+/* Animated waveform */
+.listenWave {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 36px;
+}
+
+.listenWave span {
+  display: block;
+  width: 4px;
+  height: 6px;
+  border-radius: 2px;
+  background: var(--color-primary);
+  opacity: 0.5;
+  transition: height 0.3s ease, opacity 0.3s;
+}
+
+@keyframes listenBar {
+  0%, 100% { height: 6px;  opacity: 0.45; }
+  50%       { height: 30px; opacity: 1;    }
+}
+
+.listenWavePlaying span {
+  animation: listenBar 1s ease-in-out infinite;
+  opacity: 1;
+}
+.listenWavePlaying span:nth-child(1) { animation-delay: 0s;     animation-duration: 0.9s;  }
+.listenWavePlaying span:nth-child(2) { animation-delay: 0.15s;  animation-duration: 1.1s;  }
+.listenWavePlaying span:nth-child(3) { animation-delay: 0.3s;   animation-duration: 0.85s; }
+.listenWavePlaying span:nth-child(4) { animation-delay: 0.45s;  animation-duration: 1.05s; }
+.listenWavePlaying span:nth-child(5) { animation-delay: 0.6s;   animation-duration: 0.95s; }
+
+.listenTitle {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  text-align: center;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  max-width: 100%;
+  line-height: 1.45;
+}
+
+.listenBtns {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.listenPauseBtn {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: none;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--color-primary);
   border: none;
-  color: var(--color-primary);
+  color: #fff;
   cursor: pointer;
-  padding: 4px 5px;
-  border-radius: 4px;
-  line-height: 0;
-  transition: background 0.15s;
+  transition: transform 0.15s, opacity 0.15s;
+  flex-shrink: 0;
 }
-.ttsIconBtn:hover { background: var(--card-hint); }
+.listenPauseBtn:hover { transform: scale(1.07); opacity: 0.88; }
 
-.ttsRateSelect {
-  background: none;
-  border: 1px solid var(--filter-border);
-  color: var(--text-muted);
-  font-size: var(--fs-xs);
-  padding: 2px 4px;
-  border-radius: 4px;
-  cursor: pointer;
-  outline: none;
-  transition: border-color 0.15s;
-}
-.ttsRateSelect:hover { border-color: var(--color-primary); }
-
-@keyframes ttsBar {
-  0%, 100% { transform: scaleY(0.35); }
-  50%       { transform: scaleY(1); }
-}
-
-.ttsWave {
+.listenStopBtn {
   display: flex;
   align-items: center;
-  gap: 2px;
-  height: 14px;
-  margin-left: 2px;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  flex-shrink: 0;
+  border: none;
 }
-
-.ttsWave span {
-  display: block;
-  width: 2px;
-  height: 100%;
-  background: var(--color-primary);
-  border-radius: 1px;
-  animation: ttsBar 0.8s ease-in-out infinite;
-  transform-origin: bottom;
-}
-.ttsWave span:nth-child(2) { animation-delay: 0.18s; }
-.ttsWave span:nth-child(3) { animation-delay: 0.36s; }
+.listenStopBtn:hover { color: var(--text-base); background-color: var(--bg-wizard-option); }
 
 /* ── Mobile ── */
 @media (max-width: 600px) {
@@ -1143,7 +1210,7 @@
   .stat { font-size: var(--fs-sm); }
 
   /* Article body — larger, more comfortable reading */
-  .articleContent { font-size: var(--fs-lm); line-height: 1.4; }
+  .articleContent { font-size: var(--fs-nd); line-height: 1.4; }
   .articleContent p { margin-bottom: 1.2rem; }
   .articleContent h1 { font-size: var(--fs-xl); }
   .articleContent h2 { font-size: var(--fs-lg); }

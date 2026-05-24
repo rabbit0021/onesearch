@@ -10,13 +10,14 @@ import lightThemeCss from 'highlight.js/styles/github.min.css?inline'
 import darkThemeCss from 'highlight.js/styles/github-dark-dimmed.min.css?inline'
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
 import styles from './ReaderPage.module.css'
+import { useArticleReader } from './useArticleReader'
 
 // Override hljs background so our CSS variable shows through
 const HLJS_BG_OVERRIDE = '\n.hljs { background: transparent !important; }\n'
 
 const DEFAULT_READING_SPEED = 200 // words per minute — override per-user when personalisation is added
 
-const FONT_SCALES  = [0.85, 0.93, 1, 1.1, 1.2]
+const FONT_SCALES  = [0.55, 0.70, 0.85, 1, 1.1, 1.2]
 const FONT_FAMILIES = [
   { key: 'system',    label: 'System UI',     css: "system-ui, -apple-system, sans-serif" },
   { key: 'lucida',    label: 'Lucida',        css: "'Lucida Grande', 'Lucida Sans', Lato, sans-serif" },
@@ -181,13 +182,6 @@ function DevOverlay({ timeSpent, maxDepth, isActiveRef, openedOriginal }) {
   )
 }
 
-const TTS_RATES = [0.75, 1, 1.25, 1.5, 1.75, 2]
-
-function extractText(html) {
-  const tmp = document.createElement('div')
-  tmp.innerHTML = html
-  return tmp.textContent || tmp.innerText || ''
-}
 
 export default function ReaderPage() {
   const { state } = useLocation()
@@ -213,98 +207,15 @@ export default function ReaderPage() {
   const [lightboxSrc, setLightboxSrc] = useState(null)
   const [resumeOverlay, setResumeOverlay] = useState(false) // true=visible, 'fading'=fading out
 
+  // Refs needed by the reader hook — declared here so they're available to both
+  // the hook and the rest of the component (scroll tracking, content rendering).
+  const contentRef    = useRef(null)
+  const readerBodyRef = useRef(null)
+  const overflowRef   = useRef(null)
+
   // ── Text-to-speech ──
-  const [ttsState, setTtsState]     = useState('idle') // 'idle' | 'playing' | 'paused'
-  const [ttsRate, setTtsRate]       = useState(() => parseFloat(localStorage.getItem('reader-tts-rate')  || '1'))
-  const [ttsPitch, setTtsPitch]     = useState(() => parseFloat(localStorage.getItem('reader-tts-pitch') || '1.05'))
-  const [ttsVoices, setTtsVoices]   = useState([])
-  const [ttsVoiceURI, setTtsVoiceURI] = useState(() => localStorage.getItem('reader-tts-voice') || '')
-  const ttsRateRef    = useRef(ttsRate)
-  const ttsPitchRef   = useRef(ttsPitch)
-  const ttsVoiceURIRef = useRef(ttsVoiceURI)
-
-  // Curated reading voices with friendly display names, in priority order
-  const CURATED_VOICES = [
-    { name: 'Samantha',                          label: 'Samantha'      }, // macOS — warm, natural
-    { name: 'Karen',                             label: 'Karen'         }, // macOS Australian
-    { name: 'Moira',                             label: 'Moira'         }, // macOS Irish
-    { name: 'Tessa',                             label: 'Tessa'         }, // macOS South African
-    { name: 'Fiona',                             label: 'Fiona'         }, // macOS Scottish
-    { name: 'Victoria',                          label: 'Victoria'      }, // macOS
-    { name: 'Ava',                               label: 'Ava'           }, // macOS enhanced
-    { name: 'Allison',                           label: 'Allison'       }, // macOS
-    { name: 'Susan',                             label: 'Susan'         }, // macOS
-    { name: 'Microsoft Jenny Online (Natural)',  label: 'Jenny'         }, // Windows 11 neural
-    { name: 'Microsoft Aria Online (Natural)',   label: 'Aria'          }, // Windows 11 neural
-    { name: 'Microsoft Zira Desktop - English (United States)', label: 'Zira' },
-    { name: 'Microsoft Zira',                    label: 'Zira'          }, // Windows fallback
-    { name: 'Microsoft David Desktop - English (United States)', label: 'David' },
-    { name: 'Microsoft David',                   label: 'David'         }, // Windows male fallback
-    { name: 'Google US English',                 label: 'Google US'     }, // Chrome
-    { name: 'Google UK English Female',          label: 'Google UK'     }, // Chrome
-  ]
-
-  function pickDefaultVoice(voices) {
-    for (const { name } of CURATED_VOICES) {
-      const v = voices.find(v => v.name === name)
-      if (v) return v
-    }
-    return voices[0] || null
-  }
-
-  useEffect(() => {
-    function loadVoices() {
-      const all = window.speechSynthesis.getVoices()
-      if (!all.length) return
-      // Keep only curated voices that are available on this device
-      const curated = CURATED_VOICES
-        .map(({ name, label }) => {
-          const v = all.find(v => v.name === name)
-          return v ? { ...v, label } : null
-        })
-        .filter(Boolean)
-      // If none matched (rare), fall back to all English voices
-      const list = curated.length
-        ? curated
-        : all.filter(v => v.lang.startsWith('en'))
-      setTtsVoices(list)
-      if (!localStorage.getItem('reader-tts-voice')) {
-        const def = pickDefaultVoice(list)
-        if (def) { setTtsVoiceURI(def.voiceURI); ttsVoiceURIRef.current = def.voiceURI }
-      }
-    }
-    loadVoices()
-    window.speechSynthesis.addEventListener('voiceschanged', loadVoices)
-    return () => window.speechSynthesis.removeEventListener('voiceschanged', loadVoices)
-  }, [])
-
-  useEffect(() => { ttsRateRef.current = ttsRate;       localStorage.setItem('reader-tts-rate',  ttsRate)  }, [ttsRate])
-  useEffect(() => { ttsPitchRef.current = ttsPitch;     localStorage.setItem('reader-tts-pitch', ttsPitch) }, [ttsPitch])
-  useEffect(() => { ttsVoiceURIRef.current = ttsVoiceURI; localStorage.setItem('reader-tts-voice', ttsVoiceURI) }, [ttsVoiceURI])
-
-  useEffect(() => () => { window.speechSynthesis?.cancel() }, [])
-
-  function ttsPlay(overrides = {}) {
-    if (!content) return
-    const r = overrides.rate  ?? ttsRateRef.current
-    const p = overrides.pitch ?? ttsPitchRef.current
-    const uri = overrides.voiceURI ?? ttsVoiceURIRef.current
-    window.speechSynthesis.cancel()
-    const utterance = new SpeechSynthesisUtterance(extractText(content))
-    utterance.rate   = r
-    utterance.pitch  = p
-    utterance.volume = 1
-    const voice = window.speechSynthesis.getVoices().find(v => v.voiceURI === uri)
-    if (voice) utterance.voice = voice
-    utterance.onend  = () => setTtsState('idle')
-    utterance.onerror = () => setTtsState('idle')
-    window.speechSynthesis.speak(utterance)
-    setTtsState('playing')
-  }
-
-  function ttsPause()  { window.speechSynthesis.pause();  setTtsState('paused')  }
-  function ttsResume() { window.speechSynthesis.resume(); setTtsState('playing') }
-  function ttsStop()   { window.speechSynthesis.cancel(); setTtsState('idle')    }
+  const { state: ttsState, play: ttsPlay, pause: ttsPause, resume: ttsResume, stop: ttsStop } =
+    useArticleReader({ contentRef, scrollContainerRef: readerBodyRef, highlightClass: styles.ttsHighlight })
 
   // ── Engagement tracking ──
   const [timeSpent, setTimeSpent] = useState(0)
@@ -317,10 +228,6 @@ export default function ReaderPage() {
   const isActiveRef = useRef(true)
   const idleTimer = useRef(null)
   const IDLE_LIMIT = 60
-
-  const contentRef = useRef(null)
-  const readerBodyRef = useRef(null)
-  const overflowRef = useRef(null)
 
   useEffect(() => {
     const prev = document.body.style.overflow
@@ -514,92 +421,11 @@ export default function ReaderPage() {
     </button>
   )
 
-  const TTS_PITCHES = [
-    { value: 0.8,  label: 'Low'    },
-    { value: 0.9,  label: 'Soft'   },
-    { value: 1.0,  label: 'Normal' },
-    { value: 1.05, label: 'Warm'   },
-    { value: 1.1,  label: 'Bright' },
-    { value: 1.2,  label: 'High'   },
-  ]
-
-  const ttsControls = content && (
-    <div className={styles.ttsGroup}>
-      {/* Voice picker — always visible */}
-      {ttsVoices.length > 0 && (
-        <select
-          className={styles.ttsRateSelect}
-          style={{ maxWidth: 110 }}
-          value={ttsVoiceURI}
-          title="Voice"
-          onChange={e => {
-            setTtsVoiceURI(e.target.value)
-            if (ttsState === 'playing') ttsPlay({ voiceURI: e.target.value })
-          }}
-        >
-          {ttsVoices.map(v => (
-            <option key={v.voiceURI} value={v.voiceURI}>{v.label || v.name}</option>
-          ))}
-        </select>
-      )}
-
-      {/* Pitch picker */}
-      <select
-        className={styles.ttsRateSelect}
-        value={ttsPitch}
-        title="Pitch"
-        onChange={e => {
-          const p = parseFloat(e.target.value)
-          setTtsPitch(p)
-          if (ttsState === 'playing') ttsPlay({ pitch: p })
-        }}
-      >
-        {TTS_PITCHES.map(({ value, label }) => (
-          <option key={value} value={value}>{label}</option>
-        ))}
-      </select>
-
-      {/* Speed picker */}
-      <select
-        className={styles.ttsRateSelect}
-        value={ttsRate}
-        title="Speed"
-        onChange={e => {
-          const r = parseFloat(e.target.value)
-          setTtsRate(r)
-          if (ttsState === 'playing') ttsPlay({ rate: r })
-        }}
-      >
-        {TTS_RATES.map(r => <option key={r} value={r}>{r}×</option>)}
-      </select>
-
-      {/* Play / Pause / Stop */}
-      {ttsState === 'idle' ? (
-        <button className={styles.ttsPlayBtn} onClick={() => ttsPlay()} title="Listen">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-          Listen
-        </button>
-      ) : (
-        <>
-          {ttsState === 'playing'
-            ? <button className={styles.ttsIconBtn} onClick={ttsPause} title="Pause">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-              </button>
-            : <button className={styles.ttsIconBtn} onClick={ttsResume} title="Resume">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-              </button>
-          }
-          <button className={styles.ttsIconBtn} onClick={ttsStop} title="Stop">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
-          </button>
-          {ttsState === 'playing' && (
-            <div className={styles.ttsWave} aria-hidden="true">
-              <span/><span/><span/>
-            </div>
-          )}
-        </>
-      )}
-    </div>
+  const listenBtn = content && (
+    <button className={styles.listenBtn} onClick={ttsPlay} title="Listen to this article">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      Listen
+    </button>
   )
 
   return (
@@ -626,7 +452,7 @@ export default function ReaderPage() {
           {fontFamilyControls}
           <div className={styles.toolSep} />
           {resetControl}
-          {ttsControls && <><div className={styles.toolSep} />{ttsControls}</>}
+          {listenBtn && <><div className={styles.toolSep} />{listenBtn}</>}
         </div>
         <a href={post.url} target="_blank" rel="noopener noreferrer" className={styles.openBtn} onClick={() => { setOpenedOriginal(true); openedOriginalRef.current = true }}>
           Open original ↗
@@ -663,10 +489,10 @@ export default function ReaderPage() {
               <div className={styles.toolsPanelRow}>
                 {resetControl}
               </div>
-              {ttsControls && (
+              {listenBtn && (
                 <>
                   <div className={styles.toolsPanelDivider} />
-                  <div className={styles.toolsPanelRow}>{ttsControls}</div>
+                  <div className={styles.toolsPanelRow}>{listenBtn}</div>
                 </>
               )}
             </div>
@@ -820,6 +646,35 @@ export default function ReaderPage() {
           className={`${styles.resumeFade} ${resumeOverlay === 'fading' ? styles.resumeFadeOut : ''}`}
           onAnimationEnd={() => setResumeOverlay(false)}
         />
+      )}
+
+      {/* Listen overlay */}
+      {ttsState !== 'idle' && (
+        <div className={styles.listenOverlay}>
+          <div className={styles.listenCard}>
+            <div className={`${styles.listenWave} ${ttsState === 'playing' ? styles.listenWavePlaying : ''}`}>
+              <span/><span/><span/><span/><span/>
+            </div>
+            <p className={styles.listenTitle} style={{ fontFamily: activeFontCss }}>{post.title}</p>
+            <div className={styles.listenBtns}>
+              <button
+                className={styles.listenPauseBtn}
+                onClick={ttsState === 'playing' ? ttsPause : ttsResume}
+                aria-label={ttsState === 'playing' ? 'Pause' : 'Resume'}
+              >
+                {ttsState === 'playing'
+                  ? <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                  : <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                }
+              </button>
+              <button className={styles.listenStopBtn} onClick={ttsStop} aria-label="Stop listening">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Dev-only engagement metrics overlay */}
