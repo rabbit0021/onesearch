@@ -1323,14 +1323,13 @@ def most_liked_all_time_feed():
 
 @app.route("/api/chat/<int:post_id>", methods=["POST"])
 def chat_with_article(post_id):
-    import llm
-
     data = request.get_json(silent=True) or {}
     question = (data.get("question") or "").strip()
     if not question:
         return jsonify({"error": "question required"}), 400
 
     try:
+        import llm
         answer = llm.ask_article(post_id, question)
         return jsonify({"answer": answer})
     except llm.PostNotFoundError:
