@@ -13,7 +13,6 @@ _SYSTEM_PROMPT = (
     "If the answer is not in the article, say so honestly."
 )
 
-# Cache: post_id -> { "text": str, "expires_at": float }
 _article_cache = {}
 _CACHE_TTL = 3600       # 1 hour
 _MAX_ARTICLE_CHARS = 20_000  # ~5k tokens — stays within free tier limits
