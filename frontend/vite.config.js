@@ -26,6 +26,7 @@ export default defineConfig({
       '^/individuals(?!/)': { target: FLASK },
       '/interested': FLASK,
       '/api/tts': FLASK,
+      '/api/chat': FLASK,
       '/feedback': FLASK,
       '/verify-email': FLASK,
       '/static': FLASK,

@@ -9,7 +9,10 @@ export async function askArticle(postId, question) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ question }),
   })
-  if (!res.ok) throw new Error('Chat request failed')
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}))
+    throw new Error(body.error || 'Chat request failed')
+  }
   return res.json()  // { answer: string }
 }
 

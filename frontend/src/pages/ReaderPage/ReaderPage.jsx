@@ -223,7 +223,7 @@ export default function ReaderPage() {
   const { state: ttsState, play: ttsPlay, pause: ttsPause, resume: ttsResume, stop: ttsStop, seekBy: ttsSeekBy, adjustVolume: ttsAdjustVolume, adjustRate: ttsAdjustRate } =
     useArticleReader({ contentRef, scrollContainerRef: readerBodyRef, highlightClass: styles.ttsHighlight, postId: post?.id })
 
-  const { lastCommand, listening } = useVoiceCommands({ ttsState })
+  const { lastCommand, listening } = useVoiceCommands({ ttsState, onQuestion: sendChatMessage })
 
   // ── Engagement tracking ──
   const [timeSpent, setTimeSpent] = useState(0)
@@ -434,17 +434,18 @@ export default function ReaderPage() {
     chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [chatMsgs, chatLoading])
 
-  async function sendChatMessage() {
-    const q = chatInput.trim()
+  async function sendChatMessage(voiceText) {
+    const q = (voiceText ?? chatInput).trim()
     if (!q || chatLoading) return
     setChatInput('')
+    setChatOpen(true)
     setChatMsgs(m => [...m, { role: 'user', text: q }])
     setChatLoading(true)
     try {
       const { answer } = await askArticle(post.id, q)
       setChatMsgs(m => [...m, { role: 'bot', text: answer }])
-    } catch {
-      setChatMsgs(m => [...m, { role: 'bot', text: 'Something went wrong. Please try again.' }])
+    } catch (err) {
+      setChatMsgs(m => [...m, { role: 'bot', text: err.message || 'Something went wrong. Please try again.' }])
     } finally {
       setChatLoading(false)
     }

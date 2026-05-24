@@ -1323,17 +1323,23 @@ def most_liked_all_time_feed():
 
 @app.route("/api/chat/<int:post_id>", methods=["POST"])
 def chat_with_article(post_id):
+    import llm
+
     data = request.get_json(silent=True) or {}
     question = (data.get("question") or "").strip()
     if not question:
         return jsonify({"error": "question required"}), 400
 
-    # TODO: replace with real LLM call
-    answer = (
-        f'This is a mock answer to: "{question}"\n\n'
-        "Real answers coming soon — Gemini integration in progress."
-    )
-    return jsonify({"answer": answer})
+    try:
+        answer = llm.ask_article(post_id, question)
+        return jsonify({"answer": answer})
+    except llm.PostNotFoundError:
+        return jsonify({"error": "Post not found"}), 404
+    except llm.ContentExtractionError as e:
+        return jsonify({"error": str(e)}), 502
+    except Exception as e:
+        app.logger.error("LLM error for post %s: %s", post_id, e)
+        return jsonify({"error": "Failed to get answer"}), 500
 
 
 if __name__ == "__main__":

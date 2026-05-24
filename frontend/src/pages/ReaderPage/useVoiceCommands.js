@@ -1,11 +1,10 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
-// DEBUG MODE: logs all speech to console, no commands executed
 
 export const voiceCommandsSupported =
   typeof window !== 'undefined' &&
   !!(window.SpeechRecognition || window.webkitSpeechRecognition)
 
-export function useVoiceCommands({ ttsState }) {
+export function useVoiceCommands({ ttsState, onQuestion }) {
   const [lastCommand]              = useState(null)
   const [listening, setListening]  = useState(false)
 
@@ -13,9 +12,15 @@ export function useVoiceCommands({ ttsState }) {
   const restartTimerRef = useRef(null)
   const shouldListenRef = useRef(false)
   const genRef          = useRef(0)  // incremented on every stop — stale onend callbacks check this
+  const onQuestionRef   = useRef(onQuestion)
+
+  useEffect(() => { onQuestionRef.current = onQuestion }, [onQuestion])
 
   const handleTranscript = useCallback((transcript) => {
-    console.log('[VoiceCmd] heard:', JSON.stringify(transcript.trim()))
+    const text = transcript.trim()
+    if (!text) return
+    console.log('[VoiceCmd] heard:', JSON.stringify(text))
+    onQuestionRef.current?.(text)
   }, [])
 
   function stopRecognition() {
