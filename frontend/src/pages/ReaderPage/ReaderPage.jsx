@@ -215,7 +215,7 @@ export default function ReaderPage() {
 
   // ── Text-to-speech ──
   const { state: ttsState, play: ttsPlay, pause: ttsPause, resume: ttsResume, stop: ttsStop } =
-    useArticleReader({ contentRef, scrollContainerRef: readerBodyRef, highlightClass: styles.ttsHighlight })
+    useArticleReader({ contentRef, scrollContainerRef: readerBodyRef, highlightClass: styles.ttsHighlight, postId: post?.id })
 
   // ── Engagement tracking ──
   const [timeSpent, setTimeSpent] = useState(0)
@@ -652,27 +652,41 @@ export default function ReaderPage() {
       {ttsState !== 'idle' && (
         <div className={styles.listenOverlay}>
           <div className={styles.listenCard}>
-            <div className={`${styles.listenWave} ${ttsState === 'playing' ? styles.listenWavePlaying : ''}`}>
-              <span/><span/><span/><span/><span/>
-            </div>
-            <p className={styles.listenTitle} style={{ fontFamily: activeFontCss }}>{post.title}</p>
-            <div className={styles.listenBtns}>
-              <button
-                className={styles.listenPauseBtn}
-                onClick={ttsState === 'playing' ? ttsPause : ttsResume}
-                aria-label={ttsState === 'playing' ? 'Pause' : 'Resume'}
-              >
-                {ttsState === 'playing'
-                  ? <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-                  : <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                }
-              </button>
-              <button className={styles.listenStopBtn} onClick={ttsStop} aria-label="Stop listening">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-              </button>
-            </div>
+            {ttsState === 'loading' ? (
+              <>
+                <div className={styles.listenSpinner} />
+                <p className={styles.listenTitle} style={{ fontFamily: activeFontCss }}>Preparing audio…</p>
+                <button className={styles.listenStopBtn} onClick={ttsStop} aria-label="Cancel">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
+                </button>
+              </>
+            ) : (
+              <>
+                <div className={`${styles.listenWave} ${ttsState === 'playing' ? styles.listenWavePlaying : ''}`}>
+                  <span/><span/><span/><span/><span/>
+                </div>
+                <p className={styles.listenTitle} style={{ fontFamily: activeFontCss }}>{post.title}</p>
+                <div className={styles.listenBtns}>
+                  <button
+                    className={styles.listenPauseBtn}
+                    onClick={ttsState === 'playing' ? ttsPause : ttsResume}
+                    aria-label={ttsState === 'playing' ? 'Pause' : 'Resume'}
+                  >
+                    {ttsState === 'playing'
+                      ? <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                      : <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                    }
+                  </button>
+                  <button className={styles.listenStopBtn} onClick={ttsStop} aria-label="Stop listening">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

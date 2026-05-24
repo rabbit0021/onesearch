@@ -1,5 +1,6 @@
 # db/sqlite.py
 import sqlite3
+import json
 from threading import Lock
 from logger_config import get_logger
 
@@ -199,6 +200,15 @@ class SQLiteDatabase:
             started_at DATETIME NOT NULL,
             finished_at DATETIME DEFAULT NULL
         )
+        """)
+
+        c.execute("""
+            CREATE TABLE IF NOT EXISTS tts_cache (
+                post_id    INTEGER PRIMARY KEY,
+                audio_file TEXT    NOT NULL,
+                timings    TEXT    NOT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
         """)
 
         logger.info(f"SQLite database initialized Successfully")
@@ -758,6 +768,24 @@ class SQLiteDatabase:
                 user_email     = COALESCE(excluded.user_email, user_email),
                 last_read_at   = CURRENT_TIMESTAMP
         """, (post_id, device_id, user_email, time_spent, max_depth, int(opened_original)))
+        conn.commit()
+
+    def get_tts_cache(self, conn, post_id):
+        """Returns (audio_file, timings_list) or (None, None) if not cached."""
+        c = conn.cursor()
+        c.execute("SELECT audio_file, timings FROM tts_cache WHERE post_id = ?", (post_id,))
+        row = c.fetchone()
+        if row:
+            return row["audio_file"], json.loads(row["timings"])
+        return None, None
+
+    def save_tts_cache(self, conn, post_id, audio_file, timings):
+        """Insert or replace a TTS cache entry."""
+        c = conn.cursor()
+        c.execute(
+            "INSERT OR REPLACE INTO tts_cache (post_id, audio_file, timings) VALUES (?, ?, ?)",
+            (post_id, audio_file, json.dumps(timings)),
+        )
         conn.commit()
 
     @classmethod

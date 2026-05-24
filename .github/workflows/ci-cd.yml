@@ -39,7 +39,7 @@ jobs:
           username: root
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
-          envs: FLASK_ENV,DB_TYPE,DB_PATH,MODEL_PATH,POSTS_SECRET_KEY,SMTP_USERNAME,SMTP_PASSWORD,SECRET_KEY,JIRA_CLIENT_ID,JIRA_CLIENT_SECRET,JIRA_REDIRECT_URI,FRONTEND_URL
+          envs: FLASK_ENV,DB_TYPE,DB_PATH,MODEL_PATH,POSTS_SECRET_KEY,SMTP_USERNAME,SMTP_PASSWORD,SECRET_KEY,JIRA_CLIENT_ID,JIRA_CLIENT_SECRET,JIRA_REDIRECT_URI,FRONTEND_URL,GOOGLE_TTS_CREDENTIALS_JSON
           script: |
             cd /app
             git pull origin main
@@ -58,7 +58,12 @@ jobs:
             JIRA_CLIENT_SECRET=$JIRA_CLIENT_SECRET
             JIRA_REDIRECT_URI=$JIRA_REDIRECT_URI
             FRONTEND_URL=$FRONTEND_URL
+            GOOGLE_APPLICATION_CREDENTIALS=data/onesearch-google-tts.json
             EOF
+
+            # Write Google TTS credentials JSON (stored as a GitHub secret)
+            mkdir -p data
+            echo "$GOOGLE_TTS_CREDENTIALS_JSON" > data/onesearch-google-tts.json
 
             docker compose up -d --build
         env:
@@ -74,3 +79,4 @@ jobs:
           JIRA_CLIENT_SECRET: ${{ secrets.JIRA_CLIENT_SECRET }}
           JIRA_REDIRECT_URI: ${{ vars.JIRA_REDIRECT_URI }}
           FRONTEND_URL: ${{ vars.FRONTEND_URL }}
+          GOOGLE_TTS_CREDENTIALS_JSON: ${{ secrets.GOOGLE_TTS_CREDENTIALS_JSON }}

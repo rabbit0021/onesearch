@@ -25,6 +25,7 @@ export default defineConfig({
       '/admin/reading':FLASK,
       '^/individuals(?!/)': { target: FLASK },
       '/interested': FLASK,
+      '/api/tts': FLASK,
       '/feedback': FLASK,
       '/verify-email': FLASK,
       '/static': FLASK,

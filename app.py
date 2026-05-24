@@ -1074,6 +1074,74 @@ def get_post_content(post_id):
     return jsonify({"content": content, "url": url})
 
 
+@app.route("/api/tts/<int:post_id>", methods=["POST"])
+def generate_post_tts(post_id):
+    """Generate (or return cached) Google TTS audio for a post."""
+    from tts_generator import generate_tts
+
+    conn = app.db.get_connection()
+    try:
+        audio_file, timings = app.db.get_tts_cache(conn, post_id)
+        if audio_file and os.path.exists(audio_file) and timings:
+            return jsonify({
+                "audioUrl": f"/api/tts/audio/post_{post_id}.mp3",
+                "timings":  timings,
+            })
+        url, publisher_name = app.db.get_post_info(conn, post_id)
+        if not url:
+            return jsonify({"error": "Post not found"}), 404
+    finally:
+        conn.close()
+
+    # Fetch article content (same logic as /posts/<id>/content)
+    from handlers.factory import ScraperFactory
+
+    scraper = ScraperFactory.get_scraper(publisher_name) if publisher_name else None
+    content = None
+    if scraper:
+        try:
+            content = scraper.extract_article(url)
+        except Exception:
+            content = None
+    if not content:
+        try:
+            content = _extract_article_content(url)
+        except Exception as e:
+            return jsonify({"error": f"Could not fetch article: {e}"}), 502
+    if not content:
+        return jsonify({"error": "Could not extract article content"}), 422
+
+    audio_dir      = os.path.join("data", "tts")
+    os.makedirs(audio_dir, exist_ok=True)
+    audio_filename = f"post_{post_id}.mp3"
+    audio_path     = os.path.join(audio_dir, audio_filename)
+
+    try:
+        from tts_generator import html_to_ssml
+        _ssml, _words = html_to_ssml(content)
+        app.logger.info("TTS SSML preview (first 600 chars): %s", _ssml[:600])
+        timings = generate_tts(content, audio_path)
+    except Exception as e:
+        app.logger.error("TTS generation failed for post %s: %s", post_id, e)
+        return jsonify({"error": "TTS generation failed"}), 500
+
+    conn = app.db.get_connection()
+    try:
+        app.db.save_tts_cache(conn, post_id, audio_path, timings)
+    finally:
+        conn.close()
+
+    return jsonify({"audioUrl": f"/api/tts/audio/{audio_filename}", "timings": timings})
+
+
+@app.route("/api/tts/audio/<filename>")
+def serve_tts_audio(filename):
+    """Serve cached TTS audio files."""
+    if not re.match(r"^post_\d+\.mp3$", filename):
+        return "", 404
+    return send_from_directory(os.path.join("data", "tts"), filename, mimetype="audio/mpeg")
+
+
 @app.route("/posts/<int:post_id>/view", methods=["POST"])
 def record_view(post_id):
     data = request.get_json(silent=True) or {}

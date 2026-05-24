@@ -7,6 +7,7 @@ charset-normalizer==3.4.2
 click==8.2.1
 distro==1.9.0
 feedparser==6.0.11
+google-cloud-texttospeech==2.36.0
 filelock==3.19.1
 Flask==3.0.3
 python-dotenv==1.2.2

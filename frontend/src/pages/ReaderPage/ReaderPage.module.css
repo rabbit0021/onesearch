@@ -1145,6 +1145,7 @@
   text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   max-width: 100%;
   line-height: 1.45;
@@ -1187,6 +1188,19 @@
   border: none;
 }
 .listenStopBtn:hover { color: var(--text-base); background-color: var(--bg-wizard-option); }
+
+@keyframes listenSpin {
+  to { transform: rotate(360deg); }
+}
+
+.listenSpinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--filter-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: listenSpin 0.8s linear infinite;
+}
 
 /* ── Mobile ── */
 @media (max-width: 600px) {
