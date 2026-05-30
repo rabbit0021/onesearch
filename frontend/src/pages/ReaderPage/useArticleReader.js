@@ -222,6 +222,149 @@ export function useArticleReader({ contentRef, scrollContainerRef, highlightClas
     return voices.find(v => v.lang?.startsWith('en')) || voices[0] || null
   }
 
+  // ── Google TTS streaming path ─────────────────────────────────────────────
+
+  async function playGoogleTtsStream() {
+    if (!('MediaSource' in window) || !MediaSource.isTypeSupported('audio/mpeg')) {
+      return playGoogleTts()  // fallback to non-streaming
+    }
+
+    setSt('loading')
+    const controller = new AbortController()
+    ttsAbortRef.current = controller
+
+    const ms       = new MediaSource()
+    const audioUrl = URL.createObjectURL(ms)
+    const audio    = new Audio(audioUrl)
+    audioRef.current = audio
+
+    let sourceBuffer  = null
+    const pendingChunks = []   // ArrayBuffer queue waiting to be appended
+    let isAppending   = false
+    let streamDone    = false
+    let firstChunk    = true
+
+    function appendNext() {
+      if (isAppending || !sourceBuffer || sourceBuffer.updating || !pendingChunks.length) return
+      isAppending = true
+      sourceBuffer.appendBuffer(pendingChunks.shift())
+    }
+
+    ms.addEventListener('sourceopen', () => {
+      sourceBuffer = ms.addSourceBuffer('audio/mpeg')
+      sourceBuffer.addEventListener('updateend', () => {
+        isAppending = false
+        if (pendingChunks.length) {
+          appendNext()
+        } else if (streamDone) {
+          try { ms.endOfStream() } catch (_) {}
+        }
+      })
+      appendNext()
+    })
+
+    const nodes  = buildTextNodeMap()
+    textNodesRef.current = nodes
+    const fullText = contentRef.current?.textContent || ''
+    fullTextRef.current = fullText
+    wordTimingsRef.current = []
+    wordCharMapRef.current = {}
+
+    // Start timing interval immediately — timings accumulate as chunks arrive
+    let lastWordIdx = -1
+    timingIntervalRef.current = setInterval(() => {
+      const ct   = audio.currentTime
+      const tArr = wordTimingsRef.current
+      if (!tArr.length) return
+      let lo = 0, hi = tArr.length - 1, found = -1
+      while (lo <= hi) {
+        const mid = (lo + hi) >> 1
+        if (tArr[mid].time <= ct) { found = mid; lo = mid + 1 } else hi = mid - 1
+      }
+      if (found < 0 || tArr[found].wordIndex === lastWordIdx) return
+      lastWordIdx = tArr[found].wordIndex
+      const charPos = wordCharMapRef.current[lastWordIdx] ?? 0
+      highlightAndScrollToChar(charPos, tArr[found].word?.length || 1)
+    }, 80)
+
+    const cleanup = () => {
+      clearTimingInterval(); releaseWakeLock(); clearHighlight()
+      try { URL.revokeObjectURL(audioUrl) } catch (_) {}
+      audioRef.current = null
+    }
+    audio.addEventListener('ended', () => { cleanup(); setSt('idle') })
+    audio.addEventListener('error', () => { cleanup(); setSt('idle') })
+
+    try {
+      const res = await fetch(`/api/tts/${postId}/stream`, {
+        method: 'POST',
+        signal: controller.signal,
+      })
+      if (!res.ok) throw new Error(`TTS stream API error ${res.status}`)
+
+      const reader  = res.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer    = ''
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        if (controller.signal.aborted) break
+
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+        buffer = lines.pop()
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue
+          const data = line.slice(6).trim()
+          if (data === '[DONE]') { streamDone = true; break }
+
+          const parsed = JSON.parse(data)
+          if (parsed.error) throw new Error(parsed.error)
+
+          // Decode base64 → ArrayBuffer
+          const binary = atob(parsed.audio)
+          const bytes  = new Uint8Array(binary.length)
+          for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
+
+          // Accumulate timings
+          const newTimings = [...wordTimingsRef.current, ...parsed.timings]
+          wordTimingsRef.current = newTimings
+          wordCharMapRef.current = buildWordCharMap(fullText, newTimings)
+
+          // Queue audio chunk for MediaSource
+          pendingChunks.push(bytes.buffer)
+          appendNext()
+
+          // Start playback on first chunk
+          if (firstChunk) {
+            firstChunk = false
+            if (scrollContainerRef.current) scrollContainerRef.current.scrollTop = 0
+            audio.play().catch(() => {})
+            acquireWakeLock()
+            setSt('playing')
+          }
+        }
+      }
+
+      // Signal end of stream
+      streamDone = true
+      if (!pendingChunks.length && sourceBuffer && !sourceBuffer.updating) {
+        try { ms.endOfStream() } catch (_) {}
+      }
+
+    } catch (err) {
+      if (err.name === 'AbortError') { cleanup(); setSt('idle'); return }
+      console.warn('[TTS] Streaming failed, falling back to non-streaming:', err)
+      cleanup()
+      wordTimingsRef.current = []
+      wordCharMapRef.current = {}
+      setSt('idle')
+      playGoogleTts()
+    }
+  }
+
   // ── Google TTS path ───────────────────────────────────────────────────────
 
   async function playGoogleTts() {
@@ -346,7 +489,7 @@ export function useArticleReader({ contentRef, scrollContainerRef, highlightClas
   function play() {
     if (!contentRef.current) return
     if (postId) {
-      playGoogleTts()
+      playGoogleTtsStream()
     } else {
       playWebSpeech()
     }

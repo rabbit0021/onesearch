@@ -1387,7 +1387,7 @@
   border-bottom-right-radius: 3px;
 }
 .chatMsgBot .chatBubble {
-  background: var(--bg-hover);
+  background: var(--bg-surface);
   color: var(--text-base);
   border-bottom-left-radius: 3px;
 }

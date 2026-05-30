@@ -179,6 +179,48 @@ def generate_tts(html: str, output_path: str) -> list[dict]:
     return all_timings
 
 
+def generate_tts_stream(html: str):
+    """
+    Streaming version of generate_tts.
+    Yields (audio_bytes, chunk_timings, time_offset) for each SSML chunk
+    as soon as the TTS API responds, rather than waiting for all chunks.
+    """
+    client = texttospeech.TextToSpeechClient()
+    voice = texttospeech.VoiceSelectionParams(language_code=LANGUAGE_CODE, name=VOICE_NAME)
+    audio_config = texttospeech.AudioConfig(
+        audio_encoding=texttospeech.AudioEncoding.MP3,
+        speaking_rate=SPEAKING_RATE,
+    )
+
+    ssml, words = html_to_ssml(html)
+    time_offset = 0.0
+
+    if len(ssml.encode("utf-8")) <= MAX_SSML_BYTES:
+        audio_bytes, timepoints = _call_tts(ssml, client, voice, audio_config)
+        yield audio_bytes, _parse_timings(timepoints, words, offset=0.0), 0.0
+        return
+
+    inner = ssml[len("<speak>"):-len("</speak>")]
+    segments = re.split(r'(?<=<break time="300ms"/>)|(?<=<break time="400ms"/>)', inner)
+
+    chunk_ssmls = []
+    current = ""
+    for seg in segments:
+        candidate = current + seg
+        if len(("<speak>" + candidate + "</speak>").encode("utf-8")) > MAX_SSML_BYTES and current:
+            chunk_ssmls.append("<speak>" + current + "</speak>")
+            current = seg
+        else:
+            current = candidate
+    if current:
+        chunk_ssmls.append("<speak>" + current + "</speak>")
+
+    for chunk_ssml in chunk_ssmls:
+        audio_bytes, timepoints = _call_tts(chunk_ssml, client, voice, audio_config)
+        yield audio_bytes, _parse_timings(timepoints, words, offset=time_offset), time_offset
+        time_offset += len(audio_bytes) / 16_000
+
+
 def _parse_timings(timepoints, words: list[str], offset: float) -> list[dict]:
     timings = []
     for tp in timepoints:

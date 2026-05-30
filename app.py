@@ -1134,6 +1134,113 @@ def generate_post_tts(post_id):
     return jsonify({"audioUrl": f"/api/tts/audio/{audio_filename}", "timings": timings})
 
 
+@app.route("/api/tts/<int:post_id>/stream", methods=["POST"])
+def stream_post_tts(post_id):
+    """Stream TTS audio chunks via SSE as each chunk is synthesized."""
+    import base64
+    from tts_generator import generate_tts_stream
+
+    # ── Cache hit: stream the pre-built file as a single chunk ──────────────
+    conn = app.db.get_connection()
+    try:
+        audio_file, timings = app.db.get_tts_cache(conn, post_id)
+        if audio_file and os.path.exists(audio_file) and timings:
+            def serve_cached():
+                with open(audio_file, "rb") as f:
+                    audio_bytes = f.read()
+                payload = json.dumps({
+                    "audio":   base64.b64encode(audio_bytes).decode(),
+                    "timings": timings,
+                    "offset":  0.0,
+                })
+                yield f"data: {payload}\n\n"
+                yield "data: [DONE]\n\n"
+            return Response(
+                stream_with_context(serve_cached()),
+                mimetype="text/event-stream",
+                headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+            )
+    finally:
+        conn.close()
+
+    # ── Fetch post metadata ──────────────────────────────────────────────────
+    conn = app.db.get_connection()
+    try:
+        url, publisher_name = app.db.get_post_info(conn, post_id)
+    finally:
+        conn.close()
+
+    if not url:
+        return jsonify({"error": "Post not found"}), 404
+
+    # ── Extract article content ──────────────────────────────────────────────
+    from handlers.factory import ScraperFactory
+    content = None
+    scraper = ScraperFactory.get_scraper(publisher_name) if publisher_name else None
+    if scraper:
+        try:
+            content = scraper.extract_article(url)
+        except Exception:
+            content = None
+    if not content:
+        try:
+            content = _extract_article_content(url)
+        except Exception:
+            pass
+
+    if not content:
+        return jsonify({"error": "Could not extract article content"}), 422
+
+    audio_dir  = os.path.join("data", "tts")
+    os.makedirs(audio_dir, exist_ok=True)
+    audio_path = os.path.join(audio_dir, f"post_{post_id}.mp3")
+
+    # ── Stream chunks, write to disk incrementally ───────────────────────────
+    def generate():
+        all_timings  = []
+        completed    = False
+        tmp_path     = audio_path + ".tmp"
+        try:
+            with open(tmp_path, "wb") as f:
+                for audio_bytes, chunk_timings, time_offset in generate_tts_stream(content):
+                    f.write(audio_bytes)          # persist chunk immediately
+                    f.flush()
+                    all_timings += chunk_timings
+                    payload = json.dumps({
+                        "audio":   base64.b64encode(audio_bytes).decode(),
+                        "timings": chunk_timings,
+                        "offset":  time_offset,
+                    })
+                    yield f"data: {payload}\n\n"
+
+            # All chunks done — promote tmp file and save cache entry
+            os.replace(tmp_path, audio_path)
+            completed = True
+            c = app.db.get_connection()
+            try:
+                app.db.save_tts_cache(c, post_id, audio_path, all_timings)
+            finally:
+                c.close()
+
+        except Exception as e:
+            app.logger.error("TTS stream error for post %s: %s", post_id, e)
+            yield f"data: {json.dumps({'error': str(e)})}\n\n"
+        finally:
+            if not completed and os.path.exists(tmp_path):
+                try:
+                    os.remove(tmp_path)   # clean up partial file on cancellation
+                except OSError:
+                    pass
+
+        yield "data: [DONE]\n\n"
+
+    return Response(
+        stream_with_context(generate()),
+        mimetype="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
+
+
 @app.route("/api/tts/audio/<filename>")
 def serve_tts_audio(filename):
     """Serve cached TTS audio files."""
