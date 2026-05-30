@@ -533,7 +533,10 @@ export default function ReaderPage() {
     setChatMsgs(m => [...m, { role: 'user', text: q }, { role: 'bot', text: '' }])
     setChatLoading(true)
     try {
-      await askArticleStream(post.id, q, (chunk) => {
+      // Snapshot history before adding the new user+bot placeholder pair
+      // Only pass completed turns (exclude the empty bot placeholder just added)
+      const history = chatMsgs.map(m => ({ role: m.role === 'bot' ? 'model' : 'user', text: m.text }))
+      await askArticleStream(post.id, q, history, (chunk) => {
         setChatMsgs(m => {
           const next = [...m]
           next[next.length - 1] = { role: 'bot', text: next[next.length - 1].text + chunk }

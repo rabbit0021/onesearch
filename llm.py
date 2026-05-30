@@ -96,12 +96,29 @@ def ask_article(post_id, question):
     return response.text.strip()
 
 
-def ask_article_stream(post_id, question):
-    """Generator that yields text chunks for streaming responses."""
+def ask_article_stream(post_id, question, history=None):
+    """
+    Generator that yields text chunks for streaming responses.
+    history: list of {"role": "user"|"model", "text": str} dicts (oldest first).
+    """
     context = _get_article_context(post_id)
+
+    # First turn injects the article context into the user message
+    article_prefix = f"Article for reference:\n{context}\n\n"
+
+    contents = []
+    for i, turn in enumerate(history or []):
+        role = "user" if turn["role"] == "user" else "model"
+        text = (article_prefix + turn["text"]) if (i == 0 and role == "user") else turn["text"]
+        contents.append(types.Content(role=role, parts=[types.Part(text=text)]))
+
+    # Current question — prepend article context if there's no prior history
+    current_text = (article_prefix + question) if not contents else question
+    contents.append(types.Content(role="user", parts=[types.Part(text=current_text)]))
+
     for chunk in _client.models.generate_content_stream(
         model=_MODEL,
-        contents=f"Article:\n{context}\n\nQuestion: {question}",
+        contents=contents,
         config=types.GenerateContentConfig(
             system_instruction=_SYSTEM_PROMPT,
             temperature=0.2,

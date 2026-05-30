@@ -1432,6 +1432,7 @@ def most_liked_all_time_feed():
 def chat_with_article(post_id):
     data = request.get_json(silent=True) or {}
     question = (data.get("question") or "").strip()
+    history  = data.get("history") or []
     if not question:
         return jsonify({"error": "question required"}), 400
 
@@ -1440,7 +1441,7 @@ def chat_with_article(post_id):
 
         def generate():
             try:
-                for chunk in llm.ask_article_stream(post_id, question):
+                for chunk in llm.ask_article_stream(post_id, question, history=history):
                     yield f"data: {json.dumps({'chunk': chunk})}\n\n"
             except llm.PostNotFoundError:
                 yield f"data: {json.dumps({'error': 'Post not found'})}\n\n"

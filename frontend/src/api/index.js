@@ -3,11 +3,11 @@
  * To change an endpoint or add auth headers globally, edit this file.
  */
 
-export async function askArticleStream(postId, question, onChunk, signal) {
+export async function askArticleStream(postId, question, history, onChunk, signal) {
   const res = await fetch(`/api/chat/${postId}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ question }),
+    body: JSON.stringify({ question, history }),
     signal,
   })
   if (!res.ok) {
