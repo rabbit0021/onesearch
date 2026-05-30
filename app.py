@@ -1330,12 +1330,25 @@ def chat_with_article(post_id):
 
     try:
         import llm
-        answer = llm.ask_article(post_id, question)
-        return jsonify({"answer": answer})
-    except llm.PostNotFoundError:
-        return jsonify({"error": "Post not found"}), 404
-    except llm.ContentExtractionError as e:
-        return jsonify({"error": str(e)}), 502
+
+        def generate():
+            try:
+                for chunk in llm.ask_article_stream(post_id, question):
+                    yield f"data: {json.dumps({'chunk': chunk})}\n\n"
+            except llm.PostNotFoundError:
+                yield f"data: {json.dumps({'error': 'Post not found'})}\n\n"
+            except llm.ContentExtractionError as e:
+                yield f"data: {json.dumps({'error': str(e)})}\n\n"
+            except Exception as e:
+                app.logger.error("LLM stream error for post %s: %s", post_id, e)
+                yield f"data: {json.dumps({'error': 'Failed to get answer'})}\n\n"
+            yield "data: [DONE]\n\n"
+
+        return Response(
+            stream_with_context(generate()),
+            mimetype="text/event-stream",
+            headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+        )
     except Exception as e:
         app.logger.error("LLM error for post %s: %s", post_id, e)
         return jsonify({"error": "Failed to get answer"}), 500

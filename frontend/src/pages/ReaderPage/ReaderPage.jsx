@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { timeAgo, faviconUrl, fireToStars } from '../../components/feed/BlogCard/BlogCard'
-import { getPostContent, sendReadEvent, getReadEvent, getOrCreateDeviceId, askArticle } from '../../api'
+import { getPostContent, sendReadEvent, getReadEvent, getOrCreateDeviceId, askArticleStream } from '../../api'
 import { useTheme } from '../../context/ThemeContext'
 import { useToast } from '../../context/ToastContext'
 import ThemeSwitcher from '../../components/layout/ThemeSwitcher/ThemeSwitcher'
@@ -184,6 +184,82 @@ function DevOverlay({ timeSpent, maxDepth, isActiveRef, openedOriginal }) {
 }
 
 
+// ── Inline markdown renderer ──────────────────────────────────────────────────
+function inlineMarkdown(text, keyPrefix = '') {
+  const tokens = []
+  let remaining = text
+  let k = 0
+  while (remaining.length) {
+    const code = remaining.match(/^`([^`]+)`/)
+    if (code) { tokens.push(<code key={keyPrefix + k++}>{code[1]}</code>); remaining = remaining.slice(code[0].length); continue }
+    const bold = remaining.match(/^\*\*(.+?)\*\*/)
+    if (bold) { tokens.push(<strong key={keyPrefix + k++}>{bold[1]}</strong>); remaining = remaining.slice(bold[0].length); continue }
+    const italic = remaining.match(/^\*(.+?)\*/)
+    if (italic) { tokens.push(<em key={keyPrefix + k++}>{italic[1]}</em>); remaining = remaining.slice(italic[0].length); continue }
+    const plain = remaining.match(/^[^`*]+/) || [remaining[0]]
+    tokens.push(plain[0]); remaining = remaining.slice(plain[0].length)
+  }
+  return tokens
+}
+
+function Markdown({ text }) {
+  const lines = text.split('\n')
+  const els = []
+  let i = 0
+  while (i < lines.length) {
+    const line = lines[i]
+    if (line.startsWith('```')) {
+      const codeLines = []; i++
+      while (i < lines.length && !lines[i].startsWith('```')) { codeLines.push(lines[i]); i++ }
+      els.push(<pre key={i}><code>{codeLines.join('\n')}</code></pre>); i++; continue
+    }
+    const hm = line.match(/^(#{1,3}) (.+)/)
+    if (hm) {
+      const Tag = `h${Math.min(hm[1].length + 2, 6)}`
+      els.push(<Tag key={i}>{inlineMarkdown(hm[2], String(i))}</Tag>); i++; continue
+    }
+    if (/^[-*] /.test(line)) {
+      const items = []
+      while (i < lines.length && /^[-*] /.test(lines[i])) { items.push(<li key={i}>{inlineMarkdown(lines[i].slice(2), String(i))}</li>); i++ }
+      els.push(<ul key={`ul${i}`}>{items}</ul>); continue
+    }
+    if (/^\d+\. /.test(line)) {
+      const items = []
+      while (i < lines.length && /^\d+\. /.test(lines[i])) { items.push(<li key={i}>{inlineMarkdown(lines[i].replace(/^\d+\. /, ''), String(i))}</li>); i++ }
+      els.push(<ol key={`ol${i}`}>{items}</ol>); continue
+    }
+    if (!line.trim()) { i++; continue }
+    els.push(<p key={i}>{inlineMarkdown(line, String(i))}</p>); i++
+  }
+  return <>{els}</>
+}
+
+// ── Slash command palette ─────────────────────────────────────────────────────
+const SLASH_COMMANDS = [
+  { cmd: '/summarize', label: 'Summarize',   hint: 'Get a summary of this article',       question: 'Summarize this article in a few clear paragraphs.' },
+  { cmd: '/explain',   label: 'Explain',     hint: 'Explain the key concepts',             question: 'Explain the key concepts in this article simply.' },
+  { cmd: '/keypoints', label: 'Key points',  hint: 'List the main takeaways',              question: 'What are the key points and takeaways of this article?' },
+]
+
+function SlashMenu({ filter, activeIdx, onSelect }) {
+  const filtered = SLASH_COMMANDS.filter(c => c.cmd.includes(filter.toLowerCase()))
+  if (!filtered.length) return null
+  return (
+    <div className={styles.slashMenu}>
+      {filtered.map((c, i) => (
+        <div
+          key={c.cmd}
+          className={`${styles.slashItem} ${i === activeIdx ? styles.slashItemActive : ''}`}
+          onMouseDown={e => { e.preventDefault(); onSelect(c) }}
+        >
+          <span className={styles.slashCmd}>{c.cmd}</span>
+          <span className={styles.slashHint}>{c.hint}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export default function ReaderPage() {
   const { state } = useLocation()
   const navigate = useNavigate()
@@ -211,7 +287,11 @@ export default function ReaderPage() {
   const [chatMsgs, setChatMsgs]   = useState([])
   const [chatInput, setChatInput] = useState('')
   const [chatLoading, setChatLoading] = useState(false)
+  const [slashActive, setSlashActive] = useState(false)
+  const [slashFilter, setSlashFilter] = useState('')
+  const [slashIdx, setSlashIdx]       = useState(0)
   const chatBottomRef = useRef(null)
+  const chatInputRef  = useRef(null)
 
   // Refs needed by the reader hook — declared here so they're available to both
   // the hook and the rest of the component (scroll tracking, content rendering).
@@ -434,18 +514,38 @@ export default function ReaderPage() {
     chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [chatMsgs, chatLoading])
 
+  // Auto-focus input when chat opens
+  useEffect(() => {
+    if (chatOpen) setTimeout(() => chatInputRef.current?.focus(), 250)
+  }, [chatOpen])
+
+  // Reset textarea height when input is cleared
+  useEffect(() => {
+    if (!chatInput && chatInputRef.current) chatInputRef.current.style.height = 'auto'
+  }, [chatInput])
+
   async function sendChatMessage(voiceText) {
     const q = (voiceText ?? chatInput).trim()
     if (!q || chatLoading) return
     setChatInput('')
+    setSlashActive(false)
     setChatOpen(true)
-    setChatMsgs(m => [...m, { role: 'user', text: q }])
+    setChatMsgs(m => [...m, { role: 'user', text: q }, { role: 'bot', text: '' }])
     setChatLoading(true)
     try {
-      const { answer } = await askArticle(post.id, q)
-      setChatMsgs(m => [...m, { role: 'bot', text: answer }])
+      await askArticleStream(post.id, q, (chunk) => {
+        setChatMsgs(m => {
+          const next = [...m]
+          next[next.length - 1] = { role: 'bot', text: next[next.length - 1].text + chunk }
+          return next
+        })
+      })
     } catch (err) {
-      setChatMsgs(m => [...m, { role: 'bot', text: err.message || 'Something went wrong. Please try again.' }])
+      setChatMsgs(m => {
+        const next = [...m]
+        next[next.length - 1] = { role: 'bot', text: err.message || 'Something went wrong. Please try again.' }
+        return next
+      })
     } finally {
       setChatLoading(false)
     }
@@ -500,7 +600,7 @@ export default function ReaderPage() {
           )}
         </div>
         <a href={post.url} target="_blank" rel="noopener noreferrer" className={styles.openBtn} onClick={() => { setOpenedOriginal(true); openedOriginalRef.current = true }}>
-          Open original ↗
+           ↗
         </a>
       </div>
 
@@ -637,7 +737,7 @@ export default function ReaderPage() {
             <div className={styles.errorBlock}>
               <p className={styles.errorMsg}>Could not extract article content.</p>
               <a href={post.url} target="_blank" rel="noopener noreferrer" className={styles.openBtn}>
-                Open original ↗
+                 ↗
               </a>
             </div>
           )}
@@ -766,12 +866,18 @@ export default function ReaderPage() {
           {chatMsgs.length === 0 && (
             <p className={styles.chatEmpty}>Ask anything about this article — key points, definitions, summaries…</p>
           )}
-          {chatMsgs.map((m, i) => (
-            <div key={i} className={`${styles.chatMsg} ${m.role === 'user' ? styles.chatMsgUser : styles.chatMsgBot}`}>
-              <div className={styles.chatBubble}>{m.text}</div>
-            </div>
-          ))}
-          {chatLoading && (
+          {chatMsgs.map((m, i) => {
+            const isStreamingPlaceholder = m.role === 'bot' && m.text === '' && chatLoading && i === chatMsgs.length - 1
+            if (isStreamingPlaceholder) return null
+            return (
+              <div key={i} className={`${styles.chatMsg} ${m.role === 'user' ? styles.chatMsgUser : styles.chatMsgBot}`}>
+                <div className={styles.chatBubble}>
+                  {m.role === 'bot' ? <Markdown text={m.text} /> : m.text}
+                </div>
+              </div>
+            )
+          })}
+          {chatLoading && chatMsgs[chatMsgs.length - 1]?.text === '' && (
             <div className={`${styles.chatMsg} ${styles.chatMsgBot}`}>
               <div className={styles.chatTyping}><span/><span/><span/></div>
             </div>
@@ -780,13 +886,45 @@ export default function ReaderPage() {
         </div>
 
         <div className={styles.chatInputRow}>
+          {slashActive && (
+            <SlashMenu
+              filter={slashFilter}
+              activeIdx={slashIdx}
+              onSelect={c => { setChatInput(''); setSlashActive(false); sendChatMessage(c.question) }}
+            />
+          )}
           <textarea
+            ref={chatInputRef}
             className={styles.chatInput}
             rows={1}
             placeholder="Ask a question…"
             value={chatInput}
-            onChange={e => setChatInput(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage() } }}
+            onInput={e => {
+              const el = e.target
+              el.style.height = 'auto'
+              el.style.height = Math.min(el.scrollHeight, 120) + 'px'
+            }}
+            onChange={e => {
+              const val = e.target.value
+              setChatInput(val)
+              if (val.startsWith('/')) {
+                setSlashFilter(val.slice(1))
+                setSlashActive(true)
+                setSlashIdx(0)
+              } else {
+                setSlashActive(false)
+              }
+            }}
+            onKeyDown={e => {
+              if (slashActive) {
+                const filtered = SLASH_COMMANDS.filter(c => c.cmd.includes(slashFilter.toLowerCase()))
+                if (e.key === 'ArrowDown') { e.preventDefault(); setSlashIdx(i => Math.min(i + 1, filtered.length - 1)); return }
+                if (e.key === 'ArrowUp')   { e.preventDefault(); setSlashIdx(i => Math.max(i - 1, 0)); return }
+                if (e.key === 'Escape')    { setSlashActive(false); return }
+                if (e.key === 'Enter')     { e.preventDefault(); if (filtered[slashIdx]) { setChatInput(''); setSlashActive(false); sendChatMessage(filtered[slashIdx].question) }; return }
+              }
+              if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage() }
+            }}
           />
           <button className={styles.chatSendBtn} onClick={sendChatMessage} disabled={!chatInput.trim() || chatLoading} aria-label="Send">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>

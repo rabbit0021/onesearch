@@ -41,6 +41,7 @@ export function useArticleReader({ contentRef, scrollContainerRef, highlightClas
   const keepAliveRef        = useRef(null)
   // Google TTS refs
   const audioRef            = useRef(null)
+  const ttsAbortRef         = useRef(null)
   const timingIntervalRef   = useRef(null)
   const wordTimingsRef      = useRef([])   // [{ wordIndex, word, time }]
   const wordCharMapRef      = useRef([])   // wordCharMap[wordIndex] = charStart in fullText
@@ -93,6 +94,7 @@ export function useArticleReader({ contentRef, scrollContainerRef, highlightClas
   // ── Unmount cleanup ────────────────────────────────────────────────────────
 
   useEffect(() => () => {
+    ttsAbortRef.current?.abort()
     window.speechSynthesis?.cancel()
     clearFallback(); clearKeepAlive(); clearTimingInterval(); releaseWakeLock()
     if (audioRef.current) { audioRef.current.pause(); audioRef.current = null }
@@ -224,14 +226,17 @@ export function useArticleReader({ contentRef, scrollContainerRef, highlightClas
 
   async function playGoogleTts() {
     setSt('loading')
+    const controller = new AbortController()
+    ttsAbortRef.current = controller
     let audioUrl, timings
     try {
-      const res  = await fetch(`/api/tts/${postId}`, { method: 'POST' })
+      const res  = await fetch(`/api/tts/${postId}`, { method: 'POST', signal: controller.signal })
       if (!res.ok) throw new Error(`TTS API error ${res.status}`)
       const data = await res.json()
       audioUrl   = data.audioUrl
       timings    = data.timings
     } catch (err) {
+      if (err.name === 'AbortError') { setSt('idle'); return }
       console.warn('Google TTS failed, falling back to Web Speech:', err)
       setSt('idle')
       playWebSpeech()
@@ -385,6 +390,8 @@ export function useArticleReader({ contentRef, scrollContainerRef, highlightClas
   }
 
   function stop() {
+    ttsAbortRef.current?.abort()
+    ttsAbortRef.current = null
     if (audioRef.current) {
       audioRef.current.pause()
       audioRef.current = null

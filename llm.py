@@ -8,9 +8,10 @@ _client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 _MODEL = "gemini-2.5-flash-lite"
 _SYSTEM_PROMPT = (
-    "You are a helpful assistant answering questions about a specific article. "
-    "Answer only based on the article content provided. Be concise and direct. "
-    "If the answer is not in the article, say so honestly."
+    "You are a helpful assistant. The user is reading a specific article, provided as context. "
+    "When a question relates to the article, prioritize the article content in your answer. "
+    "For general questions outside the article's scope, answer using your broader knowledge. "
+    "Be concise and direct."
 )
 
 _article_cache = {}
@@ -93,3 +94,19 @@ def ask_article(post_id, question):
         ),
     )
     return response.text.strip()
+
+
+def ask_article_stream(post_id, question):
+    """Generator that yields text chunks for streaming responses."""
+    context = _get_article_context(post_id)
+    for chunk in _client.models.generate_content_stream(
+        model=_MODEL,
+        contents=f"Article:\n{context}\n\nQuestion: {question}",
+        config=types.GenerateContentConfig(
+            system_instruction=_SYSTEM_PROMPT,
+            temperature=0.2,
+            max_output_tokens=1024,
+        ),
+    ):
+        if chunk.text:
+            yield chunk.text

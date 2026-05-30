@@ -79,13 +79,10 @@ export function useVoiceCommands({ ttsState, onQuestion }) {
     }
   }
 
-  // Start/stop based on TTS state
+  // Auto-listening disabled — stop recognition when TTS becomes active
   useEffect(() => {
-    const active = ttsState === 'idle' || ttsState === 'paused'
-    shouldListenRef.current = active
-    if (active) {
-      startRecognition()
-    } else {
+    shouldListenRef.current = false
+    if (ttsState !== 'idle' && ttsState !== 'paused') {
       stopRecognition()
     }
     return stopRecognition
