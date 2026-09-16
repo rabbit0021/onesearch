@@ -24,16 +24,24 @@ class GoogleScraper(BaseScraper):
         if not date_str:
             return None    
 
-        # Clean string: remove dot, normalize case
-        clean_str = date_str.replace('.', '').title()  # 'Aug 18, 2025' or 'July 24, 2025'    
+        # Clean string: remove dots, normalize case
+        # e.g. 'SEPT. 15, 2026' -> 'Sept 15, 2026'
+        clean_str = date_str.replace('.', '').title()
 
         # Try full month name first (%B), then abbreviated (%b)
-        for fmt in ("%B %d, %Y", "%b %d, %Y"):
-            try:
-                dt = datetime.strptime(clean_str, fmt)
-                return dt.replace(tzinfo=timezone.utc)
-            except ValueError:
-                continue    
+        # Also try truncating 4-char abbrevs like 'Sept' -> 'Sep'
+        parts = clean_str.split(' ', 1)
+        candidates = [clean_str]
+        if len(parts) == 2 and len(parts[0]) > 3:
+            candidates.append(parts[0][:3] + ' ' + parts[1])
+
+        for s in candidates:
+            for fmt in ("%B %d, %Y", "%b %d, %Y"):
+                try:
+                    dt = datetime.strptime(s, fmt)
+                    return dt.replace(tzinfo=timezone.utc)
+                except ValueError:
+                    continue
 
         logger.warning(f"Unable to parse date from Google blog: '{date_str}'")
         return None
