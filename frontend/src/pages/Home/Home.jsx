@@ -8,6 +8,7 @@ import NotificationIcon from '../../components/layout/NotificationIcon/Notificat
 import ThemeSwitcher from '../../components/layout/ThemeSwitcher/ThemeSwitcher'
 import JiraHeaderButton from '../../components/jira/JiraHeaderButton/JiraHeaderButton'
 import Sidebar from '../../components/sidebar/Sidebar/Sidebar'
+import LoginButton from '../../components/ui/LoginButton/LoginButton'
 
 import EmailInput from '../../components/subscription/EmailInput/EmailInput'
 import TopicSelector from '../../components/subscription/TopicSelector/TopicSelector'
@@ -174,6 +175,7 @@ export default function Home() {
       <div className={`${styles.topRight} ${atTop ? '' : styles.topRightHidden}`}>
         <div className={`${styles.topRightHideable} ${atTop ? '' : styles.topRightHidden}`}>
           <JiraHeaderButton />
+          <LoginButton />
           <ThemeSwitcher />
         </div>
         <NotificationIcon open={sidebarOpen} hasDot={hasDot} onClick={handleSidebarToggle} btnRef={toggleRef} />

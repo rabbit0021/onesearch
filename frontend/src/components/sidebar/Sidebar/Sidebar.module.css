@@ -28,6 +28,42 @@
   gap: 12px;
 }
 
+.profileBtn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--border-mid);
+  border-radius: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+  font-family: inherit;
+}
+
+.profileBtn:hover { background: var(--bg-surface); }
+
+.profileAvatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.profileLabel {
+  font-size: var(--fs-sm);
+  color: var(--text-strong);
+  font-weight: 500;
+}
+
 .actionBtn {
   margin-top: 6px;
   background: var(--color-primary);

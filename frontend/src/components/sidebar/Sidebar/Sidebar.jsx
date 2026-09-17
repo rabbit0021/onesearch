@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { postInterested } from '../../../api'
 import { useToast } from '../../../context/ToastContext'
+import { useAuth } from '../../../context/AuthContext'
 import FeatureCard from '../FeatureCard/FeatureCard'
 import ChatWidget from '../ChatWidget/ChatWidget'
 import styles from './Sidebar.module.css'
@@ -14,6 +16,8 @@ import styles from './Sidebar.module.css'
 export default function Sidebar({ open, onClose, toggleRef }) {
   const ref = useRef(null)
   const { showToast } = useToast()
+  const { email } = useAuth()
+  const navigate = useNavigate()
 
   // Close when clicking outside, but not when clicking the toggle button
   // (the toggle button handles its own open/close)
@@ -44,6 +48,12 @@ export default function Sidebar({ open, onClose, toggleRef }) {
   return (
     <aside ref={ref} className={`${styles.sidebar} ${open ? styles.open : ''}`}>
       <div className={styles.content}>
+        {email && (
+          <button className={styles.profileBtn} onClick={() => { navigate('/profile'); onClose() }}>
+            <span className={styles.profileAvatar}>{email[0].toUpperCase()}</span>
+            <span className={styles.profileLabel}>profile</span>
+          </button>
+        )}
         <FeatureCard title="Feature Poll 🚀">
           <p>Recommendations based on your reading patterns</p>
           <br />

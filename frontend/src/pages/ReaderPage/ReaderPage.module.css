@@ -236,19 +236,23 @@
   top: calc(100% + 4px);
   right: 0;
   z-index: 1;
-  background: var(--filter-bg);
-  border: 1px solid var(--filter-border);
+  background: var(--bg-reader-toolbar);
+  border: 1px solid rgba(255,255,255,0.2);
   border-radius: 6px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
   padding: 0.25rem 0.75rem 0.5rem;
   min-width: 180px;
   display: flex;
   flex-direction: column;
   overflow: visible;
+  color: var(--reader-toolbar-text);
 }
 
 .toolsPopover .fontSelectWrap { width: 100%; }
-.toolsPopover .fontSelectTrigger { width: 100%; }
+.toolsPopover .fontSelectTrigger { width: 100%; color: var(--reader-toolbar-text); }
+.toolsPopover .toolIconBtn,
+.toolsPopover .toolResetBtn,
+.toolsPopover .listenBtn { color: var(--reader-toolbar-text) !important; }
 
 .toolsPanelRow {
   display: flex;
@@ -268,7 +272,7 @@
 
 .toolsPanelDivider {
   height: 1px;
-  background: var(--filter-border);
+  background: rgba(255,255,255,0.2);
 }
 
 .toolGroup {
@@ -644,14 +648,20 @@
 
 /* Links */
 .articleContent a {
-  color: var(--color-primary);
+  color: inherit;
+  font-weight: normal;
   text-decoration: underline;
-  text-underline-offset: 3px;
+  text-decoration-style: wavy;
+  text-decoration-color: var(--text-muted);
+  text-underline-offset: 4px;
   text-decoration-thickness: 1px;
   word-break: break-word;
-  transition: opacity 0.12s;
+  transition: color 0.15s, text-decoration-color 0.15s;
 }
-.articleContent a:hover { opacity: 0.75; }
+.articleContent a:hover {
+  color: var(--reader-link);
+  text-decoration-color: var(--reader-link);
+}
 
 /* Inline emphasis */
 .articleContent strong, .articleContent b { font-weight: 600; }
@@ -1305,6 +1315,18 @@
   /* Hide desktop inline controls, show toolbar below nav */
   .topBarControls { display: none; }
   .readerToolbar { display: flex; }
+
+  .aiFloatBtn { bottom: 0.5rem; }
+
+  /* Force white text/icons on the primary-colored mobile toolbar */
+  .readerToolbar .toolIconBtn,
+  .readerToolbar .toolScale,
+  .readerToolbar .toolDotsBtn,
+  .readerToolbar .listenBtn,
+  .readerToolbar .toolResetBtn { color: var(--reader-toolbar-text) !important; }
+  .readerToolbar :global(.darkToggle),
+  .readerToolbar :global(.paletteToggle) { color: var(--reader-toolbar-text) !important; }
+  .readerToolbar .toolSep { background: rgba(255,255,255,0.35) !important; }
 
   /* Always hide secondary items on mobile — they live in the ⋮ menu */
   .toolOverflowItems { display: none; }

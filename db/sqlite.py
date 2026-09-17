@@ -315,8 +315,8 @@ class SQLiteDatabase:
 
     def get_subscriptions_by_email(self, conn, email):
         query = """
-            SELECT s.email, s.topic, s.publisher_id, s.joined_time, s.last_notified_at,
-                   p.id AS publisher_id, p.publisher_name, p.last_scraped_at, p.publisher_type
+            SELECT s.id, s.email, s.topic, s.publisher_id, s.joined_time, s.last_notified_at, s.frequency_in_days,
+                   p.id AS pub_id, p.publisher_name, p.last_scraped_at, p.publisher_type
             FROM (
                 SELECT *
                 FROM subscriptions
@@ -327,17 +327,18 @@ class SQLiteDatabase:
         cursor = conn.execute(query, (email,))
         return [
             {
+                "id": row["id"],
                 "email": row["email"],
                 "topic": row["topic"],
                 "publisher_id": row["publisher_id"],
                 "joined_time": row["joined_time"],
                 "last_notified_at": row["last_notified_at"],
+                "frequency_in_days": row["frequency_in_days"],
                 "publisher": {
-                    "id": row["publisher_id"],
+                    "id": row["pub_id"],
                     "publisher_name": row["publisher_name"],
                     "last_scraped_at": row['last_scraped_at'],
                     "publisher_type": row['publisher_type']
-
                 },
             }
             for row in cursor.fetchall()

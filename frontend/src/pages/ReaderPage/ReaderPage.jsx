@@ -594,7 +594,7 @@ export default function ReaderPage() {
 
       {/* Mobile toolbar — hidden when scrolled */}
       <div className={`${styles.readerToolbar} ${atTop ? '' : styles.readerToolbarHidden}`}>
-        <div className={styles.toolTheme}><ThemeSwitcher /></div>
+        <div className={styles.toolTheme}><ThemeSwitcher bare /></div>
         <div className={styles.toolSep} />
         {fontSizeControls}
         {/* These collapse into ⋮ on very narrow screens */}

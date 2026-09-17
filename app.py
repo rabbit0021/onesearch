@@ -207,23 +207,52 @@ def subscriptions_for_email():
     email = request.args.get("email", "").strip().lower()
     if not email:
         return jsonify([])
-    
+
     conn = app.db.get_connection()
-    
     subscriptions = app.db.get_subscriptions_by_email(conn, email)
-    
-    grouped = {}
-    for entry in subscriptions:
-        topic = entry["topic"]
-        publisher = entry["publisher"]["publisher_name"]
-        if topic not in grouped:
-            grouped[topic] = set()
-        grouped[topic].add(publisher)
-            
-    # Convert sets to lists for JSON serializability
-    result = {topic: list(publishers) for topic, publishers in grouped.items()}
-    conn.close()  
-    return jsonify(result)
+    conn.close()
+    return jsonify(subscriptions)
+
+
+@app.route("/subscriptions/<int:sub_id>/frequency", methods=["PATCH"])
+def update_subscription_frequency(sub_id):
+    email = request.args.get("email", "").strip().lower()
+    data = request.get_json(silent=True) or {}
+    frequency = data.get("frequency_in_days")
+    if not email or frequency is None:
+        return jsonify({"error": "email and frequency_in_days required"}), 400
+    try:
+        frequency = int(frequency)
+        if frequency < 0 or frequency > 30:
+            raise ValueError
+    except ValueError:
+        return jsonify({"error": "frequency_in_days must be 0-30"}), 400
+    conn = app.db.get_connection()
+    subs = app.db.get_subscriptions_by_email(conn, email)
+    if not any(s["id"] == sub_id for s in subs):
+        conn.close()
+        return jsonify({"error": "not found"}), 404
+    conn.execute("UPDATE subscriptions SET frequency_in_days = ? WHERE id = ?", (frequency, sub_id))
+    conn.commit()
+    conn.close()
+    return jsonify({"ok": True})
+
+
+@app.route("/subscriptions/<int:sub_id>", methods=["DELETE"])
+def delete_subscription(sub_id):
+    email = request.args.get("email", "").strip().lower()
+    if not email:
+        return jsonify({"error": "email required"}), 400
+    conn = app.db.get_connection()
+    # verify ownership before deleting
+    subs = app.db.get_subscriptions_by_email(conn, email)
+    if not any(s["id"] == sub_id for s in subs):
+        conn.close()
+        return jsonify({"error": "not found"}), 404
+    app.db.remove_subscription(conn, sub_id)
+    conn.commit()
+    conn.close()
+    return jsonify({"ok": True})
 
 @app.route("/interested", methods=["POST"])
 def interested():

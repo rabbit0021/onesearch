@@ -52,6 +52,22 @@ export async function getSubscriptionsForEmail(email) {
   return res.json()
 }
 
+export async function updateSubscriptionFrequency(id, email, frequency_in_days) {
+  const res = await fetch(`/subscriptions/${id}/frequency?email=${encodeURIComponent(email)}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ frequency_in_days }),
+  })
+  if (!res.ok) throw new Error('Failed to update frequency')
+  return res.json()
+}
+
+export async function deleteSubscription(id, email) {
+  const res = await fetch(`/subscriptions/${id}?email=${encodeURIComponent(email)}`, { method: 'DELETE' })
+  if (!res.ok) throw new Error('Failed to delete subscription')
+  return res.json()
+}
+
 /**
  * @param {{ email: string, techteams: string[], topic: string, frequency: number }} params
  */

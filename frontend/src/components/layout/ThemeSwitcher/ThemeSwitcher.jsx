@@ -14,7 +14,7 @@ export default function ThemeSwitcher({ bare = false }) {
         title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
         aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
         aria-pressed={darkMode}
-        style={bare ? { color: 'inherit' } : {}}
+        style={bare ? { color: 'var(--reader-toolbar-text, #fff)' } : {}}
       >
         {darkMode ? 'light' : 'dark'}
       </button>
