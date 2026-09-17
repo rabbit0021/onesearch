@@ -62,7 +62,7 @@ function applyTheme(theme) {
 
 export function ThemeProvider({ children }) {
   const [themeKey, setThemeKey] = useState(
-    () => localStorage.getItem('theme5') || 'claude'
+    () => localStorage.getItem('theme5') || 'cobalt'
   )
 
   const [darkMode, setDarkMode] = useState(
