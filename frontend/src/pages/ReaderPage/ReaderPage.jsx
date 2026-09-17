@@ -18,7 +18,7 @@ const HLJS_BG_OVERRIDE = '\n.hljs { background: transparent !important; }\n'
 
 const DEFAULT_READING_SPEED = 200 // words per minute — override per-user when personalisation is added
 
-const FONT_SCALES  = [0.55, 0.70, 0.85, 1, 1.1, 1.2]
+const FONT_SCALES  = [0.75, 0.82, 0.90, 1, 1.08, 1.16, 1.25, 1.35]
 const FONT_FAMILIES = [
   { key: 'system',    label: 'System UI',     css: "system-ui, -apple-system, sans-serif" },
   { key: 'lucida',    label: 'Lucida',        css: "'Lucida Grande', 'Lucida Sans', Lato, sans-serif" },
@@ -489,7 +489,7 @@ export default function ReaderPage() {
         </svg>
       </button>
       <span className={styles.toolScale}>{Math.round(FONT_SCALES[fontLevel] * 100)}%</span>
-      <button className={styles.toolIconBtn} onClick={() => setFontLevel(l => Math.min(4, l + 1))} disabled={fontLevel === 4} title="Increase font size">
+      <button className={styles.toolIconBtn} onClick={() => setFontLevel(l => Math.min(7, l + 1))} disabled={fontLevel === 7} title="Increase font size">
         <svg width="18" height="14" viewBox="0 0 22 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
           <path d="M2 13 L7 1 L12 13"/><path d="M3.8 9 L10.2 9"/><path d="M15 7 L20 7"/><path d="M17.5 4.5 L17.5 9.5"/>
         </svg>
@@ -578,7 +578,7 @@ export default function ReaderPage() {
         </div>
         {/* Desktop: all controls inline in nav */}
         <div className={styles.topBarControls}>
-          <div className={styles.toolTheme}><ThemeSwitcher /></div>
+          <div className={styles.toolTheme}><ThemeSwitcher bare /></div>
           <div className={styles.toolSep} />
           {fontSizeControls}
           <div className={styles.toolSep} />
@@ -586,21 +586,6 @@ export default function ReaderPage() {
           <div className={styles.toolSep} />
           {resetControl}
           {listenBtn && <><div className={styles.toolSep} />{listenBtn}</>}
-          {content && (
-            <>
-              <div className={styles.toolSep} />
-              <button
-                className={`${styles.chatToggleBtn} ${chatOpen ? styles.chatToggleActive : ''}`}
-                onClick={() => setChatOpen(o => !o)}
-                title="Ask about this article"
-              >
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                </svg>
-                Ask
-              </button>
-            </>
-          )}
         </div>
         <a href={post.url} target="_blank" rel="noopener noreferrer" className={styles.openBtn} onClick={() => { setOpenedOriginal(true); openedOriginalRef.current = true }}>
            ↗
@@ -645,18 +630,6 @@ export default function ReaderPage() {
               )}
               {content && (
                 <>
-                  <div className={styles.toolsPanelDivider} />
-                  <div className={styles.toolsPanelRow}>
-                    <button
-                      className={`${styles.chatToggleBtn} ${chatOpen ? styles.chatToggleActive : ''}`}
-                      onClick={() => { setChatOpen(o => !o); setToolsOpen(false) }}
-                    >
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                      </svg>
-                      Ask article
-                    </button>
-                  </div>
                 </>
               )}
             </div>
@@ -857,6 +830,33 @@ export default function ReaderPage() {
 
       {/* Dev-only engagement metrics overlay */}
       {import.meta.env.DEV && <DevOverlay timeSpent={timeSpent} maxDepth={maxDepth} isActiveRef={isActiveRef} openedOriginal={openedOriginal} />}
+
+      {/* Floating AI widget button */}
+      {content && (
+        <button
+          className={`${styles.aiFloatBtn} ${chatOpen ? styles.aiFloatBtnActive : ''}`}
+          onClick={() => setChatOpen(o => !o)}
+          title="Ask about this article"
+          aria-label="Ask AI about this article"
+        >
+          {/* Robot face */}
+          <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            {/* Antenna */}
+            <line x1="16" y1="2" x2="16" y2="7" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
+            <circle cx="16" cy="2" r="1.5" fill="white"/>
+            {/* Head */}
+            <rect x="5" y="7" width="22" height="17" rx="4" fill="white" fillOpacity="0.2" stroke="white" strokeWidth="1.6"/>
+            {/* Eyes */}
+            <rect x="9" y="12" width="4" height="4" rx="1.5" fill="white"/>
+            <rect x="19" y="12" width="4" height="4" rx="1.5" fill="white"/>
+            {/* Mouth */}
+            <rect x="10" y="19" width="12" height="2.5" rx="1.25" fill="white" fillOpacity="0.8"/>
+            {/* Ears */}
+            <rect x="2" y="13" width="3" height="5" rx="1.5" fill="white" fillOpacity="0.6"/>
+            <rect x="27" y="13" width="3" height="5" rx="1.5" fill="white" fillOpacity="0.6"/>
+          </svg>
+        </button>
+      )}
 
       {/* Article chat panel */}
       <div className={`${styles.chatPanel} ${chatOpen ? styles.chatPanelOpen : ''}`}>

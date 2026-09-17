@@ -504,7 +504,7 @@ class SQLiteDatabase:
         c = conn.cursor()
         c.execute("""
             INSERT INTO publishers (publisher_name, publisher_type, last_scraped_at)
-            VALUES (?, ?, datetime('now', '-7 days'))
+            VALUES (?, ?, datetime('now', '-45 days'))
         """, (publisher_name, publisher_type))
         logger.info(f"Publisher {publisher_name} added successfully")
         return c.lastrowid

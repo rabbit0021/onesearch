@@ -10,8 +10,11 @@
   --bg-wizard: rgb(238, 238, 235);
   --bg-wizard-option: rgb(220, 220, 217);
   --bg-feed:rgb(244, 243, 241);
+  --bg-reader-page: #ffffff;
+  --bg-reader-toolbar: var(--color-primary);
+  --reader-toolbar-text: #ffffff;
 
-  --bg-card-thumbnail:rgb(114, 112, 100);
+  --bg-card-thumbnail:rgb(114, 112, 100); 
 
   --text-base: #6c6b6b;
   --text-strong: #000000;
@@ -19,7 +22,7 @@
   --text-muted: #606369;
   --text-dim: #272727;
 
-  --reader-text-base: #6c6b6b;
+  --reader-text-base: #333434;
 
 
   --border: #adadad;
@@ -78,6 +81,9 @@
   --bg-wizard: rgb(30, 30, 27);
   --bg-wizard-option: rgb(20, 20, 17);
   --bg-feed:rgb(25, 25, 25);
+  --bg-reader-page: rgb(18, 18, 18);
+  --bg-reader-toolbar: var(--color-primary);
+  --reader-toolbar-text: #ffffff;
 
   --bg-card-thumbnail:rgb(76, 76, 72);
 

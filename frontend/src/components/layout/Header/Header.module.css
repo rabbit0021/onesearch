@@ -4,7 +4,6 @@
   gap: 20px;
   flex-direction: column;
   color: var(--text-base);
-  margin-left: -7px;
 }
 
 .themeSwitcherWrap {
@@ -15,11 +14,7 @@
 .logoWrap {
   display: flex;
   align-items: center;
+  margin-left: -38px;
 }
 
-.logo {
-  width: 350px;
-  height: 70px;
-  object-fit:cover;
-}
 

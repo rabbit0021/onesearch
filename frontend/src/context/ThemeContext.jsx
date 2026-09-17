@@ -41,6 +41,14 @@ export const THEMES = {
     '--color-primary-text':  '#7a3520',
     '--color-primary-tint':  '#fdf0eb',
   },
+  cobalt: {
+    label: 'Cobalt',
+    swatch: '#0042f9',
+    '--color-primary':       '#0042f9',
+    '--color-primary-hover': '#0035cc',
+    '--color-primary-text':  '#00228a',
+    '--color-primary-tint':  '#e6eeff',
+  },
 }
 
 const ThemeContext = createContext(null)
