@@ -489,6 +489,13 @@ export function useArticleReader({ contentRef, scrollContainerRef, highlightClas
   function play() {
     if (!contentRef.current) return
     if (postId) {
+      // Fire-and-forget play event for analytics
+      const deviceId = localStorage.getItem('onesearch_device_id')
+      fetch(`/api/tts/${postId}/play-event`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ deviceId }),
+      }).catch(() => {})
       playGoogleTtsStream()
     } else {
       playWebSpeech()

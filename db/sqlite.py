@@ -212,6 +212,15 @@ class SQLiteDatabase:
         """)
 
         c.execute("""
+            CREATE TABLE IF NOT EXISTS tts_plays (
+                id         INTEGER PRIMARY KEY AUTOINCREMENT,
+                post_id    INTEGER NOT NULL,
+                device_id  TEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        c.execute("""
             CREATE TABLE IF NOT EXISTS chat_logs (
                 id              INTEGER PRIMARY KEY AUTOINCREMENT,
                 post_id         INTEGER NOT NULL,

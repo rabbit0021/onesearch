@@ -35,6 +35,15 @@ function clearKey() {
 }
 
 export default function AdminPosts() {
+  // Force light theme for admin — independent of user preference
+  useEffect(() => {
+    const prev = document.documentElement.getAttribute('data-theme')
+    document.documentElement.removeAttribute('data-theme')
+    return () => {
+      if (prev) document.documentElement.setAttribute('data-theme', prev)
+    }
+  }, [])
+
   const [secretKey, setSecretKey] = useState('')
   const [posts, setPosts]         = useState([])
   const [loading, setLoading]     = useState(false)

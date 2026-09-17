@@ -42,6 +42,14 @@ export default function ChatLogsTab({ secretKey }) {
           <span className={styles.statNum}>{(summary.total_tokens ?? 0).toLocaleString()}</span>
           <span className={styles.statLabel}>Total tokens</span>
         </div>
+        <div className={styles.statCard}>
+          <span className={styles.statNum}>{summary.total_plays ?? '—'}</span>
+          <span className={styles.statLabel}>TTS plays</span>
+        </div>
+        <div className={styles.statCard}>
+          <span className={styles.statNum}>{summary.unique_listeners ?? '—'}</span>
+          <span className={styles.statLabel}>Unique listeners</span>
+        </div>
         <div className={styles.refreshCard}>
           <button className={styles.refreshBtn} onClick={fetchLogs} disabled={loading}>
             {loading ? 'Loading…' : 'Refresh'}

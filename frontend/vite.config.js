@@ -26,7 +26,7 @@ export default defineConfig({
       '/admin/chat-logs': FLASK,
       '^/individuals(?!/)': { target: FLASK },
       '/interested': FLASK,
-      '/api/tts': FLASK,
+      '/api/tts': FLASK,  // covers /api/tts/<id>, /api/tts/<id>/stream, /api/tts/<id>/play-event
       '/api/chat': FLASK,
       '/feedback': FLASK,
       '/verify-email': FLASK,

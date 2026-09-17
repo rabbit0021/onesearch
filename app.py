@@ -322,6 +322,21 @@ def admin_reading_events():
     finally:
         conn.close()
 
+@app.route("/api/tts/<int:post_id>/play-event", methods=["POST"])
+def tts_play_event(post_id):
+    data = request.get_json(silent=True) or {}
+    device_id = data.get("deviceId")
+    conn = app.db.get_connection()
+    try:
+        conn.execute(
+            "INSERT INTO tts_plays (post_id, device_id) VALUES (?, ?)",
+            (post_id, device_id)
+        )
+        conn.commit()
+    finally:
+        conn.close()
+    return jsonify({"ok": True})
+
 @app.route("/admin/chat-logs", methods=["GET"])
 @require_secret_key
 def admin_chat_logs():
@@ -350,6 +365,12 @@ def admin_chat_logs():
             FROM chat_logs
         """)
         summary = dict(c.fetchone())
+        c.execute("""
+            SELECT COUNT(*) AS total_plays, COUNT(DISTINCT device_id) AS unique_listeners
+            FROM tts_plays
+        """)
+        tts = dict(c.fetchone())
+        summary.update(tts)
         return jsonify({"logs": rows, "summary": summary})
     finally:
         conn.close()
