@@ -28,7 +28,8 @@ class ShopifyScraper(BaseScraper):
                 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
             })
             res.raise_for_status()
-            res.encoding = res.apparent_encoding or 'utf-8'
+            # Force utf-8 — Shopify pages are UTF-8, requests defaults to ISO-8859-1
+            res.encoding = 'utf-8'
             soup = BeautifulSoup(res.text, 'html.parser')
 
             # Article title
