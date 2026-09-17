@@ -28,10 +28,24 @@ class ShopifyScraper(BaseScraper):
                 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
             })
             res.raise_for_status()
-            # Force utf-8; apparent_encoding picks it up correctly from the page
             res.encoding = res.apparent_encoding or 'utf-8'
             soup = BeautifulSoup(res.text, 'html.parser')
-            article = soup.find('article') or soup.find('main') or soup.find('div', class_=lambda c: c and 'content' in c)
-            return str(article) if article else None
+
+            # Article title
+            title = soup.find('h1')
+
+            # Article body: div with tailwind class text-body-base + pt-10
+            body = soup.find('div', class_=lambda c: c and 'text-body-base' in c and 'pt-10' in c)
+            if not body:
+                return None
+
+            # Strip hiring/marketing sections
+            for el in body.find_all(['div', 'section'], class_=lambda c: c and any(
+                k in c for k in ['leadpage', 'hiring', 'support-card', 'popular-posts', 'marketing']
+            )):
+                el.decompose()
+
+            html = (str(title) if title else '') + str(body)
+            return html
         except Exception:
             return None

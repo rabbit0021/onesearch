@@ -9,7 +9,19 @@ HEADERS = {'User-Agent': 'Mozilla/5.0'}
 
 logger = get_logger("base-handler")
 
+def _fix_encoding(text):
+    """Fix Windows-1252 mojibake that was mis-decoded as Latin-1."""
+    if not text:
+        return text
+    try:
+        return text.encode('latin-1').decode('utf-8')
+    except (UnicodeEncodeError, UnicodeDecodeError):
+        return text
+
 class BaseScraper:
+    def _fix_encoding(self, text):
+        return _fix_encoding(text)
+
     def get_feed_url(self):
         return ""
 
@@ -74,7 +86,7 @@ class BaseScraper:
                     break    
                 
                 matching_posts.append({
-                    "title": entry.title,
+                    "title": self._fix_encoding(entry.title),
                     "url": entry.link,
                     "published": published.isoformat(),
                     "tags": categories
