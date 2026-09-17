@@ -711,9 +711,10 @@ export default function ReaderPage() {
 
           {error && (
             <div className={styles.errorBlock}>
-              <p className={styles.errorMsg}>Could not extract article content.</p>
-              <a href={post.url} target="_blank" rel="noopener noreferrer" className={styles.openBtn}>
-                 ↗
+              <p className={styles.errorMsg}>This article couldn't be loaded inline.</p>
+              <p className={styles.errorHint}>It may be hosted on a platform that restricts server-side access.</p>
+              <a href={post?.url} target="_blank" rel="noopener noreferrer" className={styles.errorReadBtn}>
+                Read on original site ↗
               </a>
             </div>
           )}

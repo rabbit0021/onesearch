@@ -1,6 +1,6 @@
 from .medium_base import MediumScraper
 
-BASE_URL = "https://netflixtechblog.com/feed"
+BASE_URL = "https://netflixtechblog.com/feed?limit=50"
 
 class NetflixScraper(MediumScraper):
 

@@ -1,6 +1,6 @@
 from .medium_base import MediumScraper
 
-BASE_URL = "https://medium.com/feed/airbnb-engineering"
+BASE_URL = "https://medium.com/feed/airbnb-engineering?limit=50"
 
 class AirbnbScraper(MediumScraper):
 

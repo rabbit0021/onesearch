@@ -549,9 +549,30 @@
 
 .errorMsg {
   font-size: var(--fs-std);
+  color: var(--text-base);
+  font-weight: 600;
+  margin: 0;
+}
+
+.errorHint {
+  font-size: var(--fs-sm);
   color: var(--text-muted);
   margin: 0;
 }
+
+.errorReadBtn {
+  display: inline-block;
+  margin-top: 0.5rem;
+  padding: 10px 22px;
+  background: var(--color-primary);
+  color: #fff;
+  border-radius: 8px;
+  font-size: var(--fs-base);
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 0.15s;
+}
+.errorReadBtn:hover { opacity: 0.85; }
 
 /* ── Error full page ── */
 .errorWrap {
