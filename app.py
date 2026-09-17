@@ -322,6 +322,38 @@ def admin_reading_events():
     finally:
         conn.close()
 
+@app.route("/admin/chat-logs", methods=["GET"])
+@require_secret_key
+def admin_chat_logs():
+    conn = app.db.get_connection()
+    try:
+        c = conn.cursor()
+        c.execute("""
+            SELECT cl.id, cl.post_id, cl.question, cl.word_count,
+                   cl.input_tokens, cl.output_tokens, cl.total_tokens, cl.model,
+                   cl.created_at,
+                   po.title AS post_title
+            FROM chat_logs cl
+            LEFT JOIN posts po ON po.id = cl.post_id
+            ORDER BY cl.created_at DESC
+            LIMIT 500
+        """)
+        rows = [dict(r) for r in c.fetchall()]
+        # Summary stats
+        c.execute("""
+            SELECT
+                COUNT(*) AS total_queries,
+                COUNT(DISTINCT post_id) AS unique_posts,
+                COALESCE(SUM(input_tokens), 0)  AS total_input_tokens,
+                COALESCE(SUM(output_tokens), 0) AS total_output_tokens,
+                COALESCE(SUM(total_tokens), 0)  AS total_tokens
+            FROM chat_logs
+        """)
+        summary = dict(c.fetchone())
+        return jsonify({"logs": rows, "summary": summary})
+    finally:
+        conn.close()
+
 @app.route("/privacy-policy.html")
 @app.route("/privacy-policy")
 def privacy_policy():
@@ -1428,6 +1460,8 @@ def most_liked_all_time_feed():
         conn.close()
 
 
+MAX_QUESTION_WORDS = 500
+
 @app.route("/api/chat/<int:post_id>", methods=["POST"])
 def chat_with_article(post_id):
     data = request.get_json(silent=True) or {}
@@ -1436,13 +1470,36 @@ def chat_with_article(post_id):
     if not question:
         return jsonify({"error": "question required"}), 400
 
+    word_count = len(question.split())
+    if word_count > MAX_QUESTION_WORDS:
+        return jsonify({
+            "error": f"Question too long ({word_count} words). Please keep it under {MAX_QUESTION_WORDS} words."
+        }), 400
+
     try:
         import llm
 
         def generate():
             try:
-                for chunk in llm.ask_article_stream(post_id, question, history=history):
-                    yield f"data: {json.dumps({'chunk': chunk})}\n\n"
+                for item in llm.ask_article_stream(post_id, question, history=history):
+                    if isinstance(item, dict) and "usage" in item:
+                        # Log token usage to DB
+                        u = item["usage"]
+                        try:
+                            conn = app.db.get_connection()
+                            conn.execute("""
+                                INSERT INTO chat_logs
+                                    (post_id, question, word_count, input_tokens, output_tokens, total_tokens, model)
+                                VALUES (?, ?, ?, ?, ?, ?, ?)
+                            """, (post_id, question, word_count,
+                                  u.get("input_tokens"), u.get("output_tokens"),
+                                  u.get("total_tokens"), u.get("model")))
+                            conn.commit()
+                            conn.close()
+                        except Exception as log_err:
+                            app.logger.warning("Failed to log chat tokens: %s", log_err)
+                    else:
+                        yield f"data: {json.dumps({'chunk': item})}\n\n"
             except llm.PostNotFoundError:
                 yield f"data: {json.dumps({'error': 'Post not found'})}\n\n"
             except llm.ContentExtractionError as e:

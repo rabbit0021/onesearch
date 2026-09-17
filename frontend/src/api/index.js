@@ -291,6 +291,14 @@ export async function getAdminReadingEvents(secretKey) {
   return res.json()
 }
 
+export async function getAdminChatLogs(secretKey) {
+  const res = await fetch('/admin/chat-logs', {
+    headers: { 'X-Secret-Key': secretKey },
+  })
+  if (!res.ok) throw new Error('Failed to fetch chat logs')
+  return res.json()
+}
+
 export async function getReadEvent(postId, deviceId) {
   const res = await fetch(`/posts/${postId}/read-event?device_id=${encodeURIComponent(deviceId)}`)
   if (!res.ok) return null

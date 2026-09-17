@@ -98,7 +98,8 @@ def ask_article(post_id, question):
 
 def ask_article_stream(post_id, question, history=None):
     """
-    Generator that yields text chunks for streaming responses.
+    Generator that yields text chunks for streaming responses, then a final
+    sentinel dict {"usage": {...}} with token counts.
     history: list of {"role": "user"|"model", "text": str} dicts (oldest first).
     """
     context = _get_article_context(post_id)
@@ -116,6 +117,7 @@ def ask_article_stream(post_id, question, history=None):
     current_text = (article_prefix + question) if not contents else question
     contents.append(types.Content(role="user", parts=[types.Part(text=current_text)]))
 
+    usage = None
     for chunk in _client.models.generate_content_stream(
         model=_MODEL,
         contents=contents,
@@ -127,3 +129,14 @@ def ask_article_stream(post_id, question, history=None):
     ):
         if chunk.text:
             yield chunk.text
+        if chunk.usage_metadata:
+            usage = chunk.usage_metadata
+
+    # Yield usage as final sentinel
+    if usage:
+        yield {"usage": {
+            "input_tokens":  getattr(usage, "prompt_token_count", None),
+            "output_tokens": getattr(usage, "candidates_token_count", None),
+            "total_tokens":  getattr(usage, "total_token_count", None),
+            "model":         _MODEL,
+        }}

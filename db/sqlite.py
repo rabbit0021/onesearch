@@ -211,6 +211,20 @@ class SQLiteDatabase:
             )
         """)
 
+        c.execute("""
+            CREATE TABLE IF NOT EXISTS chat_logs (
+                id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                post_id         INTEGER NOT NULL,
+                question        TEXT    NOT NULL,
+                word_count      INTEGER NOT NULL,
+                input_tokens    INTEGER,
+                output_tokens   INTEGER,
+                total_tokens    INTEGER,
+                model           TEXT,
+                created_at      DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
         logger.info(f"SQLite database initialized Successfully")
         conn.commit()
         conn.close()

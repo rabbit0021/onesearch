@@ -896,42 +896,44 @@ export default function ReaderPage() {
               onSelect={c => { setChatInput(''); setSlashActive(false); sendChatMessage(c.question) }}
             />
           )}
-          <textarea
-            ref={chatInputRef}
-            className={styles.chatInput}
-            rows={1}
-            placeholder="Ask a question…"
-            value={chatInput}
-            onInput={e => {
-              const el = e.target
-              el.style.height = 'auto'
-              el.style.height = Math.min(el.scrollHeight, 120) + 'px'
-            }}
-            onChange={e => {
-              const val = e.target.value
-              setChatInput(val)
-              if (val.startsWith('/')) {
-                setSlashFilter(val.slice(1))
-                setSlashActive(true)
-                setSlashIdx(0)
-              } else {
-                setSlashActive(false)
-              }
-            }}
-            onKeyDown={e => {
-              if (slashActive) {
-                const filtered = SLASH_COMMANDS.filter(c => c.cmd.includes(slashFilter.toLowerCase()))
-                if (e.key === 'ArrowDown') { e.preventDefault(); setSlashIdx(i => Math.min(i + 1, filtered.length - 1)); return }
-                if (e.key === 'ArrowUp')   { e.preventDefault(); setSlashIdx(i => Math.max(i - 1, 0)); return }
-                if (e.key === 'Escape')    { setSlashActive(false); return }
-                if (e.key === 'Enter')     { e.preventDefault(); if (filtered[slashIdx]) { setChatInput(''); setSlashActive(false); sendChatMessage(filtered[slashIdx].question) }; return }
-              }
-              if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage() }
-            }}
-          />
-          <button className={styles.chatSendBtn} onClick={sendChatMessage} disabled={!chatInput.trim() || chatLoading} aria-label="Send">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
-          </button>
+          <div className={styles.chatInputWrap}>
+            <textarea
+              ref={chatInputRef}
+              className={styles.chatInput}
+              rows={1}
+              placeholder="Ask a question…"
+              value={chatInput}
+              onInput={e => {
+                const el = e.target
+                el.style.height = 'auto'
+                el.style.height = Math.min(el.scrollHeight, 120) + 'px'
+              }}
+              onChange={e => {
+                const val = e.target.value
+                setChatInput(val)
+                if (val.startsWith('/')) {
+                  setSlashFilter(val.slice(1))
+                  setSlashActive(true)
+                  setSlashIdx(0)
+                } else {
+                  setSlashActive(false)
+                }
+              }}
+              onKeyDown={e => {
+                if (slashActive) {
+                  const filtered = SLASH_COMMANDS.filter(c => c.cmd.includes(slashFilter.toLowerCase()))
+                  if (e.key === 'ArrowDown') { e.preventDefault(); setSlashIdx(i => Math.min(i + 1, filtered.length - 1)); return }
+                  if (e.key === 'ArrowUp')   { e.preventDefault(); setSlashIdx(i => Math.max(i - 1, 0)); return }
+                  if (e.key === 'Escape')    { setSlashActive(false); return }
+                  if (e.key === 'Enter')     { e.preventDefault(); if (filtered[slashIdx]) { setChatInput(''); setSlashActive(false); sendChatMessage(filtered[slashIdx].question) }; return }
+                }
+                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage() }
+              }}
+            />
+            <button className={styles.chatSendBtn} onClick={() => sendChatMessage()} disabled={!chatInput.trim() || chatLoading} aria-label="Send">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>
