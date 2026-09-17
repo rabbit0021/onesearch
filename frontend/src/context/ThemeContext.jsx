@@ -43,8 +43,8 @@ export const THEMES = {
   },
   cobalt: {
     label: 'Cobalt',
-    swatch: '#0042f9',
-    '--color-primary':       '#0042f9',
+    swatch: '#024ac6',
+    '--color-primary':       '#1557c9',
     '--color-primary-hover': '#0035cc',
     '--color-primary-text':  '#00228a',
     '--color-primary-tint':  '#e6eeff',
@@ -62,7 +62,7 @@ function applyTheme(theme) {
 
 export function ThemeProvider({ children }) {
   const [themeKey, setThemeKey] = useState(
-    () => localStorage.getItem('theme5') || 'cobalt'
+    () => localStorage.getItem('theme5') || 'ocean'
   )
 
   const [darkMode, setDarkMode] = useState(

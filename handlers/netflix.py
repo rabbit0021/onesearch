@@ -1,8 +1,8 @@
-from .base import BaseScraper
+from .medium_base import MediumScraper
 
 BASE_URL = "https://netflixtechblog.com/feed"
 
-class NetflixScraper(BaseScraper):
-        
+class NetflixScraper(MediumScraper):
+
     def get_feed_url(self):
         return BASE_URL
