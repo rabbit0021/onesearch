@@ -47,7 +47,8 @@
   --card-shadow-hover: rgba(0, 0, 0, 0.12);
   --card-title: #4c4e58;
   --card-publisher: #6b7280;
-  --card-hint: var(--color-primary-tint);
+  --card-hint: #e9e9e9;
+  --card-tag: #787878;
 
   --arcade-highlight: #fdfdfd;
   --arcade-shadow-mid: #b5b5b5;
@@ -81,7 +82,7 @@
   --bg-disabled: rgb(25, 25, 25);
   --bg-wizard: rgb(30, 30, 27);
   --bg-wizard-option: rgb(20, 20, 17);
-  --bg-feed:rgb(25, 25, 25);
+  --bg-feed:#1b1b1b;
   --bg-reader-page: rgb(18, 18, 18);
   --bg-reader-toolbar: var(--color-primary);
   --reader-toolbar-text: #ffffff;
@@ -113,13 +114,13 @@
   --filter-placeholder: #929292;
   --filter-prefix-color: var(--color-primary);
 
-  --card-bg: #22201e;
+  --card-bg: #222222;
   --card-shadow: rgba(0, 0, 0, 0.4);
   --card-shadow-hover: rgba(0, 0, 0, 0.6);
-  --card-title: #c2c2bb;
+  --card-title: #dfdfdf;
   --card-publisher: #d0ceca;
-  --card-hint: var(--bg-surface);
-
+  --card-hint: #434343;
+  --card-tag: #9c9c9c;
 
   --arcade-highlight: #333333;     
   --arcade-shadow-mid: #000000;     

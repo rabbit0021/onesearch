@@ -88,6 +88,54 @@ const PALETTES = {
     'Product Management':         '#FCD34D',
     'General':                    '#CBD5E1',
   },
+  // Nature — muted, warm-neutral friendly, easy on the eyes
+  nature: {
+    'Software Engineering':       '#5B8DB8',  // ocean blue
+    'Frontend Engineering':       '#4A9E8E',  // teal
+    'Backend Engineering':        '#7B6FAB',  // soft purple
+    'Mobile Engineering':         '#C47E6B',  // terracotta
+    'Platform & Infrastructure':  '#C4964A',  // amber
+    'Data Engineering':           '#4A8FA8',  // steel blue
+    'Data Science':               '#9B6BAE',  // lavender
+    'Machine Learning & AI':      '#7A9E6B',  // sage green
+    'Data Analytics':             '#5BA88A',  // sea green
+    'Security Engineering':       '#B85B5B',  // muted red
+    'QA & Testing':               '#6B9E7A',  // forest
+    'Product Management':         '#B8935B',  // warm sand
+    'General':                    '#8A9BAB',  // slate
+  },
+  // Sunset dark — same sunset hues, mid-tone for dark bg (#22201e)
+  sunsetDark: {
+    'Software Engineering':       '#3A7A9E',
+    'Frontend Engineering':       '#3A8A8A',
+    'Backend Engineering':        '#6A5A9E',
+    'Mobile Engineering':         '#9E5A6A',
+    'Platform & Infrastructure':  '#9E6A3A',
+    'Data Engineering':           '#2E6A8A',
+    'Data Science':               '#7A5A9E',
+    'Machine Learning & AI':      '#9E5A6E',
+    'Data Analytics':             '#3A7A9E',
+    'Security Engineering':       '#9E3A4A',
+    'QA & Testing':               '#3A7A7A',
+    'Product Management':         '#C4845A',
+    'General':                    '#6A6A8A',
+  },
+  // Sunset — inspired by peach→coral→mauve→periwinkle→ocean gradient
+  sunset: {
+    'Software Engineering':       '#00577F',  // deep ocean
+    'Frontend Engineering':       '#4A7FA8',  // mid ocean
+    'Backend Engineering':        '#4A7FA8',  // mid ocean blue
+    'Mobile Engineering':         '#E08C3A',  // warm orange
+    'Platform & Infrastructure':  '#ED717F',  // coral
+    'Data Engineering':           '#2E8A6A',  // teal green
+    'Data Science':               '#9B6E9E',  // soft violet
+    'Machine Learning & AI':      '#D4828E',  // dusty rose
+    'Data Analytics':             '#5B8FAE',  // sky blue
+    'Security Engineering':       '#B05A6A',  // deep coral
+    'QA & Testing':               '#6E8EAE',  // muted blue
+    'Product Management':         '#F5AD92',  // peach
+    'General':                    '#A0A0A0',  // neutral gray
+  },
 }
 
 export const TOPIC_COLORS = PALETTES.soft // fallback for external imports
@@ -124,6 +172,7 @@ export default function BlogCard({ post, readProgress }) {
   const { darkMode } = useTheme()
   const palette = darkMode ? PALETTES.wizard : PALETTES.wizard
   const color = palette[post.topic] || palette['General']
+  const accent = PALETTES.sunset[post.topic] || PALETTES.sunset['General']
   const favicon = faviconUrl(post.url)
   const individualMeta = INDIVIDUALS_META[post.publisher?.toLowerCase()]
   const individualThumb = individualMeta?.image?.replace(/(\.[^.]+)$/, '-thumb$1')
@@ -211,9 +260,9 @@ export default function BlogCard({ post, readProgress }) {
       role="link"
       tabIndex={0}
       onKeyDown={e => e.key === 'Enter' && handleCardClick(e)}
-      style={{ cursor: 'pointer' }}
+      style={{ cursor: 'pointer', '--card-accent': accent }}
     >
-      <div className={styles.thumbnail} style={{ background: color }}>
+      <div className={styles.cardHeader}>
         {individualThumb ? (
           <div className={styles.individualProfile}>
             <img
@@ -221,14 +270,6 @@ export default function BlogCard({ post, readProgress }) {
               alt={post.publisher}
               className={styles.individualAvatar}
               onError={e => { e.currentTarget.style.display = 'none' }}
-              // onClick={e => {
-              //   e.preventDefault()
-              //   e.stopPropagation()
-              //   setShowLightbox(true)
-              //   getIndividualStats().then(stats => {
-              //     setIndividualLikeCount(stats[post.publisher?.toLowerCase()] ?? 0)
-              //   }).catch(() => {})
-              // }}
               style={{ cursor: 'pointer' }}
             />
           </div>
@@ -240,7 +281,7 @@ export default function BlogCard({ post, readProgress }) {
             onError={e => { e.currentTarget.style.display = 'none' }}
           />
         ) : null}
-        <span className={styles.topicLabel}>{post.topic}</span>
+        <span className={styles.publisherName}>{post.publisher}</span>
       </div>
 
       {readProgress != null && (
@@ -296,9 +337,8 @@ export default function BlogCard({ post, readProgress }) {
             )}
           </div>
         </div>
-        <p className={styles.title}>
-          <span className={styles.titlePublisher}>{post.publisher}: </span>{post.title}
-        </p>
+        <p className={styles.title}>{post.title}</p>
+        <span className={styles.topicLabel}><span className={styles.topicDot}>●</span>{post.topic}</span>
         {tags.length > 0 && (
           <div className={styles.tags} ref={tagsContainerRef}>
             {(tagsSlice !== null ? tags.slice(0, tagsSlice) : tags).map(tag => (

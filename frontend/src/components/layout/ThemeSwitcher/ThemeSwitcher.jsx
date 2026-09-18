@@ -4,7 +4,7 @@ import styles from './ThemeSwitcher.module.css'
 
 export default function ThemeSwitcher({ bare = false }) {
   const { themeKey, setThemeKey, darkMode, toggleDarkMode } = useTheme()
-  const [paletteOpen, setPaletteOpen] = useState(true)
+  const [paletteOpen, setPaletteOpen] = useState(false)
 
   return (
     <div className={styles.switcher} style={bare ? { border: 'none', borderTop: 'none', boxShadow: 'none', padding: '0', background: 'transparent' } : {}}>

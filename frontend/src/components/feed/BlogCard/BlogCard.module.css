@@ -1,70 +1,85 @@
 .card {
   display: flex;
   flex-direction: column;
-  border-radius: 4px;
+  border-radius: 6px;
   background: var(--card-bg);
-  box-shadow: 0 1px 4px var(--card-shadow);
+  box-shadow: none;
   text-decoration: none;
   color: inherit;
   transition: box-shadow 0.18s, transform 0.18s;
+  border-left: .1px solid var(--card-accent, #A0A0A0);
+  overflow: hidden;
 }
 
 .card:hover {
-  box-shadow: 0 4px 16px var(--card-shadow-hover);
+  box-shadow: none;
   transform: translateY(-2px);
 }
 
-/* ── Thumbnail ── */
+/* ── Thumbnail (hidden — publisher icon now lives in .cardHeader) ── */
 .thumbnail {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  border-radius: 4px 4px 0 0;
+  display: none;
 }
 
 .favicon {
-  width: 44px;
-  height: 44px;
-  border-radius: 4px;
+  width: 28px;
+  height: 28px;
+  border-radius: 5px;
   object-fit: contain;
-  background: rgba(255, 255, 255, 0.15);
-  padding: 4px;
+  flex-shrink: 0;
 }
 
 .individualProfile {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 6px;
-  margin-bottom: 20px;
 }
 
 .individualAvatar {
-  width: 100px;
-  height: 100px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2.5px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
 }
 
+/* ── Card header row: icon + topic badge ── */
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.65rem 1rem;
+  background: linear-gradient(to bottom, color-mix(in srgb, #A0A0A0 15%, var(--card-bg)), var(--card-bg));
+  border-bottom: 0.5px solid color-mix(in srgb, #A0A0A0 25%, transparent);
+}
+
+.publisherName {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--card-title);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 .topicLabel {
-  position: absolute;
-  bottom: 6px;
-  left: 7px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  width: fit-content;
   font-size: var(--fs-xs);
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.9);
-  background: rgba(0, 0, 0, 0.35);
-  padding: 2px 5px;
-  border-radius: 0;
+  color: var(--card-accent, #A0A0A0);
+  background: none;
+}
+
+.topicDot {
+  font-size: 0.45rem;
+  line-height: 1;
+  color: var(--card-accent, #A0A0A0);
+  flex-shrink: 0;
 }
 
 /* ── Icon tray ── */
@@ -236,7 +251,7 @@
 
 /* ── Card body ── */
 .body {
-  padding: 0.6rem 0.75rem 0.75rem;
+  padding: 0.65rem 1rem 1rem;
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
@@ -288,15 +303,17 @@
 }
 
 .title {
-  font-size: var(--fs-lm);
+  font-size: var(--fs-lg);
   color: var(--card-title);
   margin: 0;
-  line-height: 1.4;
+  line-height: 1.45;
   display: -webkit-box;
   -webkit-line-clamp: 4;
   line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  font-weight: 500;
+  flex: 1;
 }
 
 .tags {
@@ -309,7 +326,7 @@
 .tag {
   font-size: var(--fs-2xs);
   background-color: var(--card-hint);
-  color: var(--text-base);
+  color: var(--card-tag);
   padding: 1px 5px;
   border-radius: 0;
 }
