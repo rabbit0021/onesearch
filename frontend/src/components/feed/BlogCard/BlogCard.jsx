@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
+import Markdown from 'react-markdown'
 import { useNavigate } from 'react-router-dom'
-import { likePost, getIndividualStats, recordView, getOrCreateDeviceId } from '../../../api'
+import { likePost, getIndividualStats, recordView, getOrCreateDeviceId, getPostSummary } from '../../../api'
 import EmailDialog, { getSavedEmail } from '../../ui/EmailDialog/EmailDialog'
 import ImageLightbox from '../../ui/ImageLightbox/ImageLightbox'
 import { INDIVIDUALS_META } from '../../../data/individuals'
@@ -200,6 +201,56 @@ export default function BlogCard({ post, readProgress }) {
     setTagsSlice(null)
   }, [post.tags])
 
+  // summary state: null | 'widget' | 'loading' | 'done'
+  const [summaryState, setSummaryState] = useState('widget')
+  const [summary, setSummary] = useState(post.summary || null)
+  const [hovered, setHovered] = useState(false)
+  const hoverTimer = useRef(null)
+
+  function handleMouseEnter() {
+    hoverTimer.current = setTimeout(() => {
+      setHovered(true)
+    }, 1200)
+  }
+
+  function handleMouseLeave() {
+    clearTimeout(hoverTimer.current)
+    setHovered(false)
+  }
+
+  const [flipped, setFlipped] = useState(false)
+  const [backVisible, setBackVisible] = useState(false)
+  const cardOuterRef = useRef(null)
+
+  function flipOpen() {
+    setBackVisible(false)
+    setFlipped(true)
+    // content fades in after rotation settles
+    setTimeout(() => setBackVisible(true), 400)
+    setTimeout(() => {
+      cardOuterRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' })
+    }, 500)
+  }
+
+  function handleSummarize(e) {
+    e.stopPropagation()
+    if (summary) { flipOpen(); return }
+    setSummaryState('loading')
+    getPostSummary(post.id)
+      .then(data => { setSummary(data.summary); setSummaryState('done'); flipOpen() })
+      .catch(() => setSummaryState('widget'))
+  }
+
+  function handleFlipBack(e) {
+    e.stopPropagation()
+    // fade out content first, then rotate back
+    setBackVisible(false)
+    setTimeout(() => {
+      setFlipped(false)
+      setSummaryState('widget')
+    }, 280)
+  }
+
   const [displayCount, setDisplayCount] = useState(post.like_count || 0)
   const [viewCount, setViewCount] = useState(Math.max(post.view_count || 0, post.like_count || 0))
   const [showEmailDialog, setShowEmailDialog] = useState(false)
@@ -254,109 +305,169 @@ export default function BlogCard({ post, readProgress }) {
         onClose={() => setShowLightbox(false)}
       />
     )}
+    <div className={styles.cardPerspective}>
     <div
-      className={`${styles.card} ${match ? styles.cardMatched : ''}`}
-      onClick={handleCardClick}
-      role="link"
-      tabIndex={0}
-      onKeyDown={e => e.key === 'Enter' && handleCardClick(e)}
-      style={{ cursor: 'pointer', '--card-accent': accent }}
+      ref={cardOuterRef}
+      className={`${styles.cardOuter} ${flipped ? styles.cardFlipped : ''}`}
+      style={{ '--card-accent': accent }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
-      <div className={styles.cardHeader}>
-        {individualThumb ? (
-          <div className={styles.individualProfile}>
+      {/* FRONT */}
+      <div
+        className={`${styles.card} ${styles.cardFront} ${match ? styles.cardMatched : ''}`}
+        onClick={handleCardClick}
+        role="link"
+        tabIndex={0}
+        onKeyDown={e => e.key === 'Enter' && handleCardClick(e)}
+        style={{ cursor: 'pointer' }}
+      >
+        <div className={styles.cardHeader}>
+          {individualThumb ? (
+            <div className={styles.individualProfile}>
+              <img
+                src={individualThumb}
+                alt={post.publisher}
+                className={styles.individualAvatar}
+                onError={e => { e.currentTarget.style.display = 'none' }}
+                style={{ cursor: 'pointer' }}
+              />
+            </div>
+          ) : favicon ? (
             <img
-              src={individualThumb}
-              alt={post.publisher}
-              className={styles.individualAvatar}
+              src={favicon}
+              alt=""
+              className={styles.favicon}
               onError={e => { e.currentTarget.style.display = 'none' }}
-              style={{ cursor: 'pointer' }}
             />
-          </div>
-        ) : favicon ? (
-          <img
-            src={favicon}
-            alt=""
-            className={styles.favicon}
-            onError={e => { e.currentTarget.style.display = 'none' }}
-          />
-        ) : null}
-        <span className={styles.publisherName}>{post.publisher}</span>
-      </div>
-
-      {readProgress != null && (
-        <div className={styles.readProgress}>
-          <div className={styles.readProgressBar} style={{ width: `${readProgress}%` }} />
+          ) : null}
+          <span className={styles.publisherName}>{post.publisher}</span>
         </div>
-      )}
 
-      <div className={styles.body}>
-        <div className={styles.meta}>
-          <div className={styles.metadesc}>
-            <span className={styles.date}>{timeAgo(post.published_at)}</span>
+        {readProgress != null && (
+          <div className={styles.readProgress}>
+            <div className={styles.readProgressBar} style={{ width: `${readProgress}%` }} />
           </div>
-          <div className={styles.iconTray}>
-            <div className={`${styles.iconItem} ${styles.viewItem}`}>
-              <svg className={styles.viewIcon} width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5C21.27 7.61 17 4.5 12 4.5zm0 12.5c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
-              </svg>
-              <span className={styles.viewCounter}>{viewCount}</span>
+        )}
+
+        <div className={styles.body}>
+          <div className={styles.meta}>
+            <div className={styles.metadesc}>
+              <span className={styles.date}>{timeAgo(post.published_at)}</span>
             </div>
-
-            {fireToStars(post.fire_count) > 0 && (
-              <div className={`${styles.iconItem} ${styles.starItem}`}>
-                <div className={styles.starRating}>
-                  <svg className={styles.starFilled} width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 3l2.45 4.97 5.48.8-3.97 3.87.94 5.46L12 15.6l-4.9 2.57.94-5.46L4.07 8.77l5.48-.8z"/>
-                  </svg>
-                  <span className={styles.starCount}>{fireToStars(post.fire_count)}</span>
-                </div>
-              </div>
-            )}
-
-            <div
-              className={`${styles.iconItem} ${styles.likeBtn}`}
-              role="button"
-              tabIndex={0}
-              onClick={handleLike}
-              onKeyDown={e => e.key === 'Enter' && handleLike(e)}
-            >
-              <span className={`${styles.heart} ${styles.heartActive} ${displayCount === 0 ? styles.heartZero : ''}`}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+            <div className={styles.iconTray}>
+              <div className={`${styles.iconItem} ${styles.viewItem}`}>
+                <svg className={styles.viewIcon} width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5C21.27 7.61 17 4.5 12 4.5zm0 12.5c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
                 </svg>
-              </span>
-              <span key={displayCount} className={styles.likeCounter}>{displayCount}</span>
-            </div>
-
-            {post.recent_like_count > 0 && (
-              <div className={styles.iconItem}>
-                <span className={styles.recentPlus}>+</span>
-                <span className={styles.recentCount}>{post.recent_like_count}</span>
+                <span className={styles.viewCounter}>{viewCount}</span>
               </div>
-            )}
+
+              {fireToStars(post.fire_count) > 0 && (
+                <div className={`${styles.iconItem} ${styles.starItem}`}>
+                  <div className={styles.starRating}>
+                    <svg className={styles.starFilled} width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 3l2.45 4.97 5.48.8-3.97 3.87.94 5.46L12 15.6l-4.9 2.57.94-5.46L4.07 8.77l5.48-.8z"/>
+                    </svg>
+                    <span className={styles.starCount}>{fireToStars(post.fire_count)}</span>
+                  </div>
+                </div>
+              )}
+
+              <div
+                className={`${styles.iconItem} ${styles.likeBtn}`}
+                role="button"
+                tabIndex={0}
+                onClick={handleLike}
+                onKeyDown={e => e.key === 'Enter' && handleLike(e)}
+              >
+                <span className={`${styles.heart} ${styles.heartActive} ${displayCount === 0 ? styles.heartZero : ''}`}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                  </svg>
+                </span>
+                <span key={displayCount} className={styles.likeCounter}>{displayCount}</span>
+              </div>
+
+              {post.recent_like_count > 0 && (
+                <div className={styles.iconItem}>
+                  <span className={styles.recentPlus}>+</span>
+                  <span className={styles.recentCount}>{post.recent_like_count}</span>
+                </div>
+              )}
+            </div>
           </div>
+          <p className={styles.title}>{post.title}</p>
+
+
+          <span className={styles.topicLabel}><span className={styles.topicDot}>●</span>{post.topic}</span>
+          {tags.length > 0 && (
+            <div className={styles.tags} ref={tagsContainerRef}>
+              {(tagsSlice !== null ? tags.slice(0, tagsSlice) : tags).map(tag => (
+                <span key={tag} data-tag="" className={styles.tag}>{tag}</span>
+              ))}
+              {tagsSlice !== null && (
+                <span className={styles.tagMore}>+{tags.length - tagsSlice} tags</span>
+              )}
+            </div>
+          )}
+          {match && (
+            <div className={styles.matchTip}>
+              <span className={styles.matchPrompt}>▸</span>
+              <span className={styles.matchKey}>{match.key}</span>
+              <span className={styles.matchSummary}>{match.summary}</span>
+            </div>
+          )}
         </div>
-        <p className={styles.title}>{post.title}</p>
-        <span className={styles.topicLabel}><span className={styles.topicDot}>●</span>{post.topic}</span>
-        {tags.length > 0 && (
-          <div className={styles.tags} ref={tagsContainerRef}>
-            {(tagsSlice !== null ? tags.slice(0, tagsSlice) : tags).map(tag => (
-              <span key={tag} data-tag="" className={styles.tag}>{tag}</span>
-            ))}
-            {tagsSlice !== null && (
-              <span className={styles.tagMore}>+{tags.length - tagsSlice} tags</span>
-            )}
+
+        {summaryState === 'loading' && (
+          <div className={`${styles.summaryWidget} ${styles.summaryWidgetVisible}`}>
+            <span className={styles.summaryDot} />
+            <span className={styles.summaryDot} />
+            <span className={styles.summaryDot} />
           </div>
         )}
-        {match && (
-          <div className={styles.matchTip}>
-            <span className={styles.matchPrompt}>▸</span>
-            <span className={styles.matchKey}>{match.key}</span>
-            <span className={styles.matchSummary}>{match.summary}</span>
-          </div>
+
+        {summaryState === 'widget' && (
+          <button
+            className={`${styles.summaryWidget} ${hovered ? styles.summaryWidgetVisible : ''}`}
+            onClick={handleSummarize}
+          >
+            <span className={styles.summaryBotIcon}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="8" width="18" height="13" rx="3"/>
+                <path d="M8 8V6a4 4 0 0 1 8 0v2"/>
+                <circle cx="9" cy="14" r="1" fill="currentColor" stroke="none"/>
+                <circle cx="15" cy="14" r="1" fill="currentColor" stroke="none"/>
+                <path d="M9 18h6"/>
+              </svg>
+            </span>
+            <span className={styles.summaryWidgetText}>{summary ? 'view summary' : 'summarize'}</span>
+          </button>
         )}
       </div>
+
+      {/* BACK */}
+      <div className={`${styles.card} ${styles.cardBack} ${backVisible ? styles.cardBackVisible : ''}`}>
+        <div className={styles.cardHeader}>
+          {individualThumb ? (
+            <img src={individualThumb} alt={post.publisher} className={styles.individualAvatar} onError={e => { e.currentTarget.style.display = 'none' }} />
+          ) : favicon ? (
+            <img src={favicon} alt="" className={styles.favicon} onError={e => { e.currentTarget.style.display = 'none' }} />
+          ) : null}
+          <span className={styles.publisherName}>{post.publisher}</span>
+          <button className={styles.flipBack} onClick={handleFlipBack} title="Back to article">&#x2715;</button>
+        </div>
+        <div className={styles.summaryBack}>
+          {summary && <Markdown>{summary}</Markdown>}
+        </div>
+        <div style={{ borderTop: '0.5px solid var(--border)', padding: '0.6rem 1rem 0.75rem' }}>
+          <span className={styles.topicLabel}>
+            <span className={styles.topicDot}>●</span>{post.topic}
+          </span>
+        </div>
+      </div>
+    </div>
     </div>
     </>
   )

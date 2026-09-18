@@ -516,9 +516,12 @@
   flex-direction: row;
   gap: 1rem;
   overflow-x: auto;
+  overflow-y: hidden;
   padding: 2px;
   scrollbar-width: none;
+  overscroll-behavior-x: contain;
 }
+
 
 .scrollRow::-webkit-scrollbar {
   display: none;
@@ -527,6 +530,12 @@
 .scrollCard {
   flex: 0 0 210px;
   width: 210px;
+  transition: flex-basis 0.45s cubic-bezier(0.4, 0, 0.2, 1), width 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.scrollCard:has([class*="cardFlipped"]) {
+  flex: 0 0 min(560px, 80vw);
+  width: min(560px, 80vw);
 }
 
 

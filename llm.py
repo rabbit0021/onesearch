@@ -81,6 +81,28 @@ def _get_article_context(post_id):
     return context
 
 
+def summarize_article(post_id):
+    """Return a 2-3 sentence plain-text summary of the article."""
+    context = _get_article_context(post_id)
+    response = _client.models.generate_content(
+        model=_MODEL,
+        contents=context,
+        config=types.GenerateContentConfig(
+            system_instruction=(
+                "You are summarizing a tech article for a curious reader deciding whether to read it. "
+                "Focus on what the reader will *learn* or *gain* — not just what the article covers. "
+                "Write like you're telling a friend: what's the core insight, why does it matter, and what will they walk away knowing? "
+                "Format: one punchy opening sentence (the 'so what'), then 3-4 bullet points each describing a concrete takeaway or insight in plain English. "
+                "Avoid jargon where possible; when technical terms are unavoidable use inline `code`. "
+                "No headers. Keep it tight."
+            ),
+            temperature=0.3,
+            max_output_tokens=300,
+        ),
+    )
+    return response.text.strip()
+
+
 def ask_article(post_id, question):
     """Return an answer string for question about the article."""
     context = _get_article_context(post_id)

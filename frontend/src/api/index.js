@@ -293,6 +293,12 @@ export function getOrCreateDeviceId() {
   return id
 }
 
+export async function getPostSummary(postId) {
+  const res = await fetch(`/posts/${postId}/summary`)
+  if (!res.ok) throw new Error('Failed to fetch summary')
+  return res.json()
+}
+
 export async function getPostContent(postId) {
   const res = await fetch(`/posts/${postId}/content`)
   if (!res.ok) throw new Error('Failed to fetch content')

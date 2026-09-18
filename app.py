@@ -439,6 +439,9 @@ def get_feed():
                 "fire_count": post.get("fire_count", 0),
                 "view_count": post.get("view_count", 0),
             })
+        summaries = app.db.get_summaries_for_posts(conn, [p["id"] for p in result])
+        for p in result:
+            p["summary"] = summaries.get(p["id"])
         result.sort(
             key=lambda x: datetime.fromisoformat(x["published_at"]),
             reverse=True,
@@ -473,6 +476,9 @@ def get_individuals_feed():
                 "fire_count": post.get("fire_count", 0),
                 "view_count": post.get("view_count", 0),
             })
+        summaries = app.db.get_summaries_for_posts(conn, [p["id"] for p in result])
+        for p in result:
+            p["summary"] = summaries.get(p["id"])
         result.sort(key=lambda x: datetime.fromisoformat(x["published_at"]), reverse=True)
         return jsonify(result[:limit])
     finally:
@@ -815,6 +821,9 @@ def suggested_feed():
             })
         feed.sort(key=lambda x: datetime.fromisoformat(x["published_at"]), reverse=True)
         feed = feed[:limit]
+        summaries = app.db.get_summaries_for_posts(conn, [p["id"] for p in feed])
+        for p in feed:
+            p["summary"] = summaries.get(p["id"])
     finally:
         conn.close()
 
@@ -1111,6 +1120,37 @@ def _extract_article_content(url):
         div.unwrap()
 
     return str(soup)
+
+
+@app.route("/posts/<int:post_id>/summary", methods=["GET"])
+def get_post_summary(post_id):
+    conn = app.db.get_connection()
+    try:
+        summary = app.db.get_post_summary(conn, post_id)
+        if summary:
+            return jsonify({"summary": summary})
+    finally:
+        conn.close()
+
+    # Not cached — generate via Gemini
+    try:
+        from llm import summarize_article, PostNotFoundError, ContentExtractionError
+        summary = summarize_article(post_id)
+    except PostNotFoundError:
+        return jsonify({"error": "Post not found"}), 404
+    except ContentExtractionError as e:
+        return jsonify({"error": str(e)}), 422
+    except Exception as e:
+        app.logger.error("Summary generation failed for post %s: %s", post_id, e)
+        return jsonify({"error": "Failed to generate summary"}), 500
+
+    conn = app.db.get_connection()
+    try:
+        app.db.save_post_summary(conn, post_id, summary)
+    finally:
+        conn.close()
+
+    return jsonify({"summary": summary})
 
 
 @app.route("/posts/<int:post_id>/content", methods=["GET"])
@@ -1449,6 +1489,7 @@ def most_liked_feed():
     conn = app.db.get_connection()
     try:
         posts = app.db.get_most_liked_this_month(conn, limit=limit)
+        summaries = app.db.get_summaries_for_posts(conn, [p["id"] for p in posts])
         return jsonify([{
             "id": post["id"],
             "url": post["url"],
@@ -1461,6 +1502,7 @@ def most_liked_feed():
             "recent_like_count": post["recent_like_count"],
             "fire_count": post.get("fire_count", 0),
             "view_count": post.get("view_count", 0),
+            "summary": summaries.get(post["id"]),
         } for post in posts])
     finally:
         conn.close()
@@ -1472,6 +1514,7 @@ def recommended_feed():
     conn = app.db.get_connection()
     try:
         posts = app.db.get_recommended_by_fire(conn, limit=limit)
+        summaries = app.db.get_summaries_for_posts(conn, [p["id"] for p in posts])
         return jsonify([{
             "id": post["id"],
             "url": post["url"],
@@ -1483,6 +1526,7 @@ def recommended_feed():
             "like_count": post.get("like_count", 0),
             "fire_count": post.get("fire_count", 0),
             "view_count": post.get("view_count", 0),
+            "summary": summaries.get(post["id"]),
         } for post in posts])
     finally:
         conn.close()
@@ -1494,6 +1538,7 @@ def most_liked_all_time_feed():
     conn = app.db.get_connection()
     try:
         posts = app.db.get_most_liked_all_time(conn, limit=limit)
+        summaries = app.db.get_summaries_for_posts(conn, [p["id"] for p in posts])
         return jsonify([{
             "id": post["id"],
             "url": post["url"],
@@ -1505,6 +1550,7 @@ def most_liked_all_time_feed():
             "like_count": post["like_count"],
             "fire_count": post.get("fire_count", 0),
             "view_count": post.get("view_count", 0),
+            "summary": summaries.get(post["id"]),
         } for post in posts])
     finally:
         conn.close()

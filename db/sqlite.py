@@ -234,9 +234,42 @@ class SQLiteDatabase:
             )
         """)
 
+        c.execute("""
+            CREATE TABLE IF NOT EXISTS post_summaries (
+                post_id    INTEGER PRIMARY KEY,
+                summary    TEXT    NOT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (post_id) REFERENCES posts(id)
+            )
+        """)
+
         logger.info(f"SQLite database initialized Successfully")
         conn.commit()
         conn.close()
+
+    def get_summaries_for_posts(self, conn, post_ids):
+        """Return {post_id: summary} for all post_ids that have a cached summary."""
+        if not post_ids:
+            return {}
+        placeholders = ",".join("?" * len(post_ids))
+        rows = conn.execute(
+            f"SELECT post_id, summary FROM post_summaries WHERE post_id IN ({placeholders})",
+            post_ids,
+        ).fetchall()
+        return {row["post_id"]: row["summary"] for row in rows}
+
+    def get_post_summary(self, conn, post_id):
+        row = conn.execute(
+            "SELECT summary FROM post_summaries WHERE post_id = ?", (post_id,)
+        ).fetchone()
+        return row["summary"] if row else None
+
+    def save_post_summary(self, conn, post_id, summary):
+        conn.execute(
+            "INSERT OR REPLACE INTO post_summaries (post_id, summary) VALUES (?, ?)",
+            (post_id, summary),
+        )
+        conn.commit()
 
     def get_connection(self):
         """

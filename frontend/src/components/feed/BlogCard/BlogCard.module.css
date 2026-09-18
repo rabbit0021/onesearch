@@ -1,3 +1,20 @@
+/* ── Flip container ── */
+.cardPerspective {
+  perspective: 1000px;
+}
+
+.cardOuter {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cardFlipped {
+  transform: rotateY(180deg);
+  height: 400px;
+  z-index: 5;
+}
+
 .card {
   display: flex;
   flex-direction: column;
@@ -8,12 +25,36 @@
   color: inherit;
   transition: box-shadow 0.18s, transform 0.18s;
   border-left: .1px solid var(--card-accent, #A0A0A0);
-  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
-.card:hover {
-  box-shadow: none;
+.cardFront {
+  position: relative;
+}
+
+.cardFront:hover {
   transform: translateY(-2px);
+}
+
+.cardBack {
+  position: absolute;
+  inset: 0;
+  transform: rotateY(180deg);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.cardBack > * {
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.cardBackVisible > * {
+  opacity: 1;
 }
 
 /* ── Thumbnail (hidden — publisher icon now lives in .cardHeader) ── */
@@ -256,16 +297,17 @@
   flex-direction: column;
   gap: 0.6rem;
   flex: 1;
+  position: relative;
   overflow: visible;
 }
 
 .meta {
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  gap: 0.5rem;
-  min-height: 30px;
+  gap: 0.35rem 0.5rem;
   overflow: visible;
 }
 
@@ -274,8 +316,8 @@
   flex-direction: row;
   gap: 8px;
   align-items: center;
-  flex: 1;
   min-width: 0;
+  flex-shrink: 1;
 }
 
 .publisher {
@@ -315,6 +357,186 @@
   font-weight: 500;
   flex: 1;
 }
+
+
+/* ── Flip back button ── */
+.flipBack {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: var(--fs-lg);
+  cursor: pointer;
+  padding: 2px 6px;
+  line-height: 1;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+
+.flipBack:hover {
+  color: var(--text-base);
+}
+
+/* ── Summary back face content ── */
+.summaryBack {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.75rem 1rem 1.25rem;
+  font-size: var(--fs-std);
+  color: var(--text-base);
+  line-height: 1.65;
+}
+
+.summaryBack p { margin: 0 0 0.4rem; }
+
+.summaryBack ul {
+  margin: 0.3rem 0 0 1rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.summaryBack li { line-height: 1.5; }
+
+.summaryBack code {
+  font-family: inherit;
+  font-size: var(--fs-xs);
+  background: var(--card-hint);
+  color: var(--card-tag);
+  padding: 1px 4px;
+  border-radius: 2px;
+}
+
+/* ── Summarize widget button ── */
+
+@keyframes botWakeUp {
+  0%   { transform: scale(0.5) translateY(4px); opacity: 0; }
+  60%  { transform: scale(1.2) translateY(-2px); opacity: 1; }
+  80%  { transform: scale(0.95) translateY(0); }
+  100% { transform: scale(1) translateY(0); }
+}
+
+@keyframes botIdleBob {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-2px); }
+}
+
+@keyframes widgetTextIn {
+  from { opacity: 0; transform: translateX(-6px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.summaryWidget {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: linear-gradient(to bottom, transparent, var(--card-bg) 50%);
+  border: none;
+  border-radius: 0;
+  color: var(--text-base);
+  font-family: inherit;
+  font-size: var(--fs-xs);
+  letter-spacing: 0.05em;
+  padding: 3rem 1rem 0.75rem;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 2;
+  transition: opacity 0.2s ease;
+}
+
+.summaryWidgetVisible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (hover: none) {
+  .summaryWidget {
+    position: static;
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+    background: none;
+    padding: 0 1rem 0.75rem;
+    animation: none;
+  }
+  .summaryBotIcon {
+    animation: none !important;
+  }
+  .summaryWidgetText {
+    animation: none !important;
+    background: none;
+    -webkit-text-fill-color: var(--text-base);
+  }
+}
+
+.summaryBotIcon {
+  display: flex;
+  align-items: center;
+  line-height: 0;
+  transition: transform 0.2s ease;
+}
+
+.summaryWidgetVisible .summaryBotIcon {
+  animation: botWakeUp 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both,
+             botIdleBob 1.8s ease-in-out 0.65s infinite;
+}
+
+.summaryWidget:hover .summaryBotIcon {
+  animation: none;
+  transform: scale(1.2);
+}
+
+.summaryWidgetText {
+  animation: widgetTextIn 0.3s ease 0.2s both;
+  background: linear-gradient(
+    90deg,
+    var(--text-base) 0%,
+    var(--text-base) 30%,
+    color-mix(in srgb, var(--text-base) 40%, var(--card-bg)) 50%,
+    var(--text-base) 70%,
+    var(--text-base) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: widgetTextIn 0.3s ease 0.2s both,
+             shimmer 2.5s linear 0.5s infinite;
+}
+
+/* ── Loading dots ── */
+.summaryLoading {
+  display: contents;
+}
+
+.summaryDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  opacity: 0.4;
+  animation: dotPulse 1.2s ease-in-out infinite;
+}
+
+.summaryDot:nth-child(2) { animation-delay: 0.2s; }
+.summaryDot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes dotPulse {
+  0%, 80%, 100% { opacity: 0.2; transform: scale(0.85); }
+  40%           { opacity: 1;   transform: scale(1); }
+}
+
 
 .tags {
   display: flex;
