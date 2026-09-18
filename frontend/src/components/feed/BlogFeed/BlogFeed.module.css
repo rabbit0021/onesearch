@@ -528,8 +528,8 @@
 }
 
 .scrollCard {
-  flex: 0 0 210px;
-  width: 210px;
+  flex: 0 0 340px;
+  width: 340px;
   transition: flex-basis 0.45s cubic-bezier(0.4, 0, 0.2, 1), width 0.45s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
