@@ -1,0 +1,88 @@
+.handle {
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  height: 100vh;
+  width: 16px;
+  flex: 0 0 16px;
+  cursor: col-resize;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  background: transparent;
+  border-left: 1px solid transparent;
+  border-right: 1px solid transparent;
+  transition: background 0.25s, border-color 0.25s;
+}
+
+.handle:hover {
+  background: var(--bg-disabled);
+  border-color: var(--border-mid);
+}
+
+/* center line — always subtly visible */
+.track {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1px;
+  background: var(--border-mid);
+  opacity: 0.5;
+  pointer-events: none;
+  transition: opacity 0.25s;
+}
+
+.handle:hover .track {
+  opacity: 1;
+}
+
+/* collapse button — always visible, minimal at rest */
+.collapseBtn {
+  position: relative;
+  z-index: 1;
+  width: 20px;
+  height: 32px;
+  border-radius: 2px;
+  border: 1px solid var(--border-mid);
+  background: var(--bg-page);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+
+.collapseBtn:hover {
+  background: var(--bg-surface);
+  border-color: var(--border-strong);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
+
+/* chevron */
+.arrow {
+  display: block;
+  width: 5px;
+  height: 5px;
+  border-top: 1.5px solid var(--text-muted);
+  border-right: 1.5px solid var(--text-muted);
+  transition: transform 0.2s;
+}
+
+.arrowLeft {
+  transform: rotate(-135deg) translateX(1px);
+}
+
+.arrowRight {
+  transform: rotate(45deg) translateX(-1px);
+}
+
+@media (max-width: 768px) {
+  .handle {
+    display: none;
+  }
+}

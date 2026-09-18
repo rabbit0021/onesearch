@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
+import ResizeHandle from '../../components/layout/ResizeHandle/ResizeHandle'
 import { subscribe, getSubscriptionsForEmail } from '../../api'
 import { useToast } from '../../context/ToastContext'
 
@@ -34,6 +35,50 @@ export default function Home() {
   const [frequency, setFrequency] = useState(2)
   const [existingSubs, setExistingSubs] = useState(null)
   const [submitting, setSubmitting] = useState(false)
+
+  // Resize / collapse state
+  const [formWidth, setFormWidth] = useState(35) // percent
+  const [formCollapsed, setFormCollapsed] = useState(false)
+  const layoutRef = useRef(null)
+  const isDragging = useRef(false)
+  const dragStartX = useRef(0)
+  const dragStartWidth = useRef(0)
+  const dragTotalWidth = useRef(0)
+
+  function onResizeStart(e) {
+    isDragging.current = true
+    dragStartX.current = e.clientX
+    dragStartWidth.current = formWidth
+    dragTotalWidth.current = layoutRef.current ? layoutRef.current.offsetWidth : window.innerWidth
+    document.body.style.cursor = 'col-resize'
+    document.body.style.userSelect = 'none'
+  }
+
+  useEffect(() => {
+    function onMouseMove(e) {
+      if (!isDragging.current) return
+      const delta = e.clientX - dragStartX.current
+      const newPct = Math.min(55, Math.max(15, dragStartWidth.current + (delta / dragTotalWidth.current) * 100))
+      setFormWidth(newPct)
+      if (formCollapsed) setFormCollapsed(false)
+    }
+    function onMouseUp() {
+      if (!isDragging.current) return
+      isDragging.current = false
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+    }
+    window.addEventListener('mousemove', onMouseMove)
+    window.addEventListener('mouseup', onMouseUp)
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove)
+      window.removeEventListener('mouseup', onMouseUp)
+    }
+  }, [formCollapsed])
+
+  function toggleCollapse() {
+    setFormCollapsed(c => !c)
+  }
 
   // Sidebar state
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -112,8 +157,14 @@ export default function Home() {
       <Sidebar open={sidebarOpen} onClose={closeSidebar} toggleRef={toggleRef} />
 
       <main className={styles.container}>
-        <div className={styles.layout}>
-          <div className={styles.formWrapper}>
+        <div className={styles.layout} ref={layoutRef}>
+          <div
+            className={styles.formWrapper}
+            style={formCollapsed
+              ? { flex: '0 0 0px', overflow: 'hidden', opacity: 0, minWidth: 0, padding: 0 }
+              : { flex: `0 0 ${formWidth}%`, transition: isDragging.current ? 'none' : undefined }
+            }
+          >
             {/* Mobile: header + action buttons inline */}
             <div className={styles.mobileHeaderRow}>
               <Header />
@@ -160,6 +211,8 @@ export default function Home() {
               </button>
             </form>
           </div>
+
+          <ResizeHandle onResizeStart={onResizeStart} collapsed={formCollapsed} onCollapse={toggleCollapse} />
 
           <div className={styles.feedWrapper}>
             <BlogFeed />
