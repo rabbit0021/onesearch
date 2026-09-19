@@ -6,6 +6,8 @@ import { useTheme } from '../../context/ThemeContext'
 import { useToast } from '../../context/ToastContext'
 import ThemeSwitcher from '../../components/layout/ThemeSwitcher/ThemeSwitcher'
 import hljs from 'highlight.js/lib/common'
+import katex from 'katex'
+import 'katex/dist/katex.min.css'
 import lightThemeCss from 'highlight.js/styles/github.min.css?inline'
 import darkThemeCss from 'highlight.js/styles/github-dark-dimmed.min.css?inline'
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
@@ -465,6 +467,34 @@ export default function ReaderPage() {
       hljs.highlightElement(block)
     })
   }, [content, darkMode])
+
+  // Render LaTeX math after content loads
+  useEffect(() => {
+    if (!content || !contentRef.current) return
+    const el = contentRef.current
+    // Walk all text nodes and replace $$...$$ (display) and $...$ (inline)
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT)
+    const nodes = []
+    while (walker.nextNode()) nodes.push(walker.currentNode)
+    nodes.forEach(node => {
+      const text = node.textContent
+      if (!text.includes('$')) return
+      const html = text
+        .replace(/\$\$([^$]+)\$\$/g, (_, tex) => {
+          try { return katex.renderToString(tex.trim(), { displayMode: true, throwOnError: false }) }
+          catch { return _ }
+        })
+        .replace(/\$([^$\n]+)\$/g, (_, tex) => {
+          try { return katex.renderToString(tex.trim(), { displayMode: false, throwOnError: false }) }
+          catch { return _ }
+        })
+      if (html !== text) {
+        const span = document.createElement('span')
+        span.innerHTML = html
+        node.parentNode.replaceChild(span, node)
+      }
+    })
+  }, [content])
 
   if (!post) {
     return (

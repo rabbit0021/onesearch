@@ -1020,10 +1020,22 @@ def _extract_article_content(url):
         _absolutize_srcset(el, url)
 
     # ── Collect figure media from original HTML (readability strips images from figures) ──
+    def _find_real_img(fig):
+        """Return the real image, skipping low-res placeholder imgs (data: URI, aria-hidden, data-image-placeholder)."""
+        for img in fig.find_all('img'):
+            if img.get('data-image-placeholder') is not None:
+                continue
+            if img.get('src', '').startswith('data:'):
+                continue
+            if img.get('aria-hidden') == 'true':
+                continue
+            return img
+        return fig.find('img')  # fallback to first img if no real one found
+
     orig_figure_media = []
     for fig in pre_soup.find_all('figure'):
         pic = fig.find('picture')
-        img_tag = fig.find('img')
+        img_tag = _find_real_img(fig)
         if pic:
             orig_figure_media.append(str(pic))
         elif img_tag:
@@ -1194,6 +1206,27 @@ def get_post_content(post_id):
         content = str(soup)
 
     return jsonify({"content": content, "url": url})
+
+
+@app.route("/api/img-proxy", methods=["GET"])
+def img_proxy():
+    import requests as req
+    from urllib.parse import unquote
+    img_url = request.args.get('url', '')
+    if not img_url or not img_url.startswith('http'):
+        return '', 400
+    try:
+        r = req.get(img_url, timeout=10, headers={
+            'User-Agent': 'Mozilla/5.0',
+            'Referer': img_url,
+        }, stream=True)
+        return Response(
+            r.content,
+            content_type=r.headers.get('Content-Type', 'image/jpeg'),
+            headers={'Cache-Control': 'public, max-age=86400'}
+        )
+    except Exception:
+        return '', 502
 
 
 @app.route("/api/tts/<int:post_id>", methods=["POST"])
