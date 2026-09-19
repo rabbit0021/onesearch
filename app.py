@@ -1648,6 +1648,38 @@ def chat_with_article(post_id):
         return jsonify({"error": "Failed to get answer"}), 500
 
 
+@app.route("/api/convert-code", methods=["POST"])
+def convert_code():
+    data = request.get_json(silent=True) or {}
+    code = (data.get("code") or "").strip()
+    target_lang = (data.get("target_lang") or "").strip()
+    if not code or not target_lang:
+        return jsonify({"error": "code and target_lang required"}), 400
+    if len(code) > 8000:
+        return jsonify({"error": "Code too long (max 8000 chars)"}), 400
+
+    try:
+        import llm
+
+        def generate():
+            try:
+                for chunk in llm.convert_code_stream(code, target_lang):
+                    yield f"data: {json.dumps({'chunk': chunk})}\n\n"
+            except Exception as e:
+                app.logger.error("Code conversion error: %s", e)
+                yield f"data: {json.dumps({'error': 'Conversion failed'})}\n\n"
+            yield "data: [DONE]\n\n"
+
+        return Response(
+            stream_with_context(generate()),
+            mimetype="text/event-stream",
+            headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+        )
+    except Exception as e:
+        app.logger.error("Convert code error: %s", e)
+        return jsonify({"error": "Conversion failed"}), 500
+
+
 if __name__ == "__main__":
     if os.getenv("FLASK_ENV") == "Production":
         app.run()

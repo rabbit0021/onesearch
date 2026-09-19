@@ -808,18 +808,18 @@
 
 /* Block code */
 .articleContent pre {
-  background: var(--bg-surface);
-  color: var(--text-dim);
-  border: 1px solid var(--border-mid);
+  position: relative;
+  border: 1px solid color-mix(in srgb, #A0A0A0 25%, transparent);
   border-left: 3px solid var(--color-primary);
-  border-radius: 4px;
-  padding: 1.1rem 1.25rem;
+  border-radius: 6px;
+  padding: 0.6rem 1.25rem 1.1rem;
   overflow-x: auto;
-  margin: 1.5rem 0;
-  line-height: 1.65;
   -webkit-overflow-scrolling: touch;
-  background-color: var(--bg-wizard);
-  font-family: 'Courier Prime', 'Courier', 'IBM Plex Mono', 'JetBrains Mono', 'Space Mono', 'Share Tech Mono', monospace;
+  margin: 1.5rem 0;
+  line-height: 1.7;
+  font-family: 'Fira Code', 'Cascadia Code', 'JetBrains Mono', 'IBM Plex Mono', monospace;
+  font-size: calc(1em * 0.88);
+  background: linear-gradient(to bottom, color-mix(in srgb, #A0A0A0 10%, var(--card-bg)), var(--card-bg));
 }
 
 .articleContent pre code {
@@ -830,6 +830,9 @@
   font-size: inherit;
   white-space: pre;
 }
+
+
+/* .copyCodeBtn and .codeToolbar are injected globally via CODE_TOOLBAR_CSS in ReaderPage.jsx */
 
 /* Blockquotes */
 .articleContent blockquote {

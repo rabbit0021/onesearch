@@ -5,9 +5,9 @@ import { getPostContent, sendReadEvent, getReadEvent, getOrCreateDeviceId, askAr
 import { useTheme } from '../../context/ThemeContext'
 import { useToast } from '../../context/ToastContext'
 import ThemeSwitcher from '../../components/layout/ThemeSwitcher/ThemeSwitcher'
-import hljs from 'highlight.js/lib/common'
 import katex from 'katex'
 import 'katex/dist/katex.min.css'
+import hljs from 'highlight.js/lib/common'
 import lightThemeCss from 'highlight.js/styles/github.min.css?inline'
 import darkThemeCss from 'highlight.js/styles/github-dark-dimmed.min.css?inline'
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
@@ -17,6 +17,31 @@ import { useVoiceCommands, voiceCommandsSupported } from './useVoiceCommands'
 
 // Override hljs background so our CSS variable shows through
 const HLJS_BG_OVERRIDE = '\n.hljs { background: transparent !important; }\n'
+
+const CODE_TOOLBAR_CSS = `
+.codeToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-bottom: 0.4rem;
+}
+.copyCodeBtn {
+  background: transparent;
+  border: 1px solid rgba(128,128,128,0.3);
+  border-radius: 4px;
+  color: inherit;
+  opacity: 0.5;
+  padding: 3px 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  line-height: 0;
+  transition: opacity 0.15s, color 0.15s, border-color 0.15s;
+}
+.copyCodeBtn:hover { opacity: 1; }
+.copyCodeBtn.copied { color: #3c933f; border-color: #3c933f; opacity: 1; }
+`
+
 
 const DEFAULT_READING_SPEED = 200 // words per minute — override per-user when personalisation is added
 
@@ -433,17 +458,6 @@ export default function ReaderPage() {
     return () => el.removeEventListener('scroll', onScroll)
   }, [])
 
-  // Swap highlight.js theme when dark/light mode changes
-  useEffect(() => {
-    let style = document.getElementById('hljs-theme')
-    if (!style) {
-      style = document.createElement('style')
-      style.id = 'hljs-theme'
-      document.head.appendChild(style)
-    }
-    style.textContent = (darkMode ? darkThemeCss : lightThemeCss) + HLJS_BG_OVERRIDE
-    return () => { /* keep the style tag, just update it */ }
-  }, [darkMode])
 
   useEffect(() => {
     if (!post) return
@@ -458,13 +472,61 @@ export default function ReaderPage() {
       .finally(() => setLoading(false))
   }, [post?.id])
 
+  // Swap highlight.js theme when dark/light mode changes
+  useEffect(() => {
+    let style = document.getElementById('hljs-theme')
+    if (!style) {
+      style = document.createElement('style')
+      style.id = 'hljs-theme'
+      document.head.appendChild(style)
+    }
+    style.textContent = (darkMode ? darkThemeCss : lightThemeCss) + HLJS_BG_OVERRIDE + CODE_TOOLBAR_CSS
+  }, [darkMode])
+
   // Run syntax highlighting after content renders, and re-run when theme switches
   useEffect(() => {
     if (!content || !contentRef.current) return
-    contentRef.current.querySelectorAll('pre code').forEach(block => {
-      // Reset any previous highlight so hljs re-parses cleanly
+    const root = contentRef.current
+
+    // Strip source-site copy buttons (outside or inside pre)
+    root.querySelectorAll('button, [class*="copy"], [data-clipboard]').forEach(el => {
+      if (el.classList.contains('copyCodeBtn') || el.classList.contains('codeLangSelect')) return
+      const txt = el.textContent.trim().toLowerCase()
+      if (txt === 'copy' || txt === 'copied' || txt === '') el.remove()
+    })
+
+    root.querySelectorAll('pre code').forEach(block => {
+      const pre = block.closest('pre')
+      if (!pre) return
+
+      // Skip if toolbar already injected (re-run guard)
+      if (pre.querySelector('.codeToolbar')) return
+
+      // Highlight
       block.removeAttribute('data-highlighted')
       hljs.highlightElement(block)
+      // hljs.highlightElement stores result on block.result
+      // Copy button
+      const btn = document.createElement('button')
+      btn.className = 'copyCodeBtn'
+      btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'
+      btn.addEventListener('click', e => {
+        e.stopPropagation()
+        navigator.clipboard.writeText(block.innerText).then(() => {
+          btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+          btn.classList.add('copied')
+          setTimeout(() => {
+            btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'
+            btn.classList.remove('copied')
+          }, 2000)
+        })
+      })
+
+      // Toolbar: copy button only
+      const toolbar = document.createElement('div')
+      toolbar.className = 'codeToolbar'
+      toolbar.appendChild(btn)
+      pre.insertBefore(toolbar, pre.firstChild)
     })
   }, [content, darkMode])
 
@@ -479,13 +541,15 @@ export default function ReaderPage() {
     nodes.forEach(node => {
       const text = node.textContent
       if (!text.includes('$')) return
+      // Strip Cloudflare's $$m ... m$$ marker pattern
+      const cleanTex = (tex) => tex.trim().replace(/^m\s*/, '').replace(/\s*m$/, '').trim()
       const html = text
         .replace(/\$\$([^$]+)\$\$/g, (_, tex) => {
-          try { return katex.renderToString(tex.trim(), { displayMode: true, throwOnError: false }) }
+          try { return katex.renderToString(cleanTex(tex), { displayMode: true, throwOnError: false }) }
           catch { return _ }
         })
         .replace(/\$([^$\n]+)\$/g, (_, tex) => {
-          try { return katex.renderToString(tex.trim(), { displayMode: false, throwOnError: false }) }
+          try { return katex.renderToString(cleanTex(tex), { displayMode: false, throwOnError: false }) }
           catch { return _ }
         })
       if (html !== text) {

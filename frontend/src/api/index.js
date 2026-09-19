@@ -353,6 +353,37 @@ export async function recordView(postId, userIdentifier, deviceId) {
   })
 }
 
+export async function convertCodeStream(code, targetLang, onChunk, signal) {
+  const res = await fetch('/api/convert-code', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code, target_lang: targetLang }),
+    signal,
+  })
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}))
+    throw new Error(body.error || 'Conversion failed')
+  }
+  const reader = res.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ''
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+    buffer += decoder.decode(value, { stream: true })
+    const lines = buffer.split('\n')
+    buffer = lines.pop()
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue
+      const data = line.slice(6).trim()
+      if (data === '[DONE]') return
+      const parsed = JSON.parse(data)
+      if (parsed.error) throw new Error(parsed.error)
+      if (parsed.chunk) onChunk(parsed.chunk)
+    }
+  }
+}
+
 export async function updatePost(id, topic, tags, secretKey, fireCount) {
   const res = await fetch(`/posts/${id}`, {
     method: 'PATCH',

@@ -162,3 +162,23 @@ def ask_article_stream(post_id, question, history=None):
             "total_tokens":  getattr(usage, "total_token_count", None),
             "model":         _MODEL,
         }}
+
+
+def convert_code_stream(code: str, target_lang: str):
+    """Stream code conversion to target language."""
+    prompt = (
+        f"Convert the following code to {target_lang}. "
+        "Preserve the logic exactly. Return ONLY the converted code with no explanation, "
+        "no markdown fences, no comments added — just the raw converted code.\n\n"
+        f"{code}"
+    )
+    for chunk in _client.models.generate_content_stream(
+        model=_MODEL,
+        contents=prompt,
+        config=types.GenerateContentConfig(
+            temperature=0.1,
+            max_output_tokens=2048,
+        ),
+    ):
+        if chunk.text:
+            yield chunk.text
