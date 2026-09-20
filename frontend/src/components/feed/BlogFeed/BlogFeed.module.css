@@ -5,6 +5,7 @@
   margin: 0 0rem;
   padding: 0 .5rem .5rem;
   box-sizing: border-box;
+  width: 100%;
 }
 
 @media (max-width: 768px) {
