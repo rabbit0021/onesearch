@@ -151,6 +151,11 @@ export function faviconUrl(postUrl) {
   }
 }
 
+export function publisherIconUrl(publisher) {
+  if (!publisher) return null
+  return `https://cdn.simpleicons.org/${encodeURIComponent(publisher.toLowerCase().replace(/\s+/g, ''))}`
+}
+
 export function fireToStars(fireCount) {
   if (!fireCount || fireCount <= 0) return 0
   if (fireCount <= 20) return 1
@@ -177,6 +182,7 @@ export default function BlogCard({ post, readProgress, likedPostIds = new Set(),
   const color = palette[post.topic] || palette['General']
   const accent = PALETTES.sunset[post.topic] || PALETTES.sunset['General']
   const favicon = faviconUrl(post.url)
+  const publisherIcon = publisherIconUrl(post.publisher)
   const individualMeta = INDIVIDUALS_META[post.publisher?.toLowerCase()]
   const individualThumb = individualMeta?.image?.replace(/(\.[^.]+)$/, '-thumb$1')
   const tags = post.tags ? post.tags.split(',').map(t => t.trim()).filter(Boolean) : []
@@ -351,12 +357,12 @@ export default function BlogCard({ post, readProgress, likedPostIds = new Set(),
                 style={{ cursor: 'pointer' }}
               />
             </div>
-          ) : favicon ? (
+          ) : publisherIcon ? (
             <img
-              src={favicon}
+              src={publisherIcon}
               alt=""
               className={styles.favicon}
-              onError={e => { e.currentTarget.style.display = 'none' }}
+              onError={e => { e.currentTarget.src = favicon || ''; if (!favicon) e.currentTarget.style.display = 'none' }}
             />
           ) : null}
           <span className={styles.publisherName}>{post.publisher}</span>
@@ -470,8 +476,8 @@ export default function BlogCard({ post, readProgress, likedPostIds = new Set(),
         <div className={styles.cardHeader}>
           {individualThumb ? (
             <img src={individualThumb} alt={post.publisher} className={styles.individualAvatar} onError={e => { e.currentTarget.style.display = 'none' }} />
-          ) : favicon ? (
-            <img src={favicon} alt="" className={styles.favicon} onError={e => { e.currentTarget.style.display = 'none' }} />
+          ) : publisherIcon ? (
+            <img src={publisherIcon} alt="" className={styles.favicon} onError={e => { e.currentTarget.src = favicon || ''; if (!favicon) e.currentTarget.style.display = 'none' }} />
           ) : null}
           <span className={styles.publisherName}>{post.publisher}</span>
           <button className={styles.flipBack} onClick={handleFlipBack} title="Back to article">&#x2715;</button>
