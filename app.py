@@ -21,6 +21,8 @@ from datetime import timezone
 from db import get_database
 import time
 from functools import wraps
+import hmac
+from hmac import compare_digest
 from auth import jira_bp
 from classifier import get_embedding
 import numpy as np
@@ -38,6 +40,28 @@ _otp_lock  = threading.Lock()
 
 # In-memory job store: job_id -> {status, logs, job, cancel_event}
 _jobs = {}
+
+# Simple in-memory rate limiter: { (ip, endpoint) -> [timestamps] }
+_rate_store: dict = {}
+_rate_lock = threading.Lock()
+
+def _check_rate_limit(endpoint: str, max_calls: int, window_secs: int) -> bool:
+    """Return True if allowed, False if rate limit exceeded."""
+    # X-Real-IP is set by nginx (trusted); remote_addr fallback for local dev
+    ip = request.headers.get("X-Real-IP") or request.remote_addr or "unknown"
+    key = (ip, endpoint)
+    now = time.time()
+    with _rate_lock:
+        timestamps = _rate_store.get(key, [])
+        timestamps = [t for t in timestamps if now - t < window_secs]
+        if len(timestamps) >= max_calls:
+            _rate_store[key] = timestamps
+            logger.warning("Rate limit hit: ip=%s endpoint=%s calls=%d window=%ds", ip, endpoint, len(timestamps), window_secs)
+            return False
+        timestamps.append(now)
+        _rate_store[key] = timestamps
+        logger.info("Rate check: ip=%s endpoint=%s calls=%d/%d", ip, endpoint, len(timestamps), max_calls)
+    return True
 
 class JobCancelledError(Exception):
     pass
@@ -95,8 +119,8 @@ register_middlewares(app)
 def require_secret_key(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        key = request.headers.get("X-SECRET-KEY")
-        if key != SECRET_KEY:
+        key = request.headers.get("X-SECRET-KEY") or ""
+        if not compare_digest(key, SECRET_KEY):
             return jsonify({"status": "error", "message": "Unauthorized"}), 401
         return f(*args, **kwargs)
     return decorated
@@ -670,8 +694,8 @@ def cancel_job(job_id):
 
 @app.route("/admin/jobs/<job_id>/stream")
 def stream_job(job_id):
-    key = request.args.get('key', '')
-    if key != SECRET_KEY:
+    key = request.headers.get("X-SECRET-KEY") or request.args.get('key', '')
+    if not compare_digest(key, SECRET_KEY):
         return jsonify({"error": "Unauthorized"}), 401
 
     def generate():
@@ -1153,6 +1177,8 @@ def _extract_article_content(url):
 
 @app.route("/posts/<int:post_id>/summary", methods=["GET"])
 def get_post_summary(post_id):
+    if not _check_rate_limit("summary", max_calls=10, window_secs=60):
+        return jsonify({"error": "Too many requests. Please slow down."}), 429
     device_id = request.args.get("device_id") or None
     conn = app.db.get_connection()
     try:
@@ -1242,21 +1268,38 @@ def get_post_content(post_id):
     return jsonify({"content": content, "url": url})
 
 
+_IMG_PROXY_ALLOWED_HOSTS = {
+    'miro.medium.com', 'medium.com', 'cdn-images-1.medium.com',
+    'substackcdn.com', 'substack-post-media.s3.amazonaws.com',
+    'cdn.simpleicons.org', 'www.google.com',
+    'engineering.atspotify.com', 'engineering.fb.com',
+    'blog.cloudflare.com', 'netflixtechblog.com',
+    'shopify.engineering', 'airbnb.io',
+}
+_IMG_CONTENT_TYPES = {'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml', 'image/x-icon'}
+
 @app.route("/api/img-proxy", methods=["GET"])
 def img_proxy():
     import requests as req
-    from urllib.parse import unquote
+    from urllib.parse import urlparse
     img_url = request.args.get('url', '')
-    if not img_url or not img_url.startswith('http'):
+    if not img_url:
         return '', 400
     try:
-        r = req.get(img_url, timeout=10, headers={
-            'User-Agent': 'Mozilla/5.0',
-            'Referer': img_url,
-        }, stream=True)
+        parsed = urlparse(img_url)
+        if parsed.scheme not in ('http', 'https'):
+            return '', 400
+        host = parsed.hostname or ''
+        # Allow exact match or subdomain of allowed hosts
+        if not any(host == h or host.endswith('.' + h) for h in _IMG_PROXY_ALLOWED_HOSTS):
+            return '', 403
+        r = req.get(img_url, timeout=10, headers={'User-Agent': 'Mozilla/5.0'}, stream=True)
+        ct = r.headers.get('Content-Type', '').split(';')[0].strip()
+        if ct not in _IMG_CONTENT_TYPES:
+            return '', 415
         return Response(
             r.content,
-            content_type=r.headers.get('Content-Type', 'image/jpeg'),
+            content_type=ct,
             headers={'Cache-Control': 'public, max-age=86400'}
         )
     except Exception:
@@ -1266,6 +1309,8 @@ def img_proxy():
 @app.route("/api/tts/<int:post_id>", methods=["POST"])
 def generate_post_tts(post_id):
     """Generate (or return cached) Google TTS audio for a post."""
+    if not _check_rate_limit("tts", max_calls=5, window_secs=60):
+        return jsonify({"error": "Too many requests. Please slow down."}), 429
     from tts_generator import generate_tts
 
     conn = app.db.get_connection()
@@ -1326,6 +1371,8 @@ def generate_post_tts(post_id):
 @app.route("/api/tts/<int:post_id>/stream", methods=["POST"])
 def stream_post_tts(post_id):
     """Stream TTS audio chunks via SSE as each chunk is synthesized."""
+    if not _check_rate_limit("tts", max_calls=5, window_secs=60):
+        return jsonify({"error": "Too many requests. Please slow down."}), 429
     import base64
     from tts_generator import generate_tts_stream
 
@@ -1642,6 +1689,8 @@ MAX_QUESTION_WORDS = 500
 
 @app.route("/api/chat/<int:post_id>", methods=["POST"])
 def chat_with_article(post_id):
+    if not _check_rate_limit("chat", max_calls=20, window_secs=60):
+        return jsonify({"error": "Too many requests. Please slow down."}), 429
     data = request.get_json(silent=True) or {}
     question = (data.get("question") or "").strip()
     history  = data.get("history") or []

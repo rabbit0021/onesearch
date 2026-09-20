@@ -14,24 +14,17 @@ import styles from './AdminPosts.module.css'
 
 const TABS = ['Posts', 'Publishers', 'Subscriptions', 'Notifications', 'Jobs', 'Feedback', 'Likes', 'Reading', 'Chat']
 const STORAGE_KEY = 'admin_secret_key'
-const TTL_MS = 3 * 24 * 60 * 60 * 1000 // 3 days
 
 function saveKey(key) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({ key, expires: Date.now() + TTL_MS }))
+  sessionStorage.setItem(STORAGE_KEY, key)
 }
 
 function loadKey() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return null
-    const { key, expires } = JSON.parse(raw)
-    if (Date.now() > expires) { localStorage.removeItem(STORAGE_KEY); return null }
-    return key
-  } catch { return null }
+  return sessionStorage.getItem(STORAGE_KEY) || null
 }
 
 function clearKey() {
-  localStorage.removeItem(STORAGE_KEY)
+  sessionStorage.removeItem(STORAGE_KEY)
 }
 
 export default function AdminPosts() {
