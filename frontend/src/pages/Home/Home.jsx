@@ -170,6 +170,7 @@ export default function Home() {
               <Header />
               <div className={styles.mobileActions}>
                 <JiraHeaderButton />
+                <LoginButton />
                 <ThemeSwitcher />
               </div>
             </div>

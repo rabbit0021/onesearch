@@ -6,6 +6,7 @@
   border: 1px solid var(--border-mid);
   border-top: 2px solid var(--color-primary);
   border-radius: 8px;
+  line-height: 1;
   background: transparent;
   color: var(--text-secondary);
   font-size: var(--fs-std);

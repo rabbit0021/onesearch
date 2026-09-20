@@ -197,10 +197,10 @@
   /* Show action buttons horizontally below the header */
   .mobileActions {
     display: flex;
-    flex-direction: column;
-    gap: 10px;
-    justify-content: flex-start;
-    align-items: flex-start;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
     margin-left: 5px;
   }
 
