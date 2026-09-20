@@ -147,8 +147,9 @@
   padding: 0.5rem 0.85rem 0.8rem;
   display: flex;
   flex-direction: column;
-  position: relative;
-  z-index: 2;
+  position: sticky;
+  top: 0;
+  z-index: 10;
   max-width: 100%;
 }
 
@@ -536,6 +537,23 @@
 .scrollCard:has([class*="cardFlipped"]) {
   flex: 0 0 min(560px, 80vw);
   width: min(560px, 80vw);
+}
+
+@media (max-width: 600px) {
+  .scrollRow {
+    margin-left: -0.5rem;
+    margin-right: -0.5rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  .scrollCard {
+    flex: 0 0 82vw;
+    width: 82vw;
+  }
+  .scrollCard:has([class*="cardFlipped"]) {
+    flex: 0 0 92vw;
+    width: 92vw;
+  }
 }
 
 

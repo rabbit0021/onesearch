@@ -475,8 +475,12 @@
   }
   .summaryWidgetText {
     animation: none !important;
-    background: none;
-    -webkit-text-fill-color: var(--text-base);
+    background: none !important;
+    background-clip: unset !important;
+    -webkit-background-clip: unset !important;
+    -webkit-text-fill-color: var(--text-base) !important;
+    color: var(--text-base);
+    font-weight: 700;
   }
 }
 

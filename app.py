@@ -1002,8 +1002,15 @@ def _extract_article_content(url):
     })
     response.raise_for_status()
     # requests defaults to ISO-8859-1 for text/html with no declared charset,
-    # which corrupts UTF-8 characters. Force UTF-8, fall back to detected encoding.
-    response.encoding = response.apparent_encoding or 'utf-8'
+    # which corrupts UTF-8 characters. Prefer the Content-Type charset, then
+    # UTF-8, only falling back to chardet detection as a last resort.
+    content_type_charset = response.encoding  # set by requests from Content-Type header
+    if content_type_charset and content_type_charset.lower() not in ('iso-8859-1', 'latin-1'):
+        # Trust explicit charset from server
+        pass
+    else:
+        # Server sent no charset or the default Latin-1; assume UTF-8 first
+        response.encoding = 'utf-8'
     html = response.text
 
     # ── Pre-process: fix lazy-loaded images BEFORE readability strips them ──

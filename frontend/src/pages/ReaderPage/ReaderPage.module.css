@@ -437,6 +437,7 @@
 .readerBody {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 2.5rem 1.25rem 5rem;
   scroll-behavior: smooth;
   overscroll-behavior: contain;

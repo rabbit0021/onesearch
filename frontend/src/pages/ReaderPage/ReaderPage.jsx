@@ -319,6 +319,7 @@ export default function ReaderPage() {
   const [slashIdx, setSlashIdx]       = useState(0)
   const chatBottomRef = useRef(null)
   const chatInputRef  = useRef(null)
+  const [kbOffset, setKbOffset] = useState(0) // px keyboard pushes up the chat panel
 
   // Refs needed by the reader hook — declared here so they're available to both
   // the hook and the rest of the component (scroll tracking, content rendering).
@@ -617,6 +618,20 @@ export default function ReaderPage() {
   useEffect(() => {
     if (!chatInput && chatInputRef.current) chatInputRef.current.style.height = 'auto'
   }, [chatInput])
+
+  // Lift chat panel above the virtual keyboard on mobile
+  useEffect(() => {
+    const vv = window.visualViewport
+    if (!vv) return
+    const onResize = () => {
+      // offsetTop accounts for pinch-zoom; keyboard shrinks vv.height
+      const kb = window.innerHeight - vv.height - vv.offsetTop
+      setKbOffset(kb > 0 ? kb : 0)
+    }
+    vv.addEventListener('resize', onResize)
+    vv.addEventListener('scroll', onResize)
+    return () => { vv.removeEventListener('resize', onResize); vv.removeEventListener('scroll', onResize) }
+  }, [])
 
   async function sendChatMessage(voiceText) {
     const q = (voiceText ?? chatInput).trim()
@@ -954,7 +969,7 @@ export default function ReaderPage() {
       )}
 
       {/* Article chat panel */}
-      <div className={`${styles.chatPanel} ${chatOpen ? styles.chatPanelOpen : ''}`}>
+      <div className={`${styles.chatPanel} ${chatOpen ? styles.chatPanelOpen : ''}`} style={kbOffset > 0 ? { bottom: kbOffset } : undefined}>
         <div className={styles.chatPanelHeader}>
           <span className={styles.chatPanelTitle}>Ask about this article</span>
           <button className={styles.chatPanelClose} onClick={() => setChatOpen(false)} aria-label="Close">×</button>
