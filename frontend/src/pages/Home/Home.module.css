@@ -236,7 +236,7 @@
 
 @media (max-width: 600px) {
   .container {
-    padding: 1rem 0.75rem;
+    padding: 1rem 0.2rem;
   }
 
   .form {
