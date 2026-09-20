@@ -388,6 +388,7 @@ def admin_chat_logs():
             SELECT
                 COUNT(*) AS total_queries,
                 COUNT(DISTINCT post_id) AS unique_posts,
+                COUNT(DISTINCT device_id) AS unique_chat_users,
                 COALESCE(SUM(input_tokens), 0)  AS total_input_tokens,
                 COALESCE(SUM(output_tokens), 0) AS total_output_tokens,
                 COALESCE(SUM(total_tokens), 0)  AS total_tokens
@@ -400,6 +401,15 @@ def admin_chat_logs():
         """)
         tts = dict(c.fetchone())
         summary.update(tts)
+        c.execute("""
+            SELECT
+                COUNT(*) AS total_summarizes,
+                COUNT(DISTINCT device_id) AS unique_summarize_users,
+                COUNT(DISTINCT post_id) AS unique_summarized_posts
+            FROM summarize_logs
+        """)
+        summarize_stats = dict(c.fetchone())
+        summary.update(summarize_stats)
         return jsonify({"logs": rows, "summary": summary})
     finally:
         conn.close()
@@ -1143,10 +1153,19 @@ def _extract_article_content(url):
 
 @app.route("/posts/<int:post_id>/summary", methods=["GET"])
 def get_post_summary(post_id):
+    device_id = request.args.get("device_id") or None
     conn = app.db.get_connection()
     try:
         summary = app.db.get_post_summary(conn, post_id)
         if summary:
+            try:
+                conn.execute(
+                    "INSERT INTO summarize_logs (post_id, device_id) VALUES (?, ?)",
+                    (post_id, device_id)
+                )
+                conn.commit()
+            except Exception:
+                pass
             return jsonify({"summary": summary})
     finally:
         conn.close()
@@ -1166,6 +1185,14 @@ def get_post_summary(post_id):
     conn = app.db.get_connection()
     try:
         app.db.save_post_summary(conn, post_id, summary)
+        try:
+            conn.execute(
+                "INSERT INTO summarize_logs (post_id, device_id) VALUES (?, ?)",
+                (post_id, device_id)
+            )
+            conn.commit()
+        except Exception:
+            pass
     finally:
         conn.close()
 
@@ -1618,6 +1645,7 @@ def chat_with_article(post_id):
     data = request.get_json(silent=True) or {}
     question = (data.get("question") or "").strip()
     history  = data.get("history") or []
+    device_id = (data.get("device_id") or "").strip() or None
     if not question:
         return jsonify({"error": "question required"}), 400
 
@@ -1640,11 +1668,11 @@ def chat_with_article(post_id):
                             conn = app.db.get_connection()
                             conn.execute("""
                                 INSERT INTO chat_logs
-                                    (post_id, question, word_count, input_tokens, output_tokens, total_tokens, model)
-                                VALUES (?, ?, ?, ?, ?, ?, ?)
+                                    (post_id, question, word_count, input_tokens, output_tokens, total_tokens, model, device_id)
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                             """, (post_id, question, word_count,
                                   u.get("input_tokens"), u.get("output_tokens"),
-                                  u.get("total_tokens"), u.get("model")))
+                                  u.get("total_tokens"), u.get("model"), device_id))
                             conn.commit()
                             conn.close()
                         except Exception as log_err:

@@ -24,11 +24,15 @@ export default function ChatLogsTab({ secretKey }) {
       <div className={styles.statsRow}>
         <div className={styles.statCard}>
           <span className={styles.statNum}>{summary.total_queries ?? '—'}</span>
-          <span className={styles.statLabel}>Total queries</span>
+          <span className={styles.statLabel}>Chat queries</span>
+        </div>
+        <div className={styles.statCard}>
+          <span className={styles.statNum}>{summary.unique_chat_users ?? '—'}</span>
+          <span className={styles.statLabel}>Unique chat users</span>
         </div>
         <div className={styles.statCard}>
           <span className={styles.statNum}>{summary.unique_posts ?? '—'}</span>
-          <span className={styles.statLabel}>Unique articles</span>
+          <span className={styles.statLabel}>Unique articles chatted</span>
         </div>
         <div className={styles.statCard}>
           <span className={styles.statNum}>{(summary.total_input_tokens ?? 0).toLocaleString()}</span>
@@ -41,6 +45,18 @@ export default function ChatLogsTab({ secretKey }) {
         <div className={styles.statCard}>
           <span className={styles.statNum}>{(summary.total_tokens ?? 0).toLocaleString()}</span>
           <span className={styles.statLabel}>Total tokens</span>
+        </div>
+        <div className={styles.statCard}>
+          <span className={styles.statNum}>{summary.total_summarizes ?? '—'}</span>
+          <span className={styles.statLabel}>Summarize clicks</span>
+        </div>
+        <div className={styles.statCard}>
+          <span className={styles.statNum}>{summary.unique_summarize_users ?? '—'}</span>
+          <span className={styles.statLabel}>Unique summarize users</span>
+        </div>
+        <div className={styles.statCard}>
+          <span className={styles.statNum}>{summary.unique_summarized_posts ?? '—'}</span>
+          <span className={styles.statLabel}>Unique summarized articles</span>
         </div>
         <div className={styles.statCard}>
           <span className={styles.statNum}>{summary.total_plays ?? '—'}</span>

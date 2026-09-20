@@ -230,9 +230,15 @@ class SQLiteDatabase:
                 output_tokens   INTEGER,
                 total_tokens    INTEGER,
                 model           TEXT,
+                device_id       TEXT,
                 created_at      DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         """)
+        # Migration: add device_id if missing (existing DBs)
+        try:
+            c.execute("ALTER TABLE chat_logs ADD COLUMN device_id TEXT")
+        except Exception:
+            pass
 
         c.execute("""
             CREATE TABLE IF NOT EXISTS post_summaries (
@@ -240,6 +246,15 @@ class SQLiteDatabase:
                 summary    TEXT    NOT NULL,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (post_id) REFERENCES posts(id)
+            )
+        """)
+
+        c.execute("""
+            CREATE TABLE IF NOT EXISTS summarize_logs (
+                id         INTEGER PRIMARY KEY AUTOINCREMENT,
+                post_id    INTEGER NOT NULL,
+                device_id  TEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         """)
 

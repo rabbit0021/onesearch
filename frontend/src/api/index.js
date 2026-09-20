@@ -4,10 +4,11 @@
  */
 
 export async function askArticleStream(postId, question, history, onChunk, signal) {
+  const deviceId = getOrCreateDeviceId()
   const res = await fetch(`/api/chat/${postId}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ question, history }),
+    body: JSON.stringify({ question, history, device_id: deviceId }),
     signal,
   })
   if (!res.ok) {
@@ -301,7 +302,8 @@ export function getOrCreateDeviceId() {
 }
 
 export async function getPostSummary(postId) {
-  const res = await fetch(`/posts/${postId}/summary`)
+  const deviceId = getOrCreateDeviceId()
+  const res = await fetch(`/posts/${postId}/summary?device_id=${encodeURIComponent(deviceId)}`)
   if (!res.ok) throw new Error('Failed to fetch summary')
   return res.json()
 }
