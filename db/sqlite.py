@@ -686,12 +686,15 @@ class SQLiteDatabase:
 
     def like_post(self, conn, post_id, user_email):
         c = conn.cursor()
-        c.execute(
-            "INSERT OR IGNORE INTO post_likes (post_id, user_email) VALUES (?, ?)",
-            (post_id, user_email)
-        )
+        c.execute("SELECT 1 FROM post_likes WHERE post_id = ? AND user_email = ?", (post_id, user_email))
+        already_liked = c.fetchone() is not None
+        if already_liked:
+            c.execute("DELETE FROM post_likes WHERE post_id = ? AND user_email = ?", (post_id, user_email))
+            is_new = False
+        else:
+            c.execute("INSERT INTO post_likes (post_id, user_email) VALUES (?, ?)", (post_id, user_email))
+            is_new = True
         conn.commit()
-        is_new = c.rowcount == 1
         c.execute("SELECT COUNT(*) FROM post_likes WHERE post_id = ?", (post_id,))
         return c.fetchone()[0], is_new
 

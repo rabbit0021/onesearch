@@ -1523,6 +1523,21 @@ def like_post(post_id):
         conn.close()
 
 
+@app.route("/posts/liked", methods=["GET"])
+def liked_posts():
+    email = request.args.get('email', '').strip().lower()
+    if not email or not re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', email):
+        return jsonify({"error": "Valid email required"}), 400
+    conn = app.db.get_connection()
+    try:
+        c = conn.cursor()
+        c.execute("SELECT post_id FROM post_likes WHERE user_email = ?", (email,))
+        ids = [row[0] for row in c.fetchall()]
+        return jsonify({"liked_post_ids": ids})
+    finally:
+        conn.close()
+
+
 @app.route("/feed/most-liked", methods=["GET"])
 def most_liked_feed():
     limit = min(int(request.args.get("limit", 5)), 20)

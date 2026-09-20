@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { getFeed, getSuggestedFeed, getMostLikedFeed, getMostLikedAllTimeFeed, getIndividualsFeed, getRecommendedFeed, getContinueReading, getOrCreateDeviceId } from '../../../api'
+import { getFeed, getSuggestedFeed, getMostLikedFeed, getMostLikedAllTimeFeed, getIndividualsFeed, getRecommendedFeed, getContinueReading, getOrCreateDeviceId, getLikedPostIds } from '../../../api'
 import { getJiraStatus, getJiraIssues } from '../../../api/jira'
 import BlogCard, { TOPIC_COLORS } from '../BlogCard/BlogCard'
 import styles from './BlogFeed.module.css'
@@ -85,6 +85,7 @@ export default function BlogFeed() {
   const [recommended, setRecommended] = useState(_cacheValid() ? _cache.recommended || [] : [])
   const [continueReading, setContinueReading] = useState([])
   const [continueLoading, setContinueLoading] = useState(true)
+  const [likedPostIds, setLikedPostIds] = useState(() => new Set())
 
   const [search, setSearch] = useState('')
   const [publisher, setPublisher] = useState('')
@@ -107,6 +108,7 @@ export default function BlogFeed() {
 
     const deviceId = getOrCreateDeviceId()
     const email = localStorage.getItem('onesearch_like_email') || ''
+    if (email) getLikedPostIds(email).then(ids => setLikedPostIds(new Set(ids))).catch(() => {})
     getContinueReading(deviceId, email)
       .then(d => setContinueReading(d))
       .catch(() => {})
@@ -396,7 +398,7 @@ export default function BlogFeed() {
                 <div className={styles.scrollRow}>
                   {filteredMostLiked.map(post => (
                     <div key={post.id} className={styles.scrollCard}>
-                      <BlogCard post={post} jiraConnected={jiraConnected} />
+                      <BlogCard post={post} jiraConnected={jiraConnected} likedPostIds={likedPostIds} setLikedPostIds={setLikedPostIds} />
                     </div>
                   ))}
                 </div>
@@ -410,7 +412,7 @@ export default function BlogFeed() {
                 <div className={styles.scrollRow}>
                   {filteredIndividualsPosts.map(post => (
                     <div key={post.id} className={styles.scrollCard}>
-                      <BlogCard post={post} jiraConnected={jiraConnected} />
+                      <BlogCard post={post} jiraConnected={jiraConnected} likedPostIds={likedPostIds} setLikedPostIds={setLikedPostIds} />
                     </div>
                   ))}
                 </div>
@@ -424,7 +426,7 @@ export default function BlogFeed() {
                 <div className={styles.scrollRow}>
                   {recommended.map(post => (
                     <div key={post.id} className={styles.scrollCard}>
-                      <BlogCard post={post} jiraConnected={jiraConnected} />
+                      <BlogCard post={post} jiraConnected={jiraConnected} likedPostIds={likedPostIds} setLikedPostIds={setLikedPostIds} />
                     </div>
                   ))}
                 </div>
@@ -438,7 +440,7 @@ export default function BlogFeed() {
                 <div className={styles.scrollRow}>
                   {filteredMostLikedAllTime.map(post => (
                     <div key={post.id} className={styles.scrollCard}>
-                      <BlogCard post={post} jiraConnected={jiraConnected} />
+                      <BlogCard post={post} jiraConnected={jiraConnected} likedPostIds={likedPostIds} setLikedPostIds={setLikedPostIds} />
                     </div>
                   ))}
                 </div>
@@ -463,7 +465,7 @@ export default function BlogFeed() {
                   <span className={styles.issueSummary}>{group.issue.summary}</span>
                 </div>
                 <div className={styles.grid}>
-                  {group.posts.map(post => <BlogCard key={post.id} post={post} jiraConnected={jiraConnected} />)}
+                  {group.posts.map(post => <BlogCard key={post.id} post={post} jiraConnected={jiraConnected} likedPostIds={likedPostIds} setLikedPostIds={setLikedPostIds} />)}
                 </div>
               </div>
             ))
@@ -479,7 +481,7 @@ export default function BlogFeed() {
             : filtered.length === 0
               ? <p className={styles.hint}>No posts match your filters.</p>
               : <div className={styles.grid}>
-                  {filtered.map(post => <BlogCard key={post.id} post={post} jiraConnected={jiraConnected} />)}
+                  {filtered.map(post => <BlogCard key={post.id} post={post} jiraConnected={jiraConnected} likedPostIds={likedPostIds} setLikedPostIds={setLikedPostIds} />)}
                 </div>
           }
         </div>

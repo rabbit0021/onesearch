@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from 'react'
 import Markdown from 'react-markdown'
 import { useNavigate } from 'react-router-dom'
-import { likePost, getIndividualStats, recordView, getOrCreateDeviceId, getPostSummary } from '../../../api'
+import { likePost, getLikedPostIds, getIndividualStats, recordView, getOrCreateDeviceId, getPostSummary } from '../../../api'
 import EmailDialog, { getSavedEmail } from '../../ui/EmailDialog/EmailDialog'
 import ImageLightbox from '../../ui/ImageLightbox/ImageLightbox'
 import { INDIVIDUALS_META } from '../../../data/individuals'
 import { useTheme } from '../../../context/ThemeContext'
+import { useToast } from '../../../context/ToastContext'
 import styles from './BlogCard.module.css'
 
 const PALETTES = {
@@ -168,9 +169,10 @@ export function timeAgo(iso) {
   return `${months}mo ago`
 }
 
-export default function BlogCard({ post, readProgress }) {
+export default function BlogCard({ post, readProgress, likedPostIds = new Set(), setLikedPostIds }) {
   const navigate = useNavigate()
   const { darkMode } = useTheme()
+  const { showToast } = useToast()
   const palette = darkMode ? PALETTES.wizard : PALETTES.wizard
   const color = palette[post.topic] || palette['General']
   const accent = PALETTES.sunset[post.topic] || PALETTES.sunset['General']
@@ -273,6 +275,13 @@ export default function BlogCard({ post, readProgress }) {
       const data = await likePost(post.id, email)
       if (!data.count && data.count !== 0) return
       setDisplayCount(data.count)
+      if (setLikedPostIds) {
+        setLikedPostIds(prev => {
+          const next = new Set(prev)
+          data.is_new ? next.add(post.id) : next.delete(post.id)
+          return next
+        })
+      }
     } catch { /* network error, silently ignore */ }
   }
 
@@ -291,7 +300,16 @@ export default function BlogCard({ post, readProgress }) {
     <>
     {showEmailDialog && (
       <EmailDialog
-        onConfirm={email => { setShowEmailDialog(false); submitLike(email) }}
+        onConfirm={async email => {
+          setShowEmailDialog(false)
+          const ids = await getLikedPostIds(email)
+          if (ids.includes(post.id)) {
+            if (setLikedPostIds) setLikedPostIds(prev => new Set([...prev, post.id]))
+            showToast('You already liked this post!')
+            return
+          }
+          submitLike(email)
+        }}
         onCancel={() => setShowEmailDialog(false)}
       />
     )}
@@ -381,7 +399,7 @@ export default function BlogCard({ post, readProgress }) {
                 onClick={handleLike}
                 onKeyDown={e => e.key === 'Enter' && handleLike(e)}
               >
-                <span className={`${styles.heart} ${styles.heartActive} ${displayCount === 0 ? styles.heartZero : ''}`}>
+                <span className={`${styles.heart} ${styles.heartActive} ${!likedPostIds.has(post.id) ? styles.heartZero : ''}`}>
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                   </svg>

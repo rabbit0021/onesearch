@@ -141,6 +141,13 @@ export async function confirmOtp(email, otp) {
   return res.json()
 }
 
+export async function getLikedPostIds(email) {
+  const res = await fetch(`/posts/liked?email=${encodeURIComponent(email)}`)
+  if (!res.ok) return []
+  const data = await res.json()
+  return data.liked_post_ids || []
+}
+
 export async function likePost(id, email) {
   const res = await fetch(`/posts/${id}/like`, {
     method: 'POST',
