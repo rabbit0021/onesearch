@@ -614,6 +614,21 @@ export default function ReaderPage() {
     if (chatOpen) setTimeout(() => chatInputRef.current?.focus(), 250)
   }, [chatOpen])
 
+  // Push a history entry when chat opens on mobile so back gesture closes it, not the page
+  const isMobile = window.innerWidth <= 768
+  useEffect(() => {
+    if (chatOpen && isMobile) {
+      window.history.pushState({ chatOpen: true }, '')
+    }
+  }, [chatOpen])
+
+  useEffect(() => {
+    if (!isMobile) return
+    const onPopState = () => { if (chatOpen) setChatOpen(false) }
+    window.addEventListener('popstate', onPopState)
+    return () => window.removeEventListener('popstate', onPopState)
+  }, [chatOpen])
+
   // Reset textarea height when input is cleared
   useEffect(() => {
     if (!chatInput && chatInputRef.current) chatInputRef.current.style.height = 'auto'
@@ -945,7 +960,7 @@ export default function ReaderPage() {
       {content && (
         <button
           className={`${styles.aiFloatBtn} ${chatOpen ? styles.aiFloatBtnActive : ''}`}
-          onClick={() => setChatOpen(o => !o)}
+          onClick={() => { if (chatOpen) { if (isMobile) window.history.back(); else setChatOpen(false) } else setChatOpen(true) }}
           title="Ask about this article"
           aria-label="Ask AI about this article"
         >
@@ -972,7 +987,7 @@ export default function ReaderPage() {
       <div className={`${styles.chatPanel} ${chatOpen ? styles.chatPanelOpen : ''}`} style={kbOffset > 0 ? { bottom: kbOffset } : undefined}>
         <div className={styles.chatPanelHeader}>
           <span className={styles.chatPanelTitle}>Ask about this article</span>
-          <button className={styles.chatPanelClose} onClick={() => setChatOpen(false)} aria-label="Close">×</button>
+          <button className={styles.chatPanelClose} onClick={() => { if (isMobile) window.history.back(); else setChatOpen(false) }} aria-label="Close">×</button>
         </div>
 
         <div className={styles.chatMessages}>
