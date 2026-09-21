@@ -186,13 +186,19 @@ export default function BlogFeed() {
     }
   }, [search, publisher, topic, dateDays, activeTags])
 
+  const allPostsPool = useMemo(() => {
+    const seen = new Set()
+    return [...posts, ...mostLiked, ...mostLikedAllTime, ...individualsPosts, ...recommended]
+      .filter(p => { if (seen.has(p.id)) return false; seen.add(p.id); return true })
+  }, [posts, mostLiked, mostLikedAllTime, individualsPosts, recommended])
+
   const filtered = useMemo(() => {
-    const arr = posts.filter(filterPredicate)
+    const arr = allPostsPool.filter(filterPredicate)
     if (sortBy === 'likes') return [...arr].sort((a, b) => (b.like_count || 0) - (a.like_count || 0))
     if (sortBy === 'views') return [...arr].sort((a, b) => (b.view_count || 0) - (a.view_count || 0))
     if (sortBy === 'stars') return [...arr].sort((a, b) => (b.fire_count || 0) - (a.fire_count || 0))
-    return arr // date — already sorted by API
-  }, [posts, filterPredicate, sortBy])
+    return [...arr].sort((a, b) => new Date(b.published_at) - new Date(a.published_at))
+  }, [allPostsPool, filterPredicate, sortBy])
   const filteredMostLiked = useMemo(() => mostLiked.filter(filterPredicate), [mostLiked, filterPredicate])
   const filteredMostLikedAllTime = useMemo(() => mostLikedAllTime.filter(filterPredicate), [mostLikedAllTime, filterPredicate])
   const filteredIndividualsPosts = useMemo(() => individualsPosts.filter(filterPredicate), [individualsPosts, filterPredicate])
