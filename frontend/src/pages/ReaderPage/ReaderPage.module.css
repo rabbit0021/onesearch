@@ -802,7 +802,8 @@
   border-radius: 3px;
   padding: 2px 6px;
   font-size: var(--fs-md);
-  white-space: nowrap;
+  white-space: pre-wrap;
+  word-break: break-word;
   background-color: var(--bg-wizard);
   font-family: 'Courier Prime', 'Courier', 'IBM Plex Mono', 'JetBrains Mono', 'Space Mono', 'Share Tech Mono', monospace;
 }

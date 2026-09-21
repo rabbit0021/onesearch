@@ -1156,6 +1156,23 @@ def _extract_article_content(url):
                     new_div.append(p)
             pre.replace_with(new_div)
 
+    # ── Unwrap nested <code><code> (readability double-wrapping artifact) ──
+    for code in soup.find_all('code'):
+        inner = code.find('code')
+        if inner:
+            code.replace_with(inner)
+
+    # ── Promote <code> with newlines inside <p> to a proper <pre><code> block ──
+    for p in soup.find_all('p'):
+        code = p.find('code')
+        if code and '\n' in code.get_text():
+            pre = soup.new_tag('pre')
+            new_code = soup.new_tag('code')
+            pass  # no class — let hljs auto-detect language
+            new_code.append(BeautifulSoup(code.decode_contents(), 'html.parser'))
+            pre.append(new_code)
+            p.replace_with(pre)
+
     # ── Strip UI-only accessibility artifacts (Medium, Substack, etc.) ──
     import re as _re
     _UI_TEXT = _re.compile(
