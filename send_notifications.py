@@ -1,4 +1,5 @@
 import smtplib
+import markdown as md_lib
 from email.mime.text import MIMEText
 from datetime import datetime, timezone
 from db import get_database
@@ -116,7 +117,7 @@ def leave_unmature_notifications(notifications):
             
     return matured
 
-def process_notifications(db, conn, target_email=None, cancel_event=None):
+def process_notifications(db, conn, target_email=None, cancel_event=None, force=False):
     notifications = db.get_active_notifications(conn)
     if target_email:
         notifications = [n for n in notifications if n["email"].lower() == target_email.lower()]
@@ -126,7 +127,8 @@ def process_notifications(db, conn, target_email=None, cancel_event=None):
     notifications = deduplicate_notifications(notifications)
     logger.info(f"After dedup, found {len(notifications)} notifications to be processed")
 
-    notifications = leave_unmature_notifications(notifications)
+    if not force:
+        notifications = leave_unmature_notifications(notifications)
     logger.info(f"After leaving unmatured, found {len(notifications)} notifications to be processed")
 
     # fetch like counts for all posts in one query
@@ -134,6 +136,27 @@ def process_notifications(db, conn, target_email=None, cancel_event=None):
     like_counts = db.get_like_counts_by_urls(conn, urls)
     for n in notifications:
         n['like_count'] = like_counts.get(n['post_url'], 0)
+
+    # generate summaries only for posts that don't have one yet
+    try:
+        from llm import summarize_article, PostNotFoundError, ContentExtractionError
+        seen_post_ids = set()
+        for n in notifications:
+            post_id = n.get('post_id')
+            if post_id and n.get('summary') is None and post_id not in seen_post_ids:
+                seen_post_ids.add(post_id)
+                try:
+                    summary = summarize_article(post_id)
+                    db.save_post_summary(conn, post_id, summary)
+                    conn.commit()
+                    n['summary'] = summary
+                    logger.info(f"Generated summary for post {post_id}")
+                except (PostNotFoundError, ContentExtractionError) as e:
+                    logger.warning(f"Skipping summary for post {post_id}: {e}")
+                except Exception as e:
+                    logger.warning(f"Summary generation failed for post {post_id}: {e}")
+    except ImportError:
+        logger.warning("llm module not available, skipping summary generation")
 
     notifications_by_email = defaultdict(list)
     for row in notifications:
@@ -161,71 +184,102 @@ def process_notifications(db, conn, target_email=None, cancel_event=None):
             raise JobCancelledError()
         subject = get_random_subject()
 
-        MONO = "Courier New, Courier, monospace"
+        CATEGORY_COLORS = {
+            'Software Engineering':      '#00577F',
+            'Frontend Engineering':      '#2E8AB0',
+            'Backend Engineering':       '#6B5EA8',
+            'Mobile Engineering':        '#E08C3A',
+            'Platform & Infrastructure': '#ED717F',
+            'Data Engineering':          '#2E8A6A',
+            'Data Science':              '#9B6E9E',
+            'Machine Learning & AI':     '#D4828E',
+            'Data Analytics':            '#5B8FAE',
+            'Security Engineering':      '#B05A6A',
+            'QA & Testing':              '#6E8EAE',
+            'Product Management':        '#F5AD92',
+            'General':                   '#A0A0A0',
+        }
+
+        def publisher_icon_html(notification):
+            publisher = notification['publisher']
+            url = notification.get('post_url', '')
+            slug = publisher.lower().replace(' ', '')
+            # individual: circular photo
+            individual_img = f"/individuals/{slug}-thumb.jpg"
+            # try simpleicons for company, fallback to google favicon
+            icon_src = f"https://cdn.simpleicons.org/{slug}"
+            return f'''<div style="width:28px; height:28px; border-radius:6px;
+                          background:linear-gradient(135deg,#f0ede8,#f0e0cc);">
+                        <img src="{icon_src}" width="16" height="16" alt=""
+                             style="display:block; margin:6px auto;"
+                             onerror="this.src='https://www.google.com/s2/favicons?domain={urlparse(url).netloc}&amp;sz=32'">
+                       </div>'''
 
         category_sections = ""
         all_notifications_for_email = []
         for heading, notifications_for_email in heading_map.items():
             category = heading
+            category_color = CATEGORY_COLORS.get(category, PRIMARY_COLOR)
 
             #formatting before sending mail
             for notification in notifications_for_email:
                 notification['post_title'] = notification['post_title'][0].upper() + notification['post_title'][1:]
                 notification['publisher'] = notification['publisher'][0].upper() + notification['publisher'][1:]
 
-            def favicon_td(n):
-                url = favicon_url(n["post_url"])
-                if url:
-                    return f'<td style="vertical-align:middle; padding-right:6px;"><img src="{url}" width="13" height="13" alt="" style="display:block; border-radius:2px; opacity:0.85;"></td>'
-                return ''
+            def publisher_icon(n):
+                slug = n['publisher'].lower().replace(' ', '')
+                domain = urlparse(n.get('post_url', '')).netloc
+                icon_src = f"https://cdn.simpleicons.org/{slug}"
+                fallback = f"https://www.google.com/s2/favicons?domain={domain}&sz=32"
+                return f'''<div style="width:28px; height:28px; border-radius:6px;
+                              background:linear-gradient(135deg,#f0ede8,#f0e0cc);">
+                            <img src="{icon_src}" width="16" height="16" alt=""
+                                 style="display:block; margin:6px auto;">
+                           </div>'''
 
-            def likes_td(n):
-                count = n.get("like_count", 0)
-                if count > 0:
-                    return f'<td style="font-size:11px; color:#444440; font-family:{MONO};">// &#9829; {count}</td>'
-                return ''
+            def post_link(n):
+                post_id = n.get('post_id')
+                if post_id:
+                    return f"https://onesearch.blog/read/{post_id}"
+                return n['post_url']
+
+            def summary_html(n):
+                summary = n.get('summary')
+                if not summary:
+                    return ''
+                html = md_lib.markdown(summary)
+                # inline email-safe styles
+                html = html.replace('<p>', '<p style="margin:4px 0 6px; font-family:\'Segoe UI\',Arial,sans-serif; font-size:11px; color:#555; line-height:1.6;">')
+                html = html.replace('<ul>', '<ul style="margin:4px 0 8px; padding-left:18px; font-family:\'Segoe UI\',Arial,sans-serif; font-size:11px; color:#555; line-height:1.7;">')
+                html = html.replace('<li>', '<li style="margin-bottom:3px;">')
+                html = html.replace('<code>', '<code style="font-size:11px; background:#f4f4f4; padding:1px 4px; border-radius:3px; font-family:monospace;">')
+                label = '<p style="margin:8px 0 3px; font-family:\'Segoe UI\',Arial,sans-serif; font-size:9px; font-weight:700; color:#bbb; letter-spacing:0.12em; text-transform:uppercase;">✦ AI Summary</p>'
+                return f'<div style="margin:6px 0 10px;">{label}{html}</div>'
 
             blog_items = "".join([
                 f"""
-                <table width="100%" cellpadding="0" cellspacing="0" border="0"
-                       style="margin-bottom:8px; background:#161614; border-radius:6px;
-                              border:1px solid #252522;">
+                <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:20px;">
                   <tr>
-                    <td style="padding:2px 14px 2px 0; width:3px; background:{PRIMARY_COLOR}; border-radius:6px 0 0 6px; font-size:0; line-height:0;">&#8203;</td>
-                    <td style="padding:13px 16px;">
-                      <!-- Publisher row with favicon -->
-                      <table cellpadding="0" cellspacing="0" border="0" style="margin-bottom:6px;">
-                        <tr>
-                          <td style="vertical-align:middle; padding-right:5px; font-size:11px; color:#555550;">@</td>
-                          {favicon_td(notification)}
-                          <td style="vertical-align:middle;">
-                            <span style="font-size:11px; font-weight:700; color:{PRIMARY_COLOR};
-                                         text-transform:uppercase; letter-spacing:0.08em; font-family:{MONO};">
-                              {notification['publisher']}
-                            </span>
-                          </td>
-                        </tr>
-                      </table>
-                      <!-- Post title -->
-                      <a href="{notification['post_url']}"
-                         style="font-size:14px; font-weight:700; color:#e8e5e0;
-                                text-decoration:none; line-height:1.45; display:block;
-                                font-family:{MONO}; letter-spacing:-0.01em;">
+                    <td style="vertical-align:top; padding-right:12px; width:28px;">
+                      {publisher_icon(notification)}
+                    </td>
+                    <td style="vertical-align:top;">
+                      <p style="margin:0 0 2px; font-family:'Segoe UI',Arial,sans-serif;
+                                 font-size:12px; font-weight:700; color:#999;
+                                 letter-spacing:0.06em; text-transform:uppercase;">
+                        {notification['publisher']}
+                      </p>
+                      <a href="{post_link(notification)}"
+                         style="font-size:17px; font-weight:700; color:#111; text-decoration:none;
+                                line-height:1.4; display:block; margin-bottom:4px; font-family:'Georgia',serif;">
                         {notification['post_title']}
                       </a>
-                      <table cellpadding="0" cellspacing="0" border="0" style="margin-top:10px;">
-                        <tr>
-                          <td style="padding-right:16px;">
-                            <a href="{notification['post_url']}"
-                               style="font-size:11px; color:{PRIMARY_COLOR}; font-weight:700;
-                                      text-decoration:none; font-family:{MONO};
-                                      letter-spacing:0.03em;">
-                              $ open post &#8594;
-                            </a>
-                          </td>
-                          {likes_td(notification)}
-                        </tr>
-                      </table>
+                      {summary_html(notification)}
+                      <a href="{post_link(notification)}"
+                         style="font-family:'Segoe UI',Arial,sans-serif; font-size:11px;
+                                color:{PRIMARY_COLOR}; font-weight:600; text-decoration:none;">
+                        Read &#8594;
+                      </a>
                     </td>
                   </tr>
                 </table>
@@ -236,24 +290,23 @@ def process_notifications(db, conn, target_email=None, cancel_event=None):
             all_notifications_for_email.extend(notifications_for_email)
 
             category_sections += f"""
-                <table width="100%" cellpadding="0" cellspacing="0" border="0"
-                       style="margin-bottom:26px;">
+                <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:24px;">
                   <tr>
-                    <td style="padding-bottom:10px;">
-                      <p style="margin:0 0 2px; font-size:10px; color:#333330; font-family:{MONO}; letter-spacing:0.05em;">
-                        // category
-                      </p>
-                      <h2 style="margin:0; font-size:12px; font-weight:700; color:{PRIMARY_COLOR};
-                                 text-transform:uppercase; letter-spacing:0.1em; font-family:{MONO};
-                                 border-bottom:1px dashed #2a2a26; padding-bottom:8px;">
-                        {category}
-                      </h2>
+                    <td style="padding-bottom:12px;">
+                      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                        <tr>
+                          <td style="font-family:'Segoe UI',Arial,sans-serif; font-size:9px; font-weight:700;
+                                     color:{category_color}; letter-spacing:0.18em; text-transform:uppercase;
+                                     white-space:nowrap; padding-right:10px; width:1%;">
+                            {category}
+                          </td>
+                          <td style="border-top:1px solid #f0e0cc;"></td>
+                        </tr>
+                      </table>
                     </td>
                   </tr>
                   <tr>
-                    <td>
-                      {blog_items}
-                    </td>
+                    <td>{blog_items}</td>
                   </tr>
                 </table>
             """
@@ -288,8 +341,18 @@ def process_notifications(db, conn, target_email=None, cancel_event=None):
         raise RuntimeError(f"Failed to send to {len(failed_emails)} recipient(s): {summary}")
             
 if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--email", help="Send only to this email (for testing)")
+    parser.add_argument("--force", action="store_true", help="Ignore maturity_date — send all pending notifications immediately")
+    args = parser.parse_args()
+
     db = get_database()
     conn = db.get_connection()
-    process_notifications(db, conn)
+
+    if args.force:
+        logger.info("--force: skipping maturity date check")
+
+    process_notifications(db, conn, target_email=args.email, force=args.force)
     conn.close()
 

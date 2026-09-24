@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Onesearch Digest</title>
+</head>
+<body style="margin:0; padding:0; background:#ffffff; font-family:'Georgia', serif;">
+
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#ffffff; padding:32px 0;">
+    <tr>
+      <td align="center">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;">
+
+          <!-- Banner -->
+          <tr>
+            <td style="line-height:0; border-radius:10px 10px 0 0; overflow:hidden;">
+              <img src="/static/og-preview.png" alt="Onesearch"
+                   style="width:100%; max-width:560px; height:auto; display:block; border-radius:10px 10px 0 0;">
+            </td>
+          </tr>
+
+          <!-- Main -->
+          <tr>
+            <td style="background:#ffffff; border-left:1px solid #f0e0cc; border-right:1px solid #f0e0cc; padding:32px 32px 28px;">
+
+              <!-- Headline -->
+              <p style="margin:0 0 2px; font-family:'Segoe UI',Arial,sans-serif; font-size:10px;
+                         font-weight:700; color:#d97757; letter-spacing:0.16em; text-transform:uppercase;">
+                Your digest · Sep 24
+              </p>
+              <h1 style="margin:0 0 24px; font-size:22px; font-weight:700; color:#111;
+                          line-height:1.3; font-family:'Georgia', serif; border-bottom:2px solid #111; padding-bottom:14px;">
+                What top engineers<br>shipped this week
+              </h1>
+
+              <!-- ── Section: Software Engineering ── -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:24px;">
+
+                <!-- section label -->
+                <tr>
+                  <td style="padding-bottom:12px;">
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td style="font-family:'Segoe UI',Arial,sans-serif; font-size:9px; font-weight:700;
+                                   color:#00577F; letter-spacing:0.18em; text-transform:uppercase;
+                                   white-space:nowrap; padding-right:10px; width:1%;">
+                          Software Engineering
+                        </td>
+                        <td style="border-top:1px solid #f0e0cc;"></td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+                <!-- Post row: Netflix -->
+                <tr>
+                  <td style="padding-bottom:16px; border-bottom:1px solid #f0ede8; margin-bottom:16px;">
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td style="vertical-align:top; padding-right:12px; width:28px;">
+                          <div style="width:28px; height:28px; border-radius:6px;
+                                      background:linear-gradient(135deg, #f0ede8, #f0e0cc);
+                                      display:flex; align-items:center; justify-content:center;">
+                            <img src="https://cdn.simpleicons.org/netflix" width="16" height="16" alt=""
+                                 style="display:block; margin:6px auto;">
+                          </div>
+                        </td>
+                        <td style="vertical-align:top;">
+                          <p style="margin:0 0 1px; font-family:'Segoe UI',Arial,sans-serif;
+                                     font-size:12px; font-weight:700; color:#999; letter-spacing:0.06em;
+                                     text-transform:uppercase;">Netflix</p>
+                          <a href="https://onesearch.blog/read/101"
+                             style="font-size:17px; font-weight:700; color:#111; text-decoration:none;
+                                    line-height:1.4; display:block; margin-bottom:4px; font-family:'Georgia',serif;">
+                            Migrating our distributed cache to a multi-region architecture
+                          </a>
+                          <p style="margin:8px 0 3px; font-family:'Segoe UI',Arial,sans-serif;
+                                    font-size:9px; font-weight:700; color:#bbb; letter-spacing:0.12em;
+                                    text-transform:uppercase;">✦ AI Summary</p>
+                          <p style="margin:0 0 4px; font-family:'Segoe UI',Arial,sans-serif; font-size:11px; color:#555; line-height:1.6;">
+                            Netflix rewrote their caching layer to survive regional failures — here's the tradeoffs they accepted.
+                          </p>
+                          <ul style="margin:4px 0 8px; padding-left:18px; font-family:'Segoe UI',Arial,sans-serif; font-size:11px; color:#555; line-height:1.7;">
+                            <li style="margin-bottom:3px;">Moved from single-region <code style="font-size:11px; background:#f4f4f4; padding:1px 4px; border-radius:3px; font-family:monospace;">Memcached</code> to multi-region active-active, cutting cache miss latency by 40%</li>
+                            <li style="margin-bottom:3px;">Eliminated cross-region fallback reads that caused cascading slowdowns during outages</li>
+                            <li style="margin-bottom:3px;">Accepted eventual consistency for non-critical data — a deliberate tradeoff over strong consistency</li>
+                          </ul>
+                          <a href="https://onesearch.blog/read/101"
+                             style="font-family:'Segoe UI',Arial,sans-serif; font-size:11px;
+                                    color:#d97757; font-weight:600; text-decoration:none;">
+                            Read →
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+                <!-- spacer -->
+                <tr><td style="height:16px;"></td></tr>
+
+                <!-- Post row: Gergely Orosz (individual) -->
+                <tr>
+                  <td>
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td style="vertical-align:top; padding-right:12px; width:28px;">
+                          <img src="/individuals/gergely-orosz-thumb.jpg" width="28" height="28" alt="Gergely Orosz"
+                               style="display:block; border-radius:50%; border:1px solid #f0e0cc;">
+                        </td>
+                        <td style="vertical-align:top;">
+                          <p style="margin:0 0 1px; font-family:'Segoe UI',Arial,sans-serif;
+                                     font-size:12px; font-weight:700; color:#999; letter-spacing:0.06em;
+                                     text-transform:uppercase;">Gergely Orosz</p>
+                          <a href="https://onesearch.blog/read/202"
+                             style="font-size:17px; font-weight:700; color:#111; text-decoration:none;
+                                    line-height:1.4; display:block; margin-bottom:4px; font-family:'Georgia',serif;">
+                            How big tech runs engineering planning cycles differently
+                          </a>
+                          <p style="margin:8px 0 3px; font-family:'Segoe UI',Arial,sans-serif;
+                                    font-size:9px; font-weight:700; color:#bbb; letter-spacing:0.12em;
+                                    text-transform:uppercase;">✦ AI Summary</p>
+                          <p style="margin:0 0 4px; font-family:'Segoe UI',Arial,sans-serif; font-size:11px; color:#555; line-height:1.6;">
+                            Most mid-size companies blindly copy big tech planning rituals — this explains why that fails and what to do instead.
+                          </p>
+                          <ul style="margin:4px 0 8px; padding-left:18px; font-family:'Segoe UI',Arial,sans-serif; font-size:11px; color:#555; line-height:1.7;">
+                            <li style="margin-bottom:3px;">Google and Meta use OKRs at scale with dedicated planning infra; copying that at 50 engineers creates overhead with no benefit</li>
+                            <li style="margin-bottom:3px;">The most effective mid-size teams do lightweight <code style="font-size:11px; background:#f4f4f4; padding:1px 4px; border-radius:3px; font-family:monospace;">now / next / later</code> roadmaps over rigid H1/H2 cycles</li>
+                            <li style="margin-bottom:3px;">Engineering planning should be tied to customer outcomes, not internal velocity metrics</li>
+                          </ul>
+                          <a href="https://onesearch.blog/read/202"
+                             style="font-family:'Segoe UI',Arial,sans-serif; font-size:11px;
+                                    color:#d97757; font-weight:600; text-decoration:none;">
+                            Read →
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+              </table>
+
+              <!-- ── Section: Data Science ── -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:8px;">
+
+                <tr>
+                  <td style="padding-bottom:12px;">
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td style="font-family:'Segoe UI',Arial,sans-serif; font-size:9px; font-weight:700;
+                                   color:#9B6E9E; letter-spacing:0.18em; text-transform:uppercase;
+                                   white-space:nowrap; padding-right:10px; width:1%;">
+                          Data Science
+                        </td>
+                        <td style="border-top:1px solid #f0e0cc;"></td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+                <!-- Post row: Airbnb -->
+                <tr>
+                  <td>
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td style="vertical-align:top; padding-right:12px; width:28px;">
+                          <div style="width:28px; height:28px; border-radius:6px;
+                                      background:linear-gradient(135deg, #f0ede8, #f0e0cc);
+                                      display:flex; align-items:center; justify-content:center;">
+                            <img src="https://cdn.simpleicons.org/airbnb" width="16" height="16" alt=""
+                                 style="display:block; margin:6px auto;">
+                          </div>
+                        </td>
+                        <td style="vertical-align:top;">
+                          <p style="margin:0 0 1px; font-family:'Segoe UI',Arial,sans-serif;
+                                     font-size:12px; font-weight:700; color:#999; letter-spacing:0.06em;
+                                     text-transform:uppercase;">Airbnb</p>
+                          <a href="https://onesearch.blog/read/303"
+                             style="font-size:17px; font-weight:700; color:#111; text-decoration:none;
+                                    line-height:1.4; display:block; margin-bottom:4px; font-family:'Georgia',serif;">
+                            Building a real-time feature store for ML models at scale
+                          </a>
+                          <p style="margin:8px 0 3px; font-family:'Segoe UI',Arial,sans-serif;
+                                    font-size:9px; font-weight:700; color:#bbb; letter-spacing:0.12em;
+                                    text-transform:uppercase;">✦ AI Summary</p>
+                          <p style="margin:0 0 4px; font-family:'Segoe UI',Arial,sans-serif; font-size:11px; color:#555; line-height:1.6;">
+                            Airbnb open-sourced their feature store <code style="font-size:11px; background:#f4f4f4; padding:1px 4px; border-radius:3px; font-family:monospace;">Chronon</code> — built to fix the training-serving skew problem that plagues most ML teams.
+                          </p>
+                          <ul style="margin:4px 0 8px; padding-left:18px; font-family:'Segoe UI',Arial,sans-serif; font-size:11px; color:#555; line-height:1.7;">
+                            <li style="margin-bottom:3px;">Training-serving skew — where features computed at training time differ from serving time — was causing silent model degradation</li>
+                            <li style="margin-bottom:3px;"><code style="font-size:11px; background:#f4f4f4; padding:1px 4px; border-radius:3px; font-family:monospace;">Chronon</code> unifies feature definitions so the same logic runs in batch, streaming, and real-time serving</li>
+                            <li style="margin-bottom:3px;">Reduced feature engineering time by ~50% across Airbnb's ML teams and cut data leakage incidents significantly</li>
+                          </ul>
+                          <a href="https://onesearch.blog/read/303"
+                             style="font-family:'Segoe UI',Arial,sans-serif; font-size:11px;
+                                    color:#d97757; font-weight:600; text-decoration:none;">
+                            Read →
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+              </table>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background:#ffffff; border-left:1px solid #f0e0cc; border-right:1px solid #f0e0cc; border-bottom:1px solid #f0e0cc;
+                        border-radius:0 0 10px 10px; padding:14px 32px;
+                        border-top:1px solid #ccc;">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="vertical-align:middle; padding-right:12px; width:1%;">
+                    <a href="https://onesearch.blog" target="_blank" rel="noopener noreferrer">
+                      <img src="/static/logo.png" alt="Onesearch" width="36" height="36"
+                           style="display:block; border-radius:8px; border:1px solid #f0e0cc;">
+                    </a>
+                  </td>
+                  <td style="vertical-align:middle;">
+                    <a href="https://onesearch.blog" target="_blank" rel="noopener noreferrer"
+                       style="font-family:'Segoe UI',Arial,sans-serif; font-size:13px;
+                              font-weight:700; color:#d97757; text-decoration:none;">Onesearch</a>
+                    <p style="margin:2px 0 0; font-family:'Segoe UI',Arial,sans-serif;
+                               font-size:11px; color:#888; line-height:1.5;">
+                      One place for all engineering blogs, curated for you.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>

@@ -17,4 +17,10 @@
   margin-left: -38px;
 }
 
+@media (max-width: 768px) {
+  .header {
+    margin-top: -14px;
+  }
+}
+
 

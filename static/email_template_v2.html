@@ -3,65 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OneSearch Digest</title>
+  <title>Onesearch Digest</title>
 </head>
-<body style="margin:0; padding:0; background-color:#0a0a08; font-family:'Courier New', Courier, monospace;">
+<body style="margin:0; padding:0; background:#ffffff; font-family:'Georgia', serif;">
 
-  <!-- Outer wrapper -->
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#0a0a08; padding:20px 0;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#ffffff; padding:32px 0;">
     <tr>
       <td align="center">
-        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:700px;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;">
 
-          <!-- Terminal top bar -->
+          <!-- Banner -->
           <tr>
-            <td style="background:#1a1a16; border:1px solid #2e2e28; border-bottom:none;
-                        border-radius:10px 10px 0 0; padding:10px 16px; text-align:center;
-                        font-size:11px; color:#555550; letter-spacing:0.05em;">
-              onesearch — digest.sh
+            <td style="line-height:0; border-radius:10px 10px 0 0; overflow:hidden;">
+              <img src="cid:header" alt="Onesearch"
+                   style="width:100%; max-width:560px; height:auto; display:block; border-radius:10px 10px 0 0;">
             </td>
           </tr>
 
-          <!-- Banner image -->
+          <!-- Main -->
           <tr>
-            <td style="overflow:hidden; line-height:0; border-left:1px solid #2e2e28; border-right:1px solid #2e2e28;">
-              <img src="cid:header" alt="OneSearch"
-                   style="width:100%; max-width:700px; height:auto; display:block;">
-            </td>
-          </tr>
+            <td style="background:#ffffff; border-left:1px solid #f0e0cc; border-right:1px solid #f0e0cc; padding:32px 32px 28px;">
 
-          <!-- Main card -->
-          <tr>
-            <td style="background:#111110; padding:28px 26px 24px;
-                        border:1px solid #2e2e28; border-top:none;">
-
-              <!-- Prompt header -->
-              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:28px;">
-                <tr>
-                  <td>
-                    <p style="margin:0 0 6px; font-size:11px; color:#555550; letter-spacing:0.05em;">
-                      <span style="color:#d97757;">~/onesearch</span>
-                      <span style="color:#4a9eff;"> git:(main)</span>
-                      <span style="color:#555550;"> ✦</span>
-                    </p>
-                    <p style="margin:0 0 4px; font-size:12px; color:#888882; letter-spacing:0.03em;">
-                      <span style="color:#d97757;">$</span> run digest --for=you --curated --fresh
-                    </p>
-                    <p style="margin:0 0 18px; font-size:11px; color:#444440;">
-                      ✓ fetched latest posts &nbsp;·&nbsp; ✓ classified &nbsp;·&nbsp; ✓ ranked for you
-                    </p>
-                    <!-- Divider -->
-                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
-                      <tr>
-                        <td style="border-top:1px dashed #2e2e28; font-size:0; line-height:0;">&#8203;</td>
-                      </tr>
-                    </table>
-                    <p style="margin:14px 0 0; font-size:19px; font-weight:700; color:#f0ede8; line-height:1.3; letter-spacing:-0.01em;">
-                      What top engineers shipped recently
-                    </p>
-                  </td>
-                </tr>
-              </table>
+              <!-- Headline -->
+              <p style="margin:0 0 2px; font-family:'Segoe UI',Arial,sans-serif; font-size:10px;
+                         font-weight:700; color:{{ primary_color }}; letter-spacing:0.16em; text-transform:uppercase;">
+                Your digest
+              </p>
+              <h1 style="margin:0 0 24px; font-size:22px; font-weight:700; color:#111;
+                          line-height:1.3; font-family:'Georgia', serif; border-bottom:2px solid #111; padding-bottom:14px;">
+                What top engineers<br>shipped this week
+              </h1>
 
               <!-- Dynamic category sections injected here -->
               {{ category_sections | safe }}
@@ -71,25 +42,24 @@
 
           <!-- Footer -->
           <tr>
-            <td style="background:#0e0e0c; border:1px solid #2e2e28; border-top:1px dashed #2e2e28;
-                        border-radius:0 0 10px 10px; padding:16px 26px;">
+            <td style="background:#ffffff; border-left:1px solid #f0e0cc; border-right:1px solid #f0e0cc;
+                        border-bottom:1px solid #f0e0cc; border-top:1px solid #ccc;
+                        border-radius:0 0 10px 10px; padding:14px 32px;">
               <table width="100%" cellpadding="0" cellspacing="0" border="0">
                 <tr>
-                  <td style="vertical-align:middle; padding-right:14px; width:1%;">
+                  <td style="vertical-align:middle; padding-right:12px; width:1%;">
                     <a href="https://onesearch.blog" target="_blank" rel="noopener noreferrer">
-                      <img src="https://onesearch.blog/static/logo.png" alt="OneSearch"
-                           width="52" height="52"
-                           style="display:block; border-radius:8px; border:1px solid #2e2e28;">
+                      <img src="https://onesearch.blog/static/logo.png" alt="Onesearch" width="36" height="36"
+                           style="display:block; border-radius:8px; border:1px solid #f0e0cc;">
                     </a>
                   </td>
                   <td style="vertical-align:middle;">
-                    <p style="margin:0 0 2px; font-size:11px; color:#444440; letter-spacing:0.03em;">
-                      <span style="color:#d97757;">$</span> echo "made with ♥ by"
-                    </p>
-                    <span style="font-size:14px; font-weight:700; color:#d97757;
-                              letter-spacing:0.03em;">OneSearch</span>
-                    <p style="margin:2px 0 0; font-size:11px; color:#555550; line-height:1.6;">
-                      One place for all engineering blogs.
+                    <a href="https://onesearch.blog" target="_blank" rel="noopener noreferrer"
+                       style="font-family:'Segoe UI',Arial,sans-serif; font-size:13px;
+                              font-weight:700; color:{{ primary_color }}; text-decoration:none;">Onesearch</a>
+                    <p style="margin:2px 0 0; font-family:'Segoe UI',Arial,sans-serif;
+                               font-size:11px; color:#888; line-height:1.5;">
+                      One place for all engineering blogs, curated for you.
                     </p>
                   </td>
                 </tr>

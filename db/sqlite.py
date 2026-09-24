@@ -477,9 +477,11 @@ class SQLiteDatabase:
     def get_active_notifications(self, conn):
         c = conn.cursor()
         c.execute("""
-            SELECT *
-            FROM notifications
-            WHERE deleted = 0
+            SELECT n.*, p.id AS post_id, ps.summary
+            FROM notifications n
+            LEFT JOIN posts p ON p.url = n.post_url
+            LEFT JOIN post_summaries ps ON ps.post_id = p.id
+            WHERE n.deleted = 0
         """)
         rows = c.fetchall()
         return [dict(row) for row in rows]

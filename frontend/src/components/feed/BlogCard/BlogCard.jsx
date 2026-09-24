@@ -125,8 +125,8 @@ const PALETTES = {
   // Sunset — inspired by peach→coral→mauve→periwinkle→ocean gradient
   sunset: {
     'Software Engineering':       '#00577F',  // deep ocean
-    'Frontend Engineering':       '#4A7FA8',  // mid ocean
-    'Backend Engineering':        '#4A7FA8',  // mid ocean blue
+    'Frontend Engineering':       '#2E8AB0',  // cyan-teal
+    'Backend Engineering':        '#6B5EA8',  // purple
     'Mobile Engineering':         '#E08C3A',  // warm orange
     'Platform & Infrastructure':  '#ED717F',  // coral
     'Data Engineering':           '#2E8A6A',  // teal green

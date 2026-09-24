@@ -222,6 +222,8 @@
     position: static;
     max-height: none;
     overflow-y: visible;
+    margin-top: 0;
+    padding-top: 0;
   }
 
   .form{

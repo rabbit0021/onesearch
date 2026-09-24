@@ -89,15 +89,13 @@ def summarize_article(post_id):
         contents=context,
         config=types.GenerateContentConfig(
             system_instruction=(
-                "You are summarizing a tech article for a curious reader deciding whether to read it. "
-                "Focus on what the reader will *learn* or *gain* — not just what the article covers. "
-                "Write like you're telling a friend: what's the core insight, why does it matter, and what will they walk away knowing? "
-                "Format: one punchy opening sentence (the 'so what'), then 3-4 bullet points each describing a concrete takeaway or insight in plain English. "
-                "Avoid jargon where possible; when technical terms are unavoidable use inline `code`. "
-                "No headers. Keep it tight."
+                "You are summarizing a tech article for a curious engineer deciding whether to read it. "
+                "Focus on what they will *learn or gain* — not just what the article covers. "
+                "Format: one punchy sentence (the 'so what' — why it matters), then exactly 2-3 bullet points each naming a specific insight or takeaway in plain English, under 15 words each. "
+                "Use inline `code` for technical terms. No headers. No filler."
             ),
             temperature=0.3,
-            max_output_tokens=300,
+            max_output_tokens=150,
         ),
     )
     return response.text.strip()
