@@ -137,26 +137,27 @@ def process_notifications(db, conn, target_email=None, cancel_event=None, force=
     for n in notifications:
         n['like_count'] = like_counts.get(n['post_url'], 0)
 
-    # generate summaries only for posts that don't have one yet
-    try:
-        from llm import summarize_article, PostNotFoundError, ContentExtractionError
-        seen_post_ids = set()
-        for n in notifications:
-            post_id = n.get('post_id')
-            if post_id and n.get('summary') is None and post_id not in seen_post_ids:
-                seen_post_ids.add(post_id)
-                try:
-                    summary = summarize_article(post_id)
-                    db.save_post_summary(conn, post_id, summary)
-                    conn.commit()
-                    n['summary'] = summary
-                    logger.info(f"Generated summary for post {post_id}")
-                except (PostNotFoundError, ContentExtractionError) as e:
-                    logger.warning(f"Skipping summary for post {post_id}: {e}")
-                except Exception as e:
-                    logger.warning(f"Summary generation failed for post {post_id}: {e}")
-    except ImportError:
-        logger.warning("llm module not available, skipping summary generation")
+    # generate summaries only for posts that don't have one yet (skip in test env)
+    if os.getenv('FLASK_ENV') != 'test':
+        try:
+            from llm import summarize_article, PostNotFoundError, ContentExtractionError
+            seen_post_ids = set()
+            for n in notifications:
+                post_id = n.get('post_id')
+                if post_id and n.get('summary') is None and post_id not in seen_post_ids:
+                    seen_post_ids.add(post_id)
+                    try:
+                        summary = summarize_article(post_id)
+                        db.save_post_summary(conn, post_id, summary)
+                        conn.commit()
+                        n['summary'] = summary
+                        logger.info(f"Generated summary for post {post_id}")
+                    except (PostNotFoundError, ContentExtractionError) as e:
+                        logger.warning(f"Skipping summary for post {post_id}: {e}")
+                    except Exception as e:
+                        logger.warning(f"Summary generation failed for post {post_id}: {e}")
+        except ImportError:
+            logger.warning("llm module not available, skipping summary generation")
 
     notifications_by_email = defaultdict(list)
     for row in notifications:
