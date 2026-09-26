@@ -1,8 +1,7 @@
-
 import { useState, useEffect, useRef } from 'react'
-import { useParams, useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { timeAgo, faviconUrl, fireToStars } from '../../components/feed/BlogCard/BlogCard'
-import { getFeed, getPostContent, sendReadEvent, getReadEvent, getOrCreateDeviceId, askArticleStream } from '../../api'
+import { getPostContent, sendReadEvent, getReadEvent, getOrCreateDeviceId, askArticleStream } from '../../api'
 import { useTheme } from '../../context/ThemeContext'
 import { useToast } from '../../context/ToastContext'
 import ThemeSwitcher from '../../components/layout/ThemeSwitcher/ThemeSwitcher'
@@ -289,15 +288,13 @@ function SlashMenu({ filter, activeIdx, onSelect }) {
 }
 
 export default function ReaderPage() {
-  const { id } = useParams()
   const { state } = useLocation()
   const navigate = useNavigate()
 
-  // `post` normally arrives via in-app navigation state (clicking a BlogCard).
-  // On a fresh/direct load (email link, new tab, refresh) there is no
-  // navigation state, so we fall back to fetching it by id from the feed.
-  const [post, setPost] = useState(state?.post || null)
-  const [postError, setPostError] = useState(null)
+  // `post` only ever arrives via in-app navigation state (clicking a BlogCard).
+  // A direct/fresh load (email link, new tab, refresh) has no navigation state —
+  // in that case we just send the visitor to the homepage below.
+  const post = state?.post
 
   const { darkMode } = useTheme()
   const { showToast } = useToast()
@@ -335,18 +332,13 @@ export default function ReaderPage() {
   const readerBodyRef = useRef(null)
   const overflowRef   = useRef(null)
 
-  // ── Fallback fetch: only runs when navigation state didn't already give us
-  // a post (i.e. direct URL load / email link / refresh / new tab). ──
+  // Direct URL load (email link, refresh, new tab) has no navigation state —
+  // just send the visitor to the homepage instead of trying to render inline.
   useEffect(() => {
-    if (post) return
-    getFeed(100)
-      .then(posts => {
-        const found = posts.find(p => String(p.id) === String(id))
-        if (found) setPost(found)
-        else setPostError('Post not found')
-      })
-      .catch(() => setPostError('Post not found'))
-  }, [id])
+    if (!post) {
+      navigate('/', { replace: true })
+    }
+  }, [post, navigate])
 
   // ── Text-to-speech ──
   const { state: ttsState, play: ttsPlay, pause: ttsPause, resume: ttsResume, stop: ttsStop, seekBy: ttsSeekBy, adjustVolume: ttsAdjustVolume, adjustRate: ttsAdjustRate } =
@@ -583,16 +575,8 @@ export default function ReaderPage() {
   }, [content])
 
   if (!post) {
-    if (!postError) {
-      // Still trying navigation state first, or waiting on the fallback fetch.
-      return <div className={styles.errorWrap} />
-    }
-    return (
-      <div className={styles.errorWrap}>
-        <p className={styles.errorMsg}>Post not found.</p>
-        <button className={styles.backBtn} onClick={() => { ttsStop(); navigate(-1) }}>← Back</button>
-      </div>
-    )
+    // Redirecting to homepage — nothing to render.
+    return null
   }
 
   const favicon = faviconUrl(post.url)
