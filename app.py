@@ -169,6 +169,8 @@ def get_individuals():
 
 @app.route('/subscribe', methods=['POST'])
 def subscribe():
+    if not _check_rate_limit("subscribe", max_calls=5, window_secs=60):
+        return jsonify({"status": "error", "message": "Too many requests. Please slow down."}), 429
     data = request.form
     email = data.get('email').lower().strip()
     topic = data.get('topic').strip()
@@ -280,6 +282,8 @@ def delete_subscription(sub_id):
 
 @app.route("/interested", methods=["POST"])
 def interested():
+    if not _check_rate_limit("interested", max_calls=5, window_secs=60):
+        return jsonify({"error": "Too many requests."}), 429
     # Ensure the tempdata file exists
     if not os.path.exists(tempdata_path):
         with open(tempdata_path, 'w') as f:
@@ -297,6 +301,8 @@ def interested():
 
 @app.route("/feedback", methods=["POST"])
 def feedback():
+    if not _check_rate_limit("feedback", max_calls=5, window_secs=60):
+        return jsonify({"status": "error", "message": "Too many requests."}), 429
     data = request.get_json()  # <-- read JSON instead of request.form
     if not data:
         return jsonify({"status": "error", "message": "No data sent"}), 400
@@ -798,6 +804,30 @@ def get_posts():
     finally:
         conn.close()
         
+@app.route("/posts/<int:post_id>", methods=["GET"])
+def get_post(post_id):
+    conn = app.db.get_connection()
+    try:
+        c = conn.cursor()
+        c.execute("""
+            SELECT po.id, po.title, po.url, po.published_at, po.topic, po.tags,
+                   pu.publisher_name AS publisher,
+                   COALESCE(lc.like_count, 0) AS like_count,
+                   COALESCE(f.fire_count, 0) AS fire_count
+            FROM posts po
+            JOIN publishers pu ON pu.id = po.publisher_id
+            LEFT JOIN (SELECT post_id, COUNT(*) AS like_count FROM post_likes GROUP BY post_id) lc ON lc.post_id = po.id
+            LEFT JOIN fire f ON f.post_id = po.id
+            WHERE po.id = ?
+        """, (post_id,))
+        row = c.fetchone()
+        if not row:
+            return jsonify({"error": "Not found"}), 404
+        cols = [d[0] for d in c.description]
+        return jsonify(dict(zip(cols, row)))
+    finally:
+        conn.close()
+
 @app.route("/posts/<int:post_id>", methods=["PATCH"])
 def update_post(post_id):
     key = request.headers.get("X-SECRET-KEY")
@@ -892,6 +922,8 @@ def suggested_feed():
 
 @app.route("/verify-email/send", methods=["POST"])
 def verify_email_send():
+    if not _check_rate_limit("verify-send", max_calls=5, window_secs=60):
+        return jsonify({"error": "Too many requests."}), 429
     data = request.get_json(silent=True) or {}
     email = data.get('email', '').strip().lower()
     if not email or not re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', email):
@@ -937,6 +969,8 @@ def verify_email_send():
 
 @app.route("/verify-email/confirm", methods=["POST"])
 def verify_email_confirm():
+    if not _check_rate_limit("verify-confirm", max_calls=10, window_secs=60):
+        return jsonify({"error": "Too many requests."}), 429
     data = request.get_json(silent=True) or {}
     email = data.get('email', '').strip().lower()
     otp   = data.get('otp', '').strip()
@@ -1244,6 +1278,8 @@ def get_post_summary(post_id):
 
 @app.route("/posts/<int:post_id>/content", methods=["GET"])
 def get_post_content(post_id):
+    if not _check_rate_limit("content", max_calls=30, window_secs=60):
+        return jsonify({"error": "Too many requests."}), 429
     from handlers.factory import ScraperFactory
     from bs4 import BeautifulSoup
 
@@ -1764,36 +1800,6 @@ def chat_with_article(post_id):
         return jsonify({"error": "Failed to get answer"}), 500
 
 
-@app.route("/api/convert-code", methods=["POST"])
-def convert_code():
-    data = request.get_json(silent=True) or {}
-    code = (data.get("code") or "").strip()
-    target_lang = (data.get("target_lang") or "").strip()
-    if not code or not target_lang:
-        return jsonify({"error": "code and target_lang required"}), 400
-    if len(code) > 8000:
-        return jsonify({"error": "Code too long (max 8000 chars)"}), 400
-
-    try:
-        import llm
-
-        def generate():
-            try:
-                for chunk in llm.convert_code_stream(code, target_lang):
-                    yield f"data: {json.dumps({'chunk': chunk})}\n\n"
-            except Exception as e:
-                app.logger.error("Code conversion error: %s", e)
-                yield f"data: {json.dumps({'error': 'Conversion failed'})}\n\n"
-            yield "data: [DONE]\n\n"
-
-        return Response(
-            stream_with_context(generate()),
-            mimetype="text/event-stream",
-            headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
-        )
-    except Exception as e:
-        app.logger.error("Convert code error: %s", e)
-        return jsonify({"error": "Conversion failed"}), 500
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { timeAgo, faviconUrl, fireToStars } from '../../components/feed/BlogCard/BlogCard'
-import { getPostContent, sendReadEvent, getReadEvent, getOrCreateDeviceId, askArticleStream } from '../../api'
+import { getPost, getPostContent, sendReadEvent, getReadEvent, getOrCreateDeviceId, askArticleStream } from '../../api'
 import { useTheme } from '../../context/ThemeContext'
 import { useToast } from '../../context/ToastContext'
 import ThemeSwitcher from '../../components/layout/ThemeSwitcher/ThemeSwitcher'
@@ -289,12 +289,19 @@ function SlashMenu({ filter, activeIdx, onSelect }) {
 
 export default function ReaderPage() {
   const { state } = useLocation()
+  const { id } = useParams()
   const navigate = useNavigate()
 
-  // `post` only ever arrives via in-app navigation state (clicking a BlogCard).
-  // A direct/fresh load (email link, new tab, refresh) has no navigation state —
-  // in that case we just send the visitor to the homepage below.
-  const post = state?.post
+  const [post, setPost] = useState(state?.post ?? null)
+  const [postLoading, setPostLoading] = useState(!state?.post)
+
+  useEffect(() => {
+    if (state?.post || !id) return
+    getPost(id)
+      .then(data => setPost(data))
+      .catch(() => navigate('/', { replace: true }))
+      .finally(() => setPostLoading(false))
+  }, [id, state?.post, navigate])
 
   const { darkMode } = useTheme()
   const { showToast } = useToast()
@@ -331,14 +338,6 @@ export default function ReaderPage() {
   const contentRef    = useRef(null)
   const readerBodyRef = useRef(null)
   const overflowRef   = useRef(null)
-
-  // Direct URL load (email link, refresh, new tab) has no navigation state —
-  // just send the visitor to the homepage instead of trying to render inline.
-  useEffect(() => {
-    if (!post) {
-      navigate('/', { replace: true })
-    }
-  }, [post, navigate])
 
   // ── Text-to-speech ──
   const { state: ttsState, play: ttsPlay, pause: ttsPause, resume: ttsResume, stop: ttsStop, seekBy: ttsSeekBy, adjustVolume: ttsAdjustVolume, adjustRate: ttsAdjustRate } =
@@ -574,11 +573,6 @@ export default function ReaderPage() {
     })
   }, [content])
 
-  if (!post) {
-    // Redirecting to homepage — nothing to render.
-    return null
-  }
-
   const favicon = faviconUrl(post.url)
   const tags = post.tags ? post.tags.split(',').map(t => t.trim()).filter(Boolean) : []
   const totalMins = readTime ? parseInt(readTime, 10) : 0
@@ -693,6 +687,8 @@ export default function ReaderPage() {
       Listen
     </button>
   )
+
+  if (postLoading || !post) return null
 
   return (
     <div className={styles.page}>
