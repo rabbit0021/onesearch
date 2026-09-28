@@ -472,7 +472,7 @@ export default function ReaderPage() {
     }
     el.addEventListener('scroll', onScroll, { passive: true })
     return () => el.removeEventListener('scroll', onScroll)
-  }, [])
+  }, [post])
 
 
   useEffect(() => {
