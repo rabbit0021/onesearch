@@ -296,12 +296,15 @@ export default function ReaderPage() {
   const [postLoading, setPostLoading] = useState(!state?.post)
 
   useEffect(() => {
-    if (state?.post || !id) return
+    if (state?.post || !id) {
+      setPostLoading(false)
+      return
+    }
+    setPostLoading(true)
     getPost(id)
-      .then(data => setPost(data))
-      .catch(() => navigate('/', { replace: true }))
-      .finally(() => setPostLoading(false))
-  }, [id, state?.post, navigate])
+      .then(data => { setPost(data); setPostLoading(false) })
+      .catch(() => { setPostLoading(false); navigate('/', { replace: true }) })
+  }, [id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const { darkMode } = useTheme()
   const { showToast } = useToast()
@@ -573,8 +576,8 @@ export default function ReaderPage() {
     })
   }, [content])
 
-  const favicon = faviconUrl(post.url)
-  const tags = post.tags ? post.tags.split(',').map(t => t.trim()).filter(Boolean) : []
+  const favicon = faviconUrl(post?.url)
+  const tags = post?.tags ? post.tags.split(',').map(t => t.trim()).filter(Boolean) : []
   const totalMins = readTime ? parseInt(readTime, 10) : 0
   const minsLeft = totalMins > 0 ? Math.max(0, Math.round(totalMins * (1 - progress / 100))) : null
   const activeFontCss = FONT_FAMILIES.find(f => f.key === fontFamily)?.css
@@ -651,6 +654,8 @@ export default function ReaderPage() {
     return () => { vv.removeEventListener('resize', onResize); vv.removeEventListener('scroll', onResize) }
   }, [])
 
+  if (postLoading || !post) return null
+
   async function sendChatMessage(voiceText) {
     const q = (voiceText ?? chatInput).trim()
     if (!q || chatLoading) return
@@ -687,8 +692,6 @@ export default function ReaderPage() {
       Listen
     </button>
   )
-
-  if (postLoading || !post) return null
 
   return (
     <div className={styles.page}>
