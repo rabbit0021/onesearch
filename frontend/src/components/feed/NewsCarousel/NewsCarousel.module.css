@@ -1,3 +1,84 @@
+/* ── Compact ticker mode ── */
+.ticker {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.85rem;
+  background: linear-gradient(to bottom, color-mix(in srgb, #A0A0A0 15%, var(--card-bg)), var(--card-bg));
+  border: .5px solid var(--border-mid);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.tickerBadge {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  padding: 2px 7px;
+  clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 50%, calc(100% - 6px) 100%, 0 100%);
+  padding-right: 14px;
+}
+
+/* unused but keep for specificity */
+.tickerBadgeN, .tickerBadgeE, .tickerBadgeW, .tickerBadgeS {}
+
+.tickerClickable {
+  cursor: pointer;
+}
+
+.tickerPublisher {
+  font-size: var(--fs-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.tickerSep {
+  color: var(--border-mid);
+  font-size: var(--fs-xs);
+  flex-shrink: 0;
+}
+
+.tickerHeadline {
+  font-size: var(--fs-sm);
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.tickerClickable:hover:not(:has(.tickerMore:hover)) .tickerHeadline {
+  color: var(--color-primary);
+}
+
+.tickerMore {
+  background: none;
+  border: none;
+  font-size: var(--fs-xs);
+  color: var(--color-primary);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding: 0;
+  letter-spacing: 0.04em;
+  opacity: 0.8;
+  transition: opacity 0.15s;
+}
+
+.tickerMore:hover {
+  opacity: 1;
+}
+
+/* ── Full card mode ── */
 .wrapper {
   display: flex;
   flex-direction: column;
@@ -48,7 +129,7 @@
 
 /* ── Card area ── */
 .cardWrap {
-  background: var(--card-bg);
+  background: linear-gradient(to bottom, color-mix(in srgb, #A0A0A0 15%, var(--card-bg)), var(--card-bg));
   overflow: hidden;
 }
 
@@ -117,10 +198,13 @@
 }
 
 .newsImage {
-  width: 160px;
+  width: 180px;
   flex-shrink: 0;
-  border-radius: 4px;
   overflow: hidden;
+  background: linear-gradient(to bottom, color-mix(in srgb, #A0A0A0 15%, var(--card-bg)), var(--card-bg));
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .newsImage img {
@@ -128,6 +212,7 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  mix-blend-mode: multiply;
 }
 
 /* ── Right content column ── */

@@ -55,6 +55,8 @@ const STATIC_NEWS = [
   },
 ]
 
+const COMPACT_MODE = true
+
 function parseTags(tags) {
   if (!tags) return []
   return tags.split(',').map(t => t.trim()).filter(Boolean)
@@ -98,6 +100,31 @@ export default function NewsCarousel() {
 
   const item = items[current]
   const tags = parseTags(item.tags)
+
+  if (COMPACT_MODE) return (
+    <div
+      className={`${styles.ticker} ${item.link ? styles.tickerClickable : ''}`}
+      onClick={handleCardClick}
+    >
+      <span className={styles.tickerBadge}>NEWS</span>
+      <span className={styles.tickerPublisher}>{item.publisher}</span>
+      <span className={styles.tickerSep}>·</span>
+      <span
+        className={`${styles.tickerHeadline} ${animating ? (dir === 'left' ? styles.exitLeft : styles.exitRight) : ''}`}
+      >
+        {item.headline}
+      </span>
+      {total > 1 && (
+        <button
+          className={styles.tickerMore}
+          onClick={e => { e.stopPropagation(); next() }}
+          aria-label="Next"
+        >
+          more ›
+        </button>
+      )}
+    </div>
+  )
 
   return (
     <div className={styles.wrapper}>
