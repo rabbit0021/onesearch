@@ -186,7 +186,7 @@ function FireFill({ level }) {
     <svg width="16" height="16" viewBox="0 0 12 16" fill="none" xmlns="http://www.w3.org/2000/svg" title={`Heat level ${level}/4`}>
       <defs>
         <clipPath id={clipId}>
-          <rect x="0" y={clipY} width="12" height="16" />
+          <path d={`M0 ${clipY} Q3 ${clipY - 1.5} 6 ${clipY} Q9 ${clipY + 1.5} 12 ${clipY} L12 16 L0 16 Z`} />
         </clipPath>
         <linearGradient id={gradId} x1="6" y1="16" x2="6" y2="0" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor="#f97316" />
