@@ -174,6 +174,33 @@ export function timeAgo(iso) {
   return `${months}mo ago`
 }
 
+function FireFill({ level }) {
+  const fillPct = level / 4  // 0.25 / 0.5 / 0.75 / 1.0
+  const clipId = `fire-clip-${level}`
+  const gradId = `fire-grad-${level}`
+  // flame silhouette in a 12x16 viewBox
+  const flame = "M6 15.5 C2 15.5 0.5 12 1 9.5 C1.5 7.5 3 6.5 3 4.5 C3 3 1.5 1.5 1 0.5 C4 2 5 4 5 5.5 C5 4 4.5 2.5 4 0.5 C7.5 2 9.5 5.5 9 8.5 C10 7.5 10.5 5.5 10 4 C12 6.5 12 10 10.5 12.5 C9.5 14 8 15.5 6 15.5 Z"
+  const clipY = 16 - (16 * fillPct)
+
+  return (
+    <svg width="16" height="16" viewBox="0 0 12 16" fill="none" xmlns="http://www.w3.org/2000/svg" title={`Heat level ${level}/4`}>
+      <defs>
+        <clipPath id={clipId}>
+          <rect x="0" y={clipY} width="12" height="16" />
+        </clipPath>
+        <linearGradient id={gradId} x1="6" y1="16" x2="6" y2="0" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#f97316" />
+          <stop offset="100%" stopColor="#fef08a" />
+        </linearGradient>
+      </defs>
+      {/* filled fire clipped from bottom */}
+      <path d={flame} fill={`url(#${gradId})`} clipPath={`url(#${clipId})`} />
+      {/* stroke outline on top */}
+      <path d={flame} fill="none" stroke="currentColor" strokeWidth="0.6" opacity="0.4" />
+    </svg>
+  )
+}
+
 export default function BlogCard({ post, readProgress, likedPostIds = new Set(), setLikedPostIds }) {
   const navigate = useNavigate()
   const { darkMode } = useTheme()
@@ -389,12 +416,7 @@ export default function BlogCard({ post, readProgress, likedPostIds = new Set(),
 
               {fireToStars(post.fire_count) > 0 && (
                 <div className={`${styles.iconItem} ${styles.starItem}`}>
-                  <div className={styles.starRating}>
-                    <svg className={styles.starFilled} width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 3l2.45 4.97 5.48.8-3.97 3.87.94 5.46L12 15.6l-4.9 2.57.94-5.46L4.07 8.77l5.48-.8z"/>
-                    </svg>
-                    <span className={styles.starCount}>{fireToStars(post.fire_count)}</span>
-                  </div>
+                  <FireFill level={fireToStars(post.fire_count)} />
                 </div>
               )}
 

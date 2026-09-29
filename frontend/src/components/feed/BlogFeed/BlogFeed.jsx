@@ -1,3 +1,5 @@
+const SHOW_ALL_TIME_FAVOURITES = false
+
 import { useState, useEffect, useMemo } from 'react'
 import { getFeed, getSuggestedFeed, getMostLikedFeed, getMostLikedAllTimeFeed, getIndividualsFeed, getRecommendedFeed, getContinueReading, getOrCreateDeviceId, getLikedPostIds } from '../../../api'
 import { getJiraStatus, getJiraIssues } from '../../../api/jira'
@@ -439,7 +441,7 @@ export default function BlogFeed() {
               </div>
           }
 
-          {loading
+          {SHOW_ALL_TIME_FAVOURITES && (loading
             ? <SkeletonSection />
             : <div className={styles.section}>
                 <p className={styles.heading}>All Time Favourites</p>
@@ -451,7 +453,7 @@ export default function BlogFeed() {
                   ))}
                 </div>
               </div>
-          }
+          )}
         </>
       )}
 
