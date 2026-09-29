@@ -88,6 +88,49 @@
   padding: 0.7rem 0.85rem;
 }
 
+.newsSearchSection {
+  background: var(--card-bg);
+  border: 1px solid var(--border-mid);
+  border-radius: 6px;
+  padding: 1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.newsSearchHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.newsSearchLabel {
+  font-size: var(--fs-std);
+  font-weight: 700;
+  color: var(--text-strong);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.newsSearchDismiss {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 2px;
+  flex-shrink: 0;
+}
+
+.newsSearchDismiss:hover {
+  color: var(--text-strong);
+}
+
 /* ── Skeleton cards ── */
 @keyframes shimmer {
   0%   { background-position: -600px 0; }

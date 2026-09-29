@@ -258,6 +258,22 @@ class SQLiteDatabase:
             )
         """)
 
+        c.execute("""
+            CREATE TABLE IF NOT EXISTS news_banners (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                publisher TEXT NOT NULL,
+                time_label TEXT NOT NULL,
+                headline TEXT NOT NULL,
+                tags TEXT,
+                image_url TEXT,
+                link TEXT,
+                search_query TEXT NOT NULL,
+                position INTEGER DEFAULT 0,
+                visible BOOLEAN DEFAULT 1,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
         logger.info(f"SQLite database initialized Successfully")
         conn.commit()
         conn.close()
@@ -864,6 +880,55 @@ class SQLiteDatabase:
             (post_id, audio_file, json.dumps(timings)),
         )
         conn.commit()
+
+    def get_news_banners(self, conn):
+        c = conn.cursor()
+        c.execute("SELECT * FROM news_banners WHERE visible=1 ORDER BY position ASC, created_at DESC LIMIT 5")
+        return [dict(row) for row in c.fetchall()]
+
+    def get_all_news_banners(self, conn):
+        c = conn.cursor()
+        c.execute("SELECT * FROM news_banners ORDER BY position ASC, created_at DESC")
+        return [dict(row) for row in c.fetchall()]
+
+    def add_news_banner(self, conn, publisher, time_label, headline, tags, image_url, link, search_query, position):
+        c = conn.cursor()
+        c.execute("""
+            INSERT INTO news_banners (publisher, time_label, headline, tags, image_url, link, search_query, position)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (publisher, time_label, headline, tags, image_url, link, search_query, position))
+        conn.commit()
+        return c.lastrowid
+
+    def update_news_banner(self, conn, banner_id, publisher, time_label, headline, tags, image_url, link, search_query, position, visible):
+        c = conn.cursor()
+        c.execute("""
+            UPDATE news_banners SET publisher=?, time_label=?, headline=?, tags=?, image_url=?, link=?, search_query=?, position=?, visible=?
+            WHERE id=?
+        """, (publisher, time_label, headline, tags, image_url, link, search_query, position, visible, banner_id))
+        conn.commit()
+
+    def delete_news_banner(self, conn, banner_id):
+        c = conn.cursor()
+        c.execute("DELETE FROM news_banners WHERE id=?", (banner_id,))
+        conn.commit()
+
+    def get_posts_with_embeddings(self, conn):
+        c = conn.cursor()
+        c.execute("""
+            SELECT po.id, po.url, po.title, po.tags, po.published_at, po.topic, po.embedding,
+                   p.publisher_name,
+                   COALESCE(lc.like_count, 0) AS like_count,
+                   COALESCE(f.fire_count, 0) AS fire_count,
+                   COALESCE(vc.view_count, 0) AS view_count
+            FROM posts po
+            JOIN publishers p ON po.publisher_id = p.id
+            LEFT JOIN (SELECT post_id, COUNT(*) AS like_count FROM post_likes GROUP BY post_id) lc ON lc.post_id = po.id
+            LEFT JOIN fire f ON f.post_id = po.id
+            LEFT JOIN (SELECT post_id, COUNT(*) AS view_count FROM views GROUP BY post_id) vc ON vc.post_id = po.id
+            WHERE po.labelled = 1 AND po.embedding IS NOT NULL
+        """)
+        return [dict(row) for row in c.fetchall()]
 
     @classmethod
     def get_instance(cls, db_path):

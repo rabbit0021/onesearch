@@ -10,9 +10,10 @@ import FeedbackTab from '../../components/admin/FeedbackTab/FeedbackTab'
 import LikesTab from '../../components/admin/LikesTab/LikesTab'
 import ReadingEventsTab from '../../components/admin/ReadingEventsTab/ReadingEventsTab'
 import ChatLogsTab from '../../components/admin/ChatLogsTab/ChatLogsTab'
+import NewsBannersTab from '../../components/admin/NewsBannersTab/NewsBannersTab'
 import styles from './AdminPosts.module.css'
 
-const TABS = ['Posts', 'Publishers', 'Subscriptions', 'Notifications', 'Jobs', 'Feedback', 'Likes', 'Reading', 'Chat']
+const TABS = ['Posts', 'Publishers', 'Subscriptions', 'Notifications', 'Jobs', 'Feedback', 'Likes', 'Reading', 'Chat', 'News']
 const STORAGE_KEY = 'admin_secret_key'
 
 function saveKey(key) {
@@ -147,6 +148,10 @@ export default function AdminPosts() {
 
       {tab === 'Chat' && (
         <ChatLogsTab secretKey={secretKey} />
+      )}
+
+      {tab === 'News' && (
+        <NewsBannersTab secretKey={secretKey} />
       )}
     </div>
   )

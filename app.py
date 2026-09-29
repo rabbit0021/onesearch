@@ -1802,6 +1802,129 @@ def chat_with_article(post_id):
 
 
 
+@app.route('/api/news-banners', methods=['GET'])
+def get_news_banners():
+    db = app.db
+    conn = db.get_connection()
+    try:
+        banners = db.get_news_banners(conn)
+        return jsonify(banners)
+    finally:
+        conn.close()
+
+@app.route('/api/admin/news-banners', methods=['GET'])
+@require_secret_key
+def admin_get_news_banners():
+    db = app.db
+    conn = db.get_connection()
+    try:
+        banners = db.get_all_news_banners(conn)
+        return jsonify(banners)
+    finally:
+        conn.close()
+
+@app.route('/api/admin/news-banners', methods=['POST'])
+@require_secret_key
+def admin_create_news_banner():
+    data = request.json
+    db = app.db
+    conn = db.get_connection()
+    try:
+        banner_id = db.add_news_banner(conn,
+            publisher=data['publisher'],
+            time_label=data['time_label'],
+            headline=data['headline'],
+            tags=data.get('tags', ''),
+            image_url=data.get('image_url', ''),
+            link=data.get('link', ''),
+            search_query=data['search_query'],
+            position=data.get('position', 0)
+        )
+        return jsonify({'id': banner_id}), 201
+    finally:
+        conn.close()
+
+@app.route('/api/admin/news-banners/<int:banner_id>', methods=['PUT'])
+@require_secret_key
+def admin_update_news_banner(banner_id):
+    data = request.json
+    db = app.db
+    conn = db.get_connection()
+    try:
+        db.update_news_banner(conn, banner_id,
+            publisher=data['publisher'],
+            time_label=data['time_label'],
+            headline=data['headline'],
+            tags=data.get('tags', ''),
+            image_url=data.get('image_url', ''),
+            link=data.get('link', ''),
+            search_query=data['search_query'],
+            position=data.get('position', 0),
+            visible=data.get('visible', 1)
+        )
+        return jsonify({'ok': True})
+    finally:
+        conn.close()
+
+@app.route('/api/admin/news-banners/<int:banner_id>', methods=['DELETE'])
+@require_secret_key
+def admin_delete_news_banner(banner_id):
+    db = app.db
+    conn = db.get_connection()
+    try:
+        db.delete_news_banner(conn, banner_id)
+        return jsonify({'ok': True})
+    finally:
+        conn.close()
+
+@app.route('/api/news-search', methods=['POST'])
+def news_search():
+    data = request.json
+    query = data.get('query', '')
+    limit = data.get('limit', 20)
+    if not query:
+        return jsonify([])
+
+    query_embedding = get_embedding(query)
+
+    db = app.db
+    conn = db.get_connection()
+    try:
+        posts = db.get_posts_with_embeddings(conn)
+        results = []
+        for post in posts:
+            if not post.get('embedding'):
+                continue
+            emb = np.frombuffer(post['embedding'], dtype=np.float32)
+            norm_q = np.linalg.norm(query_embedding)
+            norm_p = np.linalg.norm(emb)
+            if norm_q == 0 or norm_p == 0:
+                continue
+            sim = float(np.dot(query_embedding, emb) / (norm_q * norm_p))
+            results.append((sim, post))
+
+        results.sort(key=lambda x: x[0], reverse=True)
+        top = [p for _, p in results[:limit]]
+
+        formatted = []
+        for p in top:
+            formatted.append({
+                'id': p['id'],
+                'url': p['url'],
+                'title': p['title'],
+                'tags': p.get('tags', ''),
+                'published_at': p['published_at'],
+                'topic': p['topic'],
+                'publisher': p.get('publisher_name', ''),
+                'like_count': p.get('like_count', 0),
+                'view_count': p.get('view_count', 0),
+                'fire_count': p.get('fire_count', 0),
+            })
+        return jsonify(formatted)
+    finally:
+        conn.close()
+
+
 if __name__ == "__main__":
     if os.getenv("FLASK_ENV") == "Production":
         app.run()

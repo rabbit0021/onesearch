@@ -1,0 +1,254 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  border-radius: 6px;
+  overflow: hidden;
+  border: .5px solid var(--border-mid);
+  box-shadow: 0 2px 12px var(--card-shadow);
+}
+
+/* ── Top accent bar ── */
+.accentBar {
+  height: 1px;
+  background: linear-gradient(90deg, var(--color-primary) 0%, transparent 100%);
+  flex-shrink: 0;
+}
+
+/* ── Header ── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55rem 1rem 0.5rem;
+  background: var(--card-bg);
+}
+
+.label {
+  font-size: var(--fs-xs);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.labelIcon {
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.counter {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Card area ── */
+.cardWrap {
+  background: var(--card-bg);
+  overflow: hidden;
+}
+
+.card {
+  padding: 1rem 1.1rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.exitLeft {
+  opacity: 0;
+  transform: translateX(-22px);
+}
+
+.exitRight {
+  opacity: 0;
+  transform: translateX(22px);
+}
+
+/* ── Meta row ── */
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.publisher {
+  font-size: var(--fs-sm);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-strong);
+}
+
+.sep {
+  color: var(--border-mid);
+  font-size: var(--fs-xs);
+  font-weight: 300;
+}
+
+.time {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+}
+
+.link {
+  margin-left: auto;
+  font-size: var(--fs-base);
+  color: var(--color-primary);
+  text-decoration: none;
+  opacity: 0.65;
+  transition: opacity 0.15s;
+  line-height: 1;
+}
+
+.link:hover {
+  opacity: 1;
+}
+
+/* ── Body (image + content side by side) ── */
+.body {
+  display: flex;
+  align-items: stretch;
+  gap: 1rem;
+}
+
+.newsImage {
+  width: 160px;
+  flex-shrink: 0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.newsImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ── Right content column ── */
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+  justify-content: space-between;
+}
+
+/* ── Headline ── */
+.headline {
+  font-size: var(--fs-lm);
+  color: var(--text-dim);
+  line-height: 1.5;
+  margin: 0;
+  letter-spacing: 0.01em;
+}
+
+/* ── Footer ── */
+.footer {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: auto;
+}
+
+.tags {
+  display: flex;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.tag {
+  font-size: var(--fs-2xs);
+  background-color: var(--card-hint);
+  color: var(--card-tag);
+  padding: 1px 5px;
+  border-radius: 0;
+}
+
+/* ── Dot indicators ── */
+.dots {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.dotBtn {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: none;
+  background: var(--border-mid);
+  padding: 0;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+  flex-shrink: 0;
+}
+
+.dotActive {
+  background: var(--color-primary);
+  transform: scale(1.35);
+}
+
+/* ── Arrows ── */
+.arrows {
+  display: flex;
+  gap: 0;
+}
+
+.arrow {
+  background: none;
+  border: .1px solid var(--border-mid);
+  color: var(--text-muted);
+  font-size: var(--fs-lm);
+  line-height: 1;
+  padding: 1px 7px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.arrow:first-child {
+  border-radius: 3px 0 0 3px;
+  border-right: none;
+}
+
+.arrow:last-child {
+  border-radius: 0 3px 3px 0;
+}
+
+.arrow:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.clickable:hover .headline {
+  color: var(--color-primary);
+}
+
+.searchingOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  border-radius: inherit;
+  z-index: 2;
+}
+
+.cardWrap {
+  position: relative;
+}

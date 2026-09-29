@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { getFeed, getSuggestedFeed, getMostLikedFeed, getMostLikedAllTimeFeed, getIndividualsFeed, getRecommendedFeed, getContinueReading, getOrCreateDeviceId, getLikedPostIds } from '../../../api'
 import { getJiraStatus, getJiraIssues } from '../../../api/jira'
 import BlogCard, { TOPIC_COLORS } from '../BlogCard/BlogCard'
+import NewsCarousel from '../NewsCarousel/NewsCarousel'
 import styles from './BlogFeed.module.css'
 
 function SkeletonCard() {
@@ -235,6 +236,8 @@ export default function BlogFeed() {
 
   return (
     <div className={styles.wrapper}>
+
+      <NewsCarousel />
 
       <div className={styles.filterBar}>
 

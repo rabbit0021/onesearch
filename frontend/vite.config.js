@@ -28,6 +28,9 @@ export default defineConfig({
       '/interested': FLASK,
       '/api/tts': FLASK,  // covers /api/tts/<id>, /api/tts/<id>/stream, /api/tts/<id>/play-event
       '/api/chat': FLASK,
+      '/api/news-banners': FLASK,
+      '/api/admin/news-banners': FLASK,
+      '/api/news-search': FLASK,
       '/feedback': FLASK,
       '/verify-email': FLASK,
       '/static': FLASK,

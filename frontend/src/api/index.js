@@ -369,6 +369,59 @@ export async function recordView(postId, userIdentifier, deviceId) {
 }
 
 
+export async function getNewsBanners() {
+  const res = await fetch('/api/news-banners')
+  if (!res.ok) throw new Error('Failed to fetch news banners')
+  return res.json()
+}
+
+export async function searchByQuery(query, limit = 20) {
+  const res = await fetch('/api/news-search', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query, limit }),
+  })
+  if (!res.ok) throw new Error('Failed to search')
+  return res.json()
+}
+
+export async function adminGetNewsBanners(secretKey) {
+  const res = await fetch('/api/admin/news-banners', {
+    headers: { 'X-SECRET-KEY': secretKey },
+  })
+  if (!res.ok) throw new Error('Failed to fetch banners')
+  return res.json()
+}
+
+export async function adminCreateNewsBanner(secretKey, data) {
+  const res = await fetch('/api/admin/news-banners', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-SECRET-KEY': secretKey },
+    body: JSON.stringify(data),
+  })
+  if (!res.ok) throw new Error('Failed to create banner')
+  return res.json()
+}
+
+export async function adminUpdateNewsBanner(secretKey, id, data) {
+  const res = await fetch(`/api/admin/news-banners/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'X-SECRET-KEY': secretKey },
+    body: JSON.stringify(data),
+  })
+  if (!res.ok) throw new Error('Failed to update banner')
+  return res.json()
+}
+
+export async function adminDeleteNewsBanner(secretKey, id) {
+  const res = await fetch(`/api/admin/news-banners/${id}`, {
+    method: 'DELETE',
+    headers: { 'X-SECRET-KEY': secretKey },
+  })
+  if (!res.ok) throw new Error('Failed to delete banner')
+  return res.json()
+}
+
 export async function updatePost(id, topic, tags, secretKey, fireCount) {
   const res = await fetch(`/posts/${id}`, {
     method: 'PATCH',
