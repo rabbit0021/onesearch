@@ -8,7 +8,7 @@ export const THEMES = {
     '--color-primary-hover': '#0b8a37',
     '--color-primary-text':  '#065523',
     '--color-primary-tint':  '#e1f9eb',
-    '--bg-feed':             'rgb(242, 247, 243)',
+    '--bg-feed':             'rgb(245, 248, 246)',
   },
   ocean: {
     label: 'Ocean',
@@ -17,7 +17,7 @@ export const THEMES = {
     '--color-primary-hover': '#1976d2',
     '--color-primary-text':  '#0d47a1',
     '--color-primary-tint':  '#e3f2fd',
-    '--bg-feed':             'rgb(242, 244, 247)',
+    '--bg-feed':             'rgb(245, 246, 248)',
   },
   lavender: {
     label: 'Lavender',
@@ -26,7 +26,7 @@ export const THEMES = {
     '--color-primary-hover': '#6d28d9',
     '--color-primary-text':  '#4c1d95',
     '--color-primary-tint':  '#ede9fe',
-    '--bg-feed':             'rgb(245, 243, 247)',
+    '--bg-feed':             'rgb(247, 245, 248)',
   },
   rose: {
     label: 'Rose',
@@ -35,7 +35,7 @@ export const THEMES = {
     '--color-primary-hover': '#c2177a',
     '--color-primary-text':  '#880e4f',
     '--color-primary-tint':  '#fce4f3',
-    '--bg-feed':             'rgb(247, 242, 245)',
+    '--bg-feed':             'rgb(248, 245, 247)',
   },
   claude: {
     label: 'Claude',
@@ -44,7 +44,7 @@ export const THEMES = {
     '--color-primary-hover': '#9c4d33',
     '--color-primary-text':  '#7a3520',
     '--color-primary-tint':  '#fdf0eb',
-    '--bg-feed':             'rgb(247, 243, 242)',
+    '--bg-feed':             'rgb(248, 246, 245)',
   },
   cobalt: {
     label: 'Cobalt',
@@ -53,7 +53,7 @@ export const THEMES = {
     '--color-primary-hover': '#0035cc',
     '--color-primary-text':  '#00228a',
     '--color-primary-tint':  '#e6eeff',
-    '--bg-feed':             'rgb(242, 244, 247)',
+    '--bg-feed':             'rgb(245, 246, 248)',
   },
 }
 
