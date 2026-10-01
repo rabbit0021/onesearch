@@ -337,3 +337,10 @@
 .cardWrap {
   position: relative;
 }
+
+@media (max-width: 768px) {
+  .ticker,
+  .wrapper {
+    margin-bottom: 0.5rem;
+  }
+}

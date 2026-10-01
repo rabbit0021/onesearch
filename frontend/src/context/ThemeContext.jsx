@@ -8,6 +8,7 @@ export const THEMES = {
     '--color-primary-hover': '#0b8a37',
     '--color-primary-text':  '#065523',
     '--color-primary-tint':  '#e1f9eb',
+    '--bg-feed':             'rgb(242, 247, 243)',
   },
   ocean: {
     label: 'Ocean',
@@ -16,6 +17,7 @@ export const THEMES = {
     '--color-primary-hover': '#1976d2',
     '--color-primary-text':  '#0d47a1',
     '--color-primary-tint':  '#e3f2fd',
+    '--bg-feed':             'rgb(242, 244, 247)',
   },
   lavender: {
     label: 'Lavender',
@@ -24,6 +26,7 @@ export const THEMES = {
     '--color-primary-hover': '#6d28d9',
     '--color-primary-text':  '#4c1d95',
     '--color-primary-tint':  '#ede9fe',
+    '--bg-feed':             'rgb(245, 243, 247)',
   },
   rose: {
     label: 'Rose',
@@ -32,6 +35,7 @@ export const THEMES = {
     '--color-primary-hover': '#c2177a',
     '--color-primary-text':  '#880e4f',
     '--color-primary-tint':  '#fce4f3',
+    '--bg-feed':             'rgb(247, 242, 245)',
   },
   claude: {
     label: 'Claude',
@@ -40,6 +44,7 @@ export const THEMES = {
     '--color-primary-hover': '#9c4d33',
     '--color-primary-text':  '#7a3520',
     '--color-primary-tint':  '#fdf0eb',
+    '--bg-feed':             'rgb(247, 243, 242)',
   },
   cobalt: {
     label: 'Cobalt',
@@ -48,15 +53,24 @@ export const THEMES = {
     '--color-primary-hover': '#0035cc',
     '--color-primary-text':  '#00228a',
     '--color-primary-tint':  '#e6eeff',
+    '--bg-feed':             'rgb(242, 244, 247)',
   },
 }
 
 const ThemeContext = createContext(null)
 
-function applyTheme(theme) {
+const LIGHT_ONLY_VARS = new Set(['--bg-feed'])
+
+function applyTheme(theme, darkMode = false) {
   const root = document.documentElement
   Object.entries(theme).forEach(([key, val]) => {
-    if (key.startsWith('--')) root.style.setProperty(key, val)
+    if (!key.startsWith('--')) return
+    if (LIGHT_ONLY_VARS.has(key)) {
+      if (!darkMode) root.style.setProperty(key, val)
+      else root.style.removeProperty(key)
+    } else {
+      root.style.setProperty(key, val)
+    }
   })
 }
 
@@ -70,9 +84,9 @@ export function ThemeProvider({ children }) {
   )
 
   useEffect(() => {
-    applyTheme(THEMES[themeKey] || THEMES.rose)
+    applyTheme(THEMES[themeKey] || THEMES.rose, darkMode)
     localStorage.setItem('theme5', themeKey)
-  }, [themeKey])
+  }, [themeKey, darkMode])
 
   useEffect(() => {
     if (darkMode) {

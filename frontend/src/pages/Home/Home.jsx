@@ -215,6 +215,8 @@ export default function Home() {
 
           <ResizeHandle onResizeStart={onResizeStart} collapsed={formCollapsed} onCollapse={toggleCollapse} />
 
+          <div className={styles.wavySep} aria-hidden="true" />
+
           <div className={styles.feedWrapper}>
             <BlogFeed />
 

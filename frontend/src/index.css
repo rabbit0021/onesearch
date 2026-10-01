@@ -9,7 +9,7 @@
   --bg-disabled: rgb(230, 230, 230);
   --bg-wizard: rgb(238, 238, 235);
   --bg-wizard-option: rgb(220, 220, 217);
-  --bg-feed:rgb(247, 245, 242 );
+  --bg-feed:rgb(247, 243, 242);
   --bg-reader-page: #ffffff;
   --bg-reader-toolbar: var(--color-primary);
   --reader-toolbar-text: #ffffff;
@@ -32,7 +32,7 @@
 
   --primary-button-bg: rgb(70, 70, 70);
 
-  --filter-bg: rgb(237, 236, 230);
+  --filter-bg: rgb(243, 242, 237);
   --filter-border: rgb(230, 230, 228);
   --filter-text: #2c2c2c;
   --filter-dim: #666;
