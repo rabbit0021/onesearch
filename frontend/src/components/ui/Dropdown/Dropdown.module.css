@@ -4,7 +4,7 @@
   left: 0;
   right: 0;
   z-index: 1;
-  background: var(--bg-wizard);
+  background: var(--bg-feed);
   border: 1px solid var(--border-mid);
   max-height: 180px;
   overflow-y: auto;
