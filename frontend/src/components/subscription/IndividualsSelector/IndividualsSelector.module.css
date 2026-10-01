@@ -159,13 +159,12 @@
   overflow-y: auto;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
 
   .browseHeader {
     flex-wrap: wrap;
     padding: 10px 12px;
     gap: 8px;
-
   }
 
   .browseSearchWrap {
@@ -179,8 +178,24 @@
     order: 2;
   }
 
+  .browseGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    padding: 10px;
+    grid-auto-rows: min-content;
+  }
+
+  .browseCard {
+    border: 1px solid var(--border-mid);
+  }
+
   .browseAvatarWrap {
-    height: 160px;
+    height: 150px;
+  }
+
+  .browseName {
+    font-size: var(--fs-base);
+    padding: 8px 10px 4px;
   }
 }
 

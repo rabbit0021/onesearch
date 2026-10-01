@@ -39,6 +39,7 @@ export default function Home() {
   // Resize / collapse state
   const [formWidth, setFormWidth] = useState(35) // percent
   const [formCollapsed, setFormCollapsed] = useState(false)
+  const [mobileFormCollapsed, setMobileFormCollapsed] = useState(true)
   const layoutRef = useRef(null)
   const isDragging = useRef(false)
   const dragStartX = useRef(0)
@@ -174,8 +175,32 @@ export default function Home() {
                 <ThemeSwitcher />
               </div>
             </div>
-            <form className={styles.form} onSubmit={handleSubmit} noValidate>
-              <div className={styles.text}>
+
+            <div className={styles.mobileFormBox}>
+            <div className={styles.mobileTextHeader}>
+              <h1 className={styles.title}>Subscribe to what you need</h1>
+              <p className={styles.intro}>
+                Onesearch aggregates insights from top tech publishers — so you always know what the industry is building, breaking,
+                and shipping.
+              </p>
+              {mobileFormCollapsed && (
+                <button
+                  type="button"
+                  className={styles.mobileExpandBtn}
+                  onClick={() => setMobileFormCollapsed(false)}
+                  aria-label="Expand subscription form"
+                >
+                  ↓
+                </button>
+              )}
+            </div>
+
+            <form
+              className={`${styles.form} ${mobileFormCollapsed ? styles.mobileFormHidden : ''}`}
+              onSubmit={handleSubmit}
+              noValidate
+            >
+              <div className={styles.desktopTextHeader}>
                 <h1 className={styles.title}>Subscribe to what you need</h1>
                 <p className={styles.intro}>
                   Onesearch aggregates insights from top tech publishers — so you always know what the industry is building, breaking,
@@ -210,7 +235,17 @@ export default function Home() {
               <button type="submit" className={styles.submitBtn} disabled={submitting}>
                 {submitting ? <>subscribing<span className={styles.blink}>_</span></> : <><span className={styles.prompt}>&gt;_</span> subscribe</>}
               </button>
+
+              <button
+                type="button"
+                className={styles.mobileCollapseBtn}
+                onClick={() => setMobileFormCollapsed(true)}
+                aria-label="Collapse subscription form"
+              >
+                ↑
+              </button>
             </form>
+            </div>{/* end mobileFormBox */}
           </div>
 
           <ResizeHandle onResizeStart={onResizeStart} collapsed={formCollapsed} onCollapse={toggleCollapse} />

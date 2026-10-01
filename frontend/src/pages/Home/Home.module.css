@@ -181,6 +181,34 @@
   display: none;
 }
 
+.mobileFormToggle {
+  display: none;
+}
+
+.mobileTextHeader {
+  display: none;
+}
+
+.desktopTextHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-self: flex-start;
+}
+
+.mobileFormBox {
+  display: contents;
+}
+
+.mobileExpandBtn,
+.mobileCollapseBtn {
+  display: none;
+}
+
+.mobileFormHidden {
+  /* applied only via media query below */
+}
+
 @media (max-width: 768px) {
   /* Hide desktop buttons from fixed corner; keep only notification icon */
   .topRightHideable {
@@ -207,7 +235,7 @@
     flex-wrap: wrap;
     gap: 8px;
     align-items: center;
-    margin-left: 5px;
+    margin-left: 10px;
   }
 
   .page {
@@ -227,11 +255,16 @@
     max-height: none;
     overflow-y: visible;
     margin-top: 0;
-    padding-top: 0;
+    padding: 0;
+    gap: 0;
   }
 
   .form{
-    margin-left: -15px;
+    margin-left: 0;
+    background-color: transparent;
+    border-radius: 0;
+    padding: 0;
+    margin-top: 0;
   }
 
   .wavySep {
@@ -245,7 +278,60 @@
     mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='6'%3E%3Cpath d='M0 3 Q3.5 0 7 3 Q10.5 6 14 3' fill='none' stroke='black' stroke-width='2'/%3E%3C/svg%3E");
     mask-repeat: repeat-x;
     mask-size: 14px 6px;
+    margin-bottom: 5px;
   }
+
+  .mobileFormBox {
+    display: flex;
+    flex-direction: column;
+    background-color: color-mix(in srgb, var(--bg-page) 85%, var(--color-primary) 15%);
+    border-radius: 6px;
+    margin-top: 1.5rem;
+    overflow: hidden;
+    padding: 10px;
+  }
+
+  .mobileTextHeader {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 5px;
+    margin-bottom: 0.75rem;
+  }
+
+
+  .mobileExpandBtn,
+  .mobileCollapseBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1.5px solid var(--color-primary);
+    background: none;
+    color: var(--color-primary);
+    font-size: var(--fs-lg);
+    cursor: pointer;
+    margin-top: 0.5rem;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+
+  .mobileCollapseBtn {
+    margin-top: 1rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .desktopTextHeader {
+    display: none;
+  }
+
+  .mobileFormHidden {
+    display: none;
+  }
+
 
   .feedWrapper{
     padding-top: 5px;
@@ -261,7 +347,7 @@
   }
 
   .form {
-    padding: 1.25rem;
+    padding: 5px;
     gap: 1rem;
   }
 }
