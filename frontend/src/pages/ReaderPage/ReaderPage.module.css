@@ -434,6 +434,14 @@
 .toolResetBtn:hover { color: var(--color-primary); }
 
 /* ── Reader body ── */
+.readerContent {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+  min-height: 0;
+}
+
 .readerBody {
   flex: 1;
   overflow-y: auto;
@@ -442,10 +450,11 @@
   scroll-behavior: smooth;
   overscroll-behavior: contain;
   position: relative;
+  min-width: 0;
 }
 
 .readerInner {
-  max-width: 65%;
+  max-width: 80ch;
   margin: 0 auto;
 }
 
@@ -1379,36 +1388,51 @@
 
 /* ── Floating AI widget button ───────────────────────────────────────── */
 @keyframes robotPulse {
-  0%, 100% { box-shadow: 0 4px 16px rgba(0,0,0,0.2), 0 0 0 0 var(--color-primary-tint); }
-  50%       { box-shadow: 0 4px 24px rgba(0,0,0,0.25), 0 0 0 8px transparent; }
+  0%, 100% {
+    box-shadow:
+      0 4px 20px rgba(0,0,0,0.25),
+      0 0 0 0 color-mix(in srgb, var(--color-primary) 60%, transparent);
+  }
+  50% {
+    box-shadow:
+      0 6px 28px rgba(0,0,0,0.3),
+      0 0 0 10px color-mix(in srgb, var(--color-primary) 0%, transparent);
+  }
 }
 
 .aiFloatBtn {
+  display: flex;
+  flex-direction: column;
   position: fixed;
   bottom: 3.5rem;
   right: 1.5rem;
   z-index: 200;
-  width: 56px;
-  height: 56px;
-  border-radius: 16px;
-  background: var(--color-primary);
+  width: 48px;
+  height: 52px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 80%, #fff 20%), var(--color-primary), color-mix(in srgb, var(--color-primary) 70%, #000 30%));
   color: #ffffff;
-  border: none;
+  border: 1.5px solid color-mix(in srgb, var(--color-primary) 50%, white 50%);
   cursor: pointer;
-  display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-  transition: transform 0.2s, border-radius 0.2s, background 0.3s;
-  animation: robotPulse 2.5s ease-in-out infinite;
+  box-shadow:
+    0 4px 20px color-mix(in srgb, var(--color-primary) 50%, transparent),
+    0 2px 8px rgba(0,0,0,0.2),
+    inset 0 1px 0 rgba(255,255,255,0.25);
+  transition: transform 0.2s, border-radius 0.2s, box-shadow 0.2s;
+  animation: robotPulse 2.8s ease-in-out infinite;
 }
 .aiFloatBtn:hover {
-  transform: scale(1.1) translateY(-2px);
-  border-radius: 20px;
+  transform: scale(1.1) translateY(-3px);
   animation: none;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  box-shadow:
+    0 8px 32px color-mix(in srgb, var(--color-primary) 65%, transparent),
+    0 4px 12px rgba(0,0,0,0.25),
+    inset 0 1px 0 rgba(255,255,255,0.3);
 }
 .aiFloatBtnActive {
+  display: none;
   border-radius: 50%;
   animation: none;
   opacity: 0.9;
@@ -1434,23 +1458,17 @@
 .chatToggleActive { color: var(--color-primary); }
 
 .chatPanel {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: 420px;
-  max-width: 100vw;
+  width: 0;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  z-index: 200;
-  transform: translateX(110%);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+  overflow: hidden;
   background: var(--bg-page);
   border-left: 1px solid var(--border-mid);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .chatPanelOpen {
-  transform: translateX(0);
-  box-shadow: -8px 0 40px rgba(0,0,0,0.12);
+  width: 380px;
 }
 
 .chatPanelHeader {
@@ -1618,8 +1636,26 @@
 .chatSendBtn:disabled { opacity: 0.3; cursor: default; }
 .chatSendBtn:not(:disabled):hover { opacity: 0.85; transform: scale(1.05); }
 
-@media (max-width: 600px) {
-  .chatPanel { width: 100vw; border-left: none; }
+@media (max-width: 768px) {
+  .chatPanel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    border-left: none;
+    transform: translateX(110%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 200;
+  }
+  .chatPanelOpen {
+    width: 100vw;
+    transform: translateX(0);
+  }
+  .aiFloatBtn {
+    display: flex;
+    bottom: 0.5rem;
+  }
 }
 
 /* ── Slash command palette ── */

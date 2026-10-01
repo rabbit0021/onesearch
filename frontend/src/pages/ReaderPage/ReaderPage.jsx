@@ -325,7 +325,7 @@ export default function ReaderPage() {
   const [atTop, setAtTop] = useState(true)
   const [lightboxSrc, setLightboxSrc] = useState(null)
   const [resumeOverlay, setResumeOverlay] = useState(false) // true=visible, 'fading'=fading out
-  const [chatOpen, setChatOpen]   = useState(false)
+  const [chatOpen, setChatOpen]   = useState(() => window.innerWidth > 768)
   const [chatMsgs, setChatMsgs]   = useState([])
   const [chatInput, setChatInput] = useState('')
   const [chatLoading, setChatLoading] = useState(false)
@@ -769,7 +769,8 @@ export default function ReaderPage() {
         </div>
       </div>
 
-      {/* Scrollable reader area */}
+      {/* Scrollable reader area + chat panel side by side on desktop */}
+      <div className={`${styles.readerContent} ${chatOpen ? styles.readerContentWithChat : ''}`}>
       <div className={styles.readerBody} ref={readerBodyRef}>
         <div className={styles.readerInner}>
           <h1 className={styles.title}>{post.title}</h1>
@@ -890,108 +891,7 @@ export default function ReaderPage() {
         </div>
       </div>
 
-      {/* Lightbox */}
-      {lightboxSrc && <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />}
-
-      {/* Progress dock — desktop only */}
-      {content && (
-        <div className={styles.readerDock}>
-          <div className={styles.dockPill}>
-            <div className={styles.dockTrack}>
-              <div className={styles.dockFill} style={{ width: `${progress}%` }} />
-            </div>
-            <span className={styles.dockText}>
-              {progress}%
-              {minsLeft !== null && progress < 100 && (
-                <span className={styles.dockSub}> · {minsLeft > 0 ? `${minsLeft} min` : 'almost done'}</span>
-              )}
-            </span>
-          </div>
-        </div>
-      )}
-
-      {/* Resume scroll overlay */}
-      {resumeOverlay && (
-        <div
-          className={`${styles.resumeFade} ${resumeOverlay === 'fading' ? styles.resumeFadeOut : ''}`}
-          onAnimationEnd={() => setResumeOverlay(false)}
-        />
-      )}
-
-      {/* Listen overlay */}
-      {ttsState !== 'idle' && (
-        <div className={styles.listenOverlay}>
-          <div className={styles.listenCard}>
-            {ttsState === 'loading' ? (
-              <>
-                <div className={styles.listenSpinner} />
-                <p className={styles.listenTitle} style={{ fontFamily: activeFontCss }}>Preparing audio…</p>
-                <button className={styles.listenStopBtn} onClick={ttsStop} aria-label="Cancel">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                  </svg>
-                </button>
-              </>
-            ) : (
-              <>
-                <div className={`${styles.listenWave} ${ttsState === 'playing' ? styles.listenWavePlaying : ''}`}>
-                  <span/><span/><span/><span/><span/>
-                </div>
-                <p className={styles.listenTitle} style={{ fontFamily: activeFontCss }}>{post.title}</p>
-                <div className={styles.listenBtns}>
-                  <button
-                    className={styles.listenPauseBtn}
-                    onClick={ttsState === 'playing' ? ttsPause : ttsResume}
-                    aria-label={ttsState === 'playing' ? 'Pause' : 'Resume'}
-                  >
-                    {ttsState === 'playing'
-                      ? <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-                      : <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                    }
-                  </button>
-                  <button className={styles.listenStopBtn} onClick={ttsStop} aria-label="Stop listening">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                    </svg>
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Dev-only engagement metrics overlay */}
-      {import.meta.env.DEV && <DevOverlay timeSpent={timeSpent} maxDepth={maxDepth} isActiveRef={isActiveRef} openedOriginal={openedOriginal} />}
-
-      {/* Floating AI widget button */}
-      {content && (
-        <button
-          className={`${styles.aiFloatBtn} ${chatOpen ? styles.aiFloatBtnActive : ''}`}
-          onClick={() => { if (chatOpen) { if (isMobile) window.history.back(); else setChatOpen(false) } else setChatOpen(true) }}
-          title="Ask about this article"
-          aria-label="Ask AI about this article"
-        >
-          {/* Robot face */}
-          <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-            {/* Antenna */}
-            <line x1="16" y1="2" x2="16" y2="7" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
-            <circle cx="16" cy="2" r="1.5" fill="white"/>
-            {/* Head */}
-            <rect x="5" y="7" width="22" height="17" rx="4" fill="white" fillOpacity="0.2" stroke="white" strokeWidth="1.6"/>
-            {/* Eyes */}
-            <rect x="9" y="12" width="4" height="4" rx="1.5" fill="white"/>
-            <rect x="19" y="12" width="4" height="4" rx="1.5" fill="white"/>
-            {/* Mouth */}
-            <rect x="10" y="19" width="12" height="2.5" rx="1.25" fill="white" fillOpacity="0.8"/>
-            {/* Ears */}
-            <rect x="2" y="13" width="3" height="5" rx="1.5" fill="white" fillOpacity="0.6"/>
-            <rect x="27" y="13" width="3" height="5" rx="1.5" fill="white" fillOpacity="0.6"/>
-          </svg>
-        </button>
-      )}
-
-      {/* Article chat panel */}
+      {/* Article chat panel — inside readerContent on desktop */}
       <div className={`${styles.chatPanel} ${chatOpen ? styles.chatPanelOpen : ''}`} style={kbOffset > 0 ? { bottom: kbOffset } : undefined}>
         <div className={styles.chatPanelHeader}>
           <span className={styles.chatPanelTitle}>Ask about this article</span>
@@ -1069,6 +969,86 @@ export default function ReaderPage() {
           </div>
         </div>
       </div>
+
+      </div>{/* end readerContent */}
+
+      {/* Lightbox */}
+      {lightboxSrc && <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />}
+
+
+      {/* Resume scroll overlay */}
+      {resumeOverlay && (
+        <div
+          className={`${styles.resumeFade} ${resumeOverlay === 'fading' ? styles.resumeFadeOut : ''}`}
+          onAnimationEnd={() => setResumeOverlay(false)}
+        />
+      )}
+
+      {/* Listen overlay */}
+      {ttsState !== 'idle' && (
+        <div className={styles.listenOverlay}>
+          <div className={styles.listenCard}>
+            {ttsState === 'loading' ? (
+              <>
+                <div className={styles.listenSpinner} />
+                <p className={styles.listenTitle} style={{ fontFamily: activeFontCss }}>Preparing audio…</p>
+                <button className={styles.listenStopBtn} onClick={ttsStop} aria-label="Cancel">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
+                </button>
+              </>
+            ) : (
+              <>
+                <div className={`${styles.listenWave} ${ttsState === 'playing' ? styles.listenWavePlaying : ''}`}>
+                  <span/><span/><span/><span/><span/>
+                </div>
+                <p className={styles.listenTitle} style={{ fontFamily: activeFontCss }}>{post.title}</p>
+                <div className={styles.listenBtns}>
+                  <button
+                    className={styles.listenPauseBtn}
+                    onClick={ttsState === 'playing' ? ttsPause : ttsResume}
+                    aria-label={ttsState === 'playing' ? 'Pause' : 'Resume'}
+                  >
+                    {ttsState === 'playing'
+                      ? <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                      : <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                    }
+                  </button>
+                  <button className={styles.listenStopBtn} onClick={ttsStop} aria-label="Stop listening">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Dev-only engagement metrics overlay */}
+      {import.meta.env.DEV && <DevOverlay timeSpent={timeSpent} maxDepth={maxDepth} isActiveRef={isActiveRef} openedOriginal={openedOriginal} />}
+
+      {/* Floating AI widget button */}
+      {content && (
+        <button
+          className={`${styles.aiFloatBtn} ${chatOpen ? styles.aiFloatBtnActive : ''}`}
+          onClick={() => { if (chatOpen) { if (isMobile) window.history.back(); else setChatOpen(false) } else setChatOpen(true) }}
+          title="Ask about this article"
+          aria-label="Ask AI about this article"
+        >
+          <svg width="22" height="22" viewBox="22 46 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="58" cy="82" r="30" fill="none" stroke="white" strokeWidth="5"/>
+            <circle cx="58" cy="82" r="20" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="1.5" strokeDasharray="5 3"/>
+            <line x1="38" y1="82" x2="78" y2="82" stroke="rgba(255,255,255,0.7)" strokeWidth="1.5"/>
+            <line x1="58" y1="62" x2="58" y2="102" stroke="rgba(255,255,255,0.7)" strokeWidth="1.5"/>
+            <circle cx="58" cy="82" r="4" fill="white"/>
+          </svg>
+          <span style={{ fontSize: '9px', color: 'white', letterSpacing: '0.06em', fontWeight: 700, lineHeight: 1, marginTop: '2px' }}>ASK</span>
+        </button>
+      )}
+
     </div>
   )
 }
