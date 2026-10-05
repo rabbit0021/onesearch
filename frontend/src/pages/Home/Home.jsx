@@ -169,10 +169,13 @@ export default function Home() {
     try {
       const res = await subscribe({ email, techteams: companies, individuals, topic, frequency })
       if (res.status === 'success') {
+        setEmail('')
         setTopic('')
+        setSources(['techteams', 'individuals'])
         setCompanies([])
         setIndividuals([])
         setFrequency(2)
+        setExistingSubs(null)
         return true  // sheet handles close + animation
       } else {
         showToast(res.message || 'Subscription failed. Try again.')
