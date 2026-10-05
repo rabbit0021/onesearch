@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { getTechTeams } from '../../../api'
 import Dropdown from '../../ui/Dropdown/Dropdown'
 import TagBadge from '../../ui/TagBadge/TagBadge'
@@ -14,6 +14,7 @@ export default function CompanySelector({ selected, onChange, disabled }) {
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState(false)
   const [all, setAll] = useState([])
+  const inputRef = useRef(null)
 
   useEffect(() => {
     getTechTeams().then(setAll).catch(() => {})
@@ -64,6 +65,7 @@ export default function CompanySelector({ selected, onChange, disabled }) {
 
       <div className={styles.relative}>
         <input
+          ref={inputRef}
           id="company"
           type="text"
           className={`${styles.input} ${disabled ? styles.inputDisabled : ''}`}
@@ -79,7 +81,7 @@ export default function CompanySelector({ selected, onChange, disabled }) {
           onBlur={() => setTimeout(() => setOpen(false), 150)}
           autoComplete="off"
         />
-        {!disabled && <Dropdown items={filtered} onSelect={handleSelect} visible={open && filtered.length > 0} />}
+        {!disabled && <Dropdown items={filtered} onSelect={handleSelect} visible={open && filtered.length > 0} anchorRef={inputRef} />}
       </div>
     </div>
   )
