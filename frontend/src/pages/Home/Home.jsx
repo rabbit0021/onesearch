@@ -31,7 +31,7 @@ export default function Home() {
   // Form state
   const [email, setEmail] = useState('')
   const [topic, setTopic] = useState('')
-  const [sources, setSources] = useState(['techteams', 'individuals'])
+  const [sources, setSources] = useState(() => window.innerWidth <= 768 ? ['techteams'] : ['techteams', 'individuals'])
   const [companies, setCompanies] = useState([])
   const [individuals, setIndividuals] = useState([])
   const [frequency, setFrequency] = useState(2)
