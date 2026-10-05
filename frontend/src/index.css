@@ -141,7 +141,7 @@
 
 body {
   color: var(--text-base);
-  font-family: 'Courier Prime', 'Courier', 'IBM Plex Mono', 'JetBrains Mono', 'Space Mono', 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', 'Courier Prime', 'BM Plex Mono', 'Space Mono', 'Share Tech Mono', monospace;
   min-height: 100vh;
   background-color: var(--bg-page);
 }
@@ -164,12 +164,12 @@ select {
 
 @media (max-width: 768px) {
   body {
-    font-family: 'Geist', sans-serif;
+    font-family: 'JetBrains Mono', 'Courier Prime', 'BM Plex Mono', 'Space Mono', 'Share Tech Mono', monospace;
   }
 
   * {
-    letter-spacing: 0.05em;
-    line-height: 1.5;
+    letter-spacing: 0.03em;
+    line-height: 1.55;
   }
 }
 
