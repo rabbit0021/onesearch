@@ -224,7 +224,7 @@ export default function Home() {
             <div className={styles.mobileTextHeader}>
               <h1 className={styles.title}>Subscribe to what you need</h1>
               <p className={styles.intro}>
-                Onesearch aggregates insights from top tech publishers — so you always know what the industry is building, breaking,
+                Onesearch aggregates insights from top tech publishers so you always know what the industry is building, breaking,
                 and shipping.
               </p>
             </div>
@@ -237,7 +237,7 @@ export default function Home() {
               <div className={styles.desktopTextHeader}>
                 <h1 className={styles.title}>Subscribe to what you need</h1>
                 <p className={styles.intro}>
-                  Onesearch aggregates insights from top tech publishers — so you always know what the industry is building, breaking,
+                  Onesearch aggregates insights from top tech publishers so you always know what the industry is building, breaking,
                   and shipping.
                 </p>
               </div>
