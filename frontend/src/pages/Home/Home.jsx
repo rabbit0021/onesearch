@@ -37,7 +37,7 @@ export default function Home() {
   const [submitting, setSubmitting] = useState(false)
 
   // Resize / collapse state
-  const [formWidth, setFormWidth] = useState(35) // percent
+  const [formWidth, setFormWidth] = useState(30) // percent
   const [formCollapsed, setFormCollapsed] = useState(false)
   const [mobileFormCollapsed, setMobileFormCollapsed] = useState(true)
   const layoutRef = useRef(null)

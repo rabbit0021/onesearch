@@ -18,6 +18,7 @@ export default function SubscriptionStatus({ data }) {
           <span className={styles.pubs}>{publishers.join(', ')}</span>
         </div>
       ))}
+      <p className={styles.deleteHint}>To manage or delete subscriptions, log in to your account.</p>
     </div>
   )
 }

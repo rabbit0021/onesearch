@@ -29,3 +29,15 @@
 .pubs {
   color: var(--text-base);
 }
+
+.deleteHint {
+  margin-top: 6px;
+  font-size: var(--fs-sm);
+  color: var(--text-base);
+  font-style: italic;
+}
+
+.deleteLink {
+  color: var(--color-primary);
+  text-decoration: underline;
+}

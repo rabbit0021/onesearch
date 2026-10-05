@@ -8,7 +8,7 @@ export const THEMES = {
     '--color-primary-hover': '#0b8a37',
     '--color-primary-text':  '#065523',
     '--color-primary-tint':  '#e1f9eb',
-    '--bg-feed':             'rgb(232, 239, 234)',
+    '--bg-feed':             'rgb(220, 230, 223)',
   },
   ocean: {
     label: 'Ocean',
@@ -17,7 +17,7 @@ export const THEMES = {
     '--color-primary-hover': '#1976d2',
     '--color-primary-text':  '#0d47a1',
     '--color-primary-tint':  '#e3f2fd',
-    '--bg-feed':             'rgb(223, 229, 238)',
+    '--bg-feed':             'rgb(222, 229, 235)',
   },
   lavender: {
     label: 'Lavender',

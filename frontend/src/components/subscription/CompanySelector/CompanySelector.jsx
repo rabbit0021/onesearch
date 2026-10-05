@@ -37,11 +37,22 @@ export default function CompanySelector({ selected, onChange, disabled }) {
     onChange(selected.filter((s) => s !== company))
   }
 
+  const allSelected = all.length > 0 && all.every(c => selected.map(s => s.toLowerCase()).includes(c.toLowerCase()))
+
+  function handleSelectAll() {
+    onChange(allSelected ? [] : all)
+  }
+
   return (
     <div className={styles.group}>
-      <label className={styles.label}>
-        Select tech teams
-      </label>
+      <div className={styles.labelRow}>
+        <label className={styles.label}>Select tech teams</label>
+        {!disabled && all.length > 0 && (
+          <button type="button" className={styles.selectAllBtn} onClick={handleSelectAll}>
+            {allSelected ? 'Deselect all' : 'Select all'}
+          </button>
+        )}
+      </div>
 
       {selected.length > 0 && (
         <div className={styles.tags}>

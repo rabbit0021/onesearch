@@ -4,10 +4,31 @@
   gap: 10px;
 }
 
+.labelRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .label {
   font-size: var(--fs-std);
   font-weight: 600;
   color: var(--text-secondary);
+}
+
+.selectAllBtn {
+  background: none;
+  border: 1px solid var(--border-mid);
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.selectAllBtn:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
 }
 
 .tags {
