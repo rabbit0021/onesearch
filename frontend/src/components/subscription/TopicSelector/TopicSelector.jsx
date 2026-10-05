@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import Dropdown from '../../ui/Dropdown/Dropdown'
 import styles from './TopicSelector.module.css'
 
@@ -25,6 +25,7 @@ const TOPICS = [
 export default function TopicSelector({ value, onChange }) {
   const [query, setQuery] = useState(value)
   const [open, setOpen] = useState(false)
+  const inputRef = useRef(null)
 
   const filtered = TOPICS.filter((t) => t.toLowerCase().includes(query.toLowerCase()))
 
@@ -47,6 +48,7 @@ export default function TopicSelector({ value, onChange }) {
       </label>
       <div className={styles.relative}>
         <input
+          ref={inputRef}
           id="topic"
           type="text"
           className={styles.input}
@@ -58,7 +60,7 @@ export default function TopicSelector({ value, onChange }) {
           onBlur={() => setTimeout(() => setOpen(false), 150)}
           autoComplete="off"
         />
-        <Dropdown items={filtered} onSelect={handleSelect} visible={open} />
+        <Dropdown items={filtered} onSelect={handleSelect} visible={open} anchorRef={inputRef} />
       </div>
     </div>
   )

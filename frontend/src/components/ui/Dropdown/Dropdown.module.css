@@ -1,15 +1,12 @@
 .dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  z-index: 1;
   background: var(--bg-feed);
   border: 1px solid var(--border-mid);
   max-height: 180px;
   overflow-y: auto;
   list-style: none;
-  margin-top: 2px;
+  margin: 0;
+  padding: 0;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
 }
 
 .item {

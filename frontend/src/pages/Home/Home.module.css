@@ -222,6 +222,15 @@
     transform: none !important;
   }
 
+  /* Hide form box and form on mobile — bottom sheet handles subscribe */
+  .mobileFormBox {
+    display: none;
+  }
+
+  .form {
+    display: none;
+  }
+
   /* Stack header logo above action buttons */
   .mobileHeaderRow {
     flex-direction: column;
@@ -257,6 +266,7 @@
     margin-top: 0;
     padding: 0;
     gap: 0;
+    flex: none !important;
   }
 
   .form{
@@ -335,10 +345,56 @@
 
   .feedWrapper{
     padding-top: 5px;
+    padding-bottom: 80px;
     background-color: var(--bg-feed);
   }
 
 
+}
+
+/* Mobile subscribe FAB — hidden on desktop */
+.mobileSubscribeTrigger {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobileFormWrap { display: none; }
+
+  .mobileSubscribeTrigger {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    padding: 10px 10px;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom));
+    background: var(--bg-page);
+    border-top: 1px solid var(--border-mid);
+  }
+
+  .mobileSubscribeTriggerBtn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: var(--primary-button-bg);
+    color: var(--color-primary-tint);
+    border: 1px solid var(--color-primary);
+    border-radius: 4px;
+    padding: 0.7rem 1.4rem;
+    font-size: var(--fs-md);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .mobileSubscribeTriggerBtn:active {
+    background: var(--color-primary);
+    color: #0a0a0a;
+  }
 }
 
 @media (max-width: 600px) {

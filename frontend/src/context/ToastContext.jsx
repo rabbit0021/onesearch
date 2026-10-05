@@ -36,18 +36,21 @@ export function ToastProvider({ children }) {
     })
   }, [])
 
-  const showToast = useCallback((message, duration = 3000) => {
+  const showToast = useCallback((message, duration = 2000) => {
     const id = ++idRef.current
     setToasts(prev => [...prev, { id, message }])
     timers.current[id] = setTimeout(() => dismiss(id), duration)
   }, [dismiss])
 
-  // click anywhere dismisses
+  // click anywhere dismisses — delay attaching so the triggering tap doesn't immediately fire it
   useEffect(() => {
     if (toasts.length === 0) return
     const handle = () => dismissAll()
-    document.addEventListener('click', handle)
-    return () => document.removeEventListener('click', handle)
+    const t = setTimeout(() => document.addEventListener('click', handle), 400)
+    return () => {
+      clearTimeout(t)
+      document.removeEventListener('click', handle)
+    }
   }, [toasts.length, dismissAll])
 
   const active = toasts.length > 0

@@ -1,0 +1,250 @@
+/* Overlay */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.overlayVisible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Sheet */
+.sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 301;
+  background: var(--bg-page);
+  border-radius: 16px 16px 0 0;
+  min-height: 55dvh;
+  max-height: 90dvh;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.sheetOpen {
+  transform: translateY(0);
+}
+
+.sheetClosed {
+  transform: translateY(100%);
+}
+
+/* Handle bar */
+.handle {
+  width: 40px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border-mid);
+  margin: 16px auto 0;
+  flex-shrink: 0;
+}
+
+/* Progress */
+.progressTrack {
+  height: 3px;
+  background: var(--border-mid);
+  margin: 20px 24px 0;
+  border-radius: 2px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 2px;
+  transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+
+/* Step body — clips the sliding track */
+.stepBody {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+}
+
+/* Track: all panels side by side, slides via translateX */
+.stepTrack {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  flex-shrink: 0;
+  transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+  align-items: flex-start;
+}
+
+/* Each panel is exactly the width of the viewport */
+.stepPanel {
+  flex: 0 0 100%;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  padding: 24px 24px 8px;
+}
+
+.stepPanel::-webkit-scrollbar {
+  display: none;
+}
+
+/* Step content wrapper */
+.stepContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Nav bar */
+.nav {
+  flex-shrink: 0;
+  display: flex;
+  gap: 12px;
+  padding: 16px 20px;
+  border-top: 1px solid var(--border-mid);
+  background: var(--bg-page);
+}
+
+.nextBtn {
+  flex: 1;
+  background: var(--primary-button-bg);
+  color: var(--color-primary-tint);
+  border: 1px solid var(--color-primary);
+  border-radius: 4px;
+  padding: 0.65rem 1.4rem;
+  font-size: var(--fs-md);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  outline: none;
+}
+
+@media (hover: hover) {
+  .nextBtn:hover:not(:disabled) {
+    background: var(--color-primary);
+    color: #0a0a0a;
+  }
+}
+
+.nextBtn:active:not(:disabled) {
+  background: var(--color-primary);
+  color: #0a0a0a;
+}
+
+.nextBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.backBtn {
+  flex: 0 0 90px;
+  background: none;
+  color: var(--text-base);
+  border: 1px solid var(--border-mid);
+  border-radius: 4px;
+  padding: 0.65rem 1.2rem;
+  font-size: var(--fs-md);
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+  outline: none;
+}
+
+@media (hover: hover) {
+  .backBtn:hover:not(:disabled) {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+}
+
+.backBtn:active:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.backBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.prompt {
+  margin-right: 6px;
+  opacity: 0.7;
+}
+
+/* Success overlay */
+.successOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  background: var(--bg-page);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  border-radius: 16px 16px 0 0;
+}
+
+.successTick {
+  width: 80px;
+  height: 80px;
+  animation: popIn 0.4s ease forwards;
+}
+
+.successRing {
+  fill: none;
+  stroke: #1fa810;
+  stroke-width: 2;
+  stroke-dasharray: 150;
+  stroke-dashoffset: 150;
+  animation: ringDraw 0.5s ease forwards 0.1s;
+}
+
+.successCheck {
+  fill: none;
+  stroke: #1fa810;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 50;
+  stroke-dashoffset: 50;
+  animation: checkDraw 0.35s ease forwards 0.5s;
+}
+
+.successMsg {
+  font-size: var(--fs-lg);
+  font-weight: 600;
+  color: var(--text-strong);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+@keyframes popIn {
+  0%   { transform: scale(0.6); opacity: 0; }
+  70%  { transform: scale(1.08); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes ringDraw {
+  from { stroke-dashoffset: 150; }
+  to   { stroke-dashoffset: 0; }
+}
+
+@keyframes checkDraw {
+  from { stroke-dashoffset: 50; }
+  to   { stroke-dashoffset: 0; }
+}
+

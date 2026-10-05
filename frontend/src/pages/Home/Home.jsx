@@ -19,6 +19,7 @@ import IndividualsSelector from '../../components/subscription/IndividualsSelect
 import FrequencySlider from '../../components/subscription/FrequencySlider/FrequencySlider'
 import SubscriptionStatus from '../../components/subscription/SubscriptionStatus/SubscriptionStatus'
 
+import MobileSubscribeSheet from '../../components/subscription/MobileSubscribeSheet/MobileSubscribeSheet'
 import JiraIssuesSummary from '../../components/jira/JiraIssuesSummary/JiraIssuesSummary'
 import BlogFeed from '../../components/feed/BlogFeed/BlogFeed'
 import styles from './Home.module.css'
@@ -35,6 +36,8 @@ export default function Home() {
   const [frequency, setFrequency] = useState(2)
   const [existingSubs, setExistingSubs] = useState(null)
   const [submitting, setSubmitting] = useState(false)
+
+  const [sheetOpen, setSheetOpen] = useState(false)
 
   // Resize / collapse state
   const [formWidth, setFormWidth] = useState(30) // percent
@@ -161,6 +164,31 @@ export default function Home() {
     }
   }
 
+  async function handleSheetSubmit() {
+    setSubmitting(true)
+    try {
+      const res = await subscribe({ email, techteams: companies, individuals, topic, frequency })
+      if (res.status === 'success') {
+        setTopic('')
+        setCompanies([])
+        setIndividuals([])
+        setFrequency(2)
+        return true  // sheet handles close + animation
+      } else {
+        showToast(res.message || 'Subscription failed. Try again.')
+      }
+    } catch {
+      showToast('Something went wrong. Try again.')
+    } finally {
+      setSubmitting(false)
+    }
+    return false
+  }
+
+  function handleSheetClose() {
+    setSheetOpen(false)
+  }
+
   const closeSidebar = useCallback(() => setSidebarOpen(false), [])
 
   return (
@@ -193,16 +221,6 @@ export default function Home() {
                 Onesearch aggregates insights from top tech publishers — so you always know what the industry is building, breaking,
                 and shipping.
               </p>
-              {mobileFormCollapsed && (
-                <button
-                  type="button"
-                  className={styles.mobileExpandBtn}
-                  onClick={() => setMobileFormCollapsed(false)}
-                  aria-label="Expand subscription form"
-                >
-                  ↓
-                </button>
-              )}
             </div>
 
             <form
@@ -271,6 +289,38 @@ export default function Home() {
 
         {/* <Footer /> */}
       </main>
+
+      {/* Mobile bottom trigger bar */}
+      <div className={styles.mobileSubscribeTrigger}>
+        <button
+          type="button"
+          className={styles.mobileSubscribeTriggerBtn}
+          onClick={() => setSheetOpen(true)}
+        >
+          <span className={styles.prompt}>&gt;_</span> subscribe
+        </button>
+      </div>
+
+      <MobileSubscribeSheet
+        open={sheetOpen}
+        onClose={handleSheetClose}
+        email={email}
+        setEmail={handleEmailBlur}
+        topic={topic}
+        setTopic={setTopic}
+        sources={sources}
+        onSourceChange={handleSourceChange}
+        companies={companies}
+        setCompanies={setCompanies}
+        individuals={individuals}
+        setIndividuals={setIndividuals}
+        frequency={frequency}
+        setFrequency={setFrequency}
+        existingSubs={existingSubs}
+        submitting={submitting}
+        onSubmit={handleSheetSubmit}
+        showToast={showToast}
+      />
 
       {/* Fixed top-right corner — desktop: all buttons; mobile: notif only */}
       <div className={`${styles.topRight} ${atTop ? '' : styles.topRightHidden}`}>

@@ -1,7 +1,7 @@
 .group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 10px;
 }
 
 .label {
@@ -34,4 +34,32 @@
   font-size: var(--fs-2xs);
   color: var(--text-dim);
   text-align: right;
+}
+
+.presets {
+  display: flex;
+  gap: 8px;
+}
+
+.presetBtn {
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border-mid);
+  background: none;
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.presetBtn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.presetActive {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
 }

@@ -1,5 +1,11 @@
 import styles from './FrequencySlider.module.css'
 
+const PRESETS = [
+  { label: 'Immediate', value: 0 },
+  { label: '2 days',    value: 2 },
+  { label: '1 week',    value: 7 },
+]
+
 /**
  * Props:
  *   value     – number  (0–30)
@@ -12,8 +18,20 @@ export default function FrequencySlider({ value, onChange }) {
         Make it a digest
       </label>
       <p className={styles.hint}>
-        Set how often you want the digest (0 = immediate as the blog is published)
+        How often should we send your digest?
       </p>
+      <div className={styles.presets}>
+        {PRESETS.map(p => (
+          <button
+            key={p.value}
+            type="button"
+            className={`${styles.presetBtn} ${value === p.value ? styles.presetActive : ''}`}
+            onClick={() => onChange(p.value)}
+          >
+            {p.label}
+          </button>
+        ))}
+      </div>
       <div className={styles.row}>
         <input
           id="frequency"
