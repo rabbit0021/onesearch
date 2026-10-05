@@ -110,7 +110,17 @@ export default function Home() {
     }
     try {
       const data = await getSubscriptionsForEmail(email)
-      setExistingSubs(Object.keys(data).length > 0 ? data : null)
+      if (!data || (Array.isArray(data) && data.length === 0)) { setExistingSubs(null); return }
+      // API returns array of subscription rows — group by topic
+      const arr = Array.isArray(data) ? data : Object.values(data).flat()
+      if (arr.length === 0) { setExistingSubs(null); return }
+      const grouped = arr.reduce((acc, sub) => {
+        const t = sub.topic || 'General'
+        if (!acc[t]) acc[t] = []
+        acc[t].push(sub.publisher?.publisher_name || sub.publisher_id)
+        return acc
+      }, {})
+      setExistingSubs(grouped)
     } catch {
       // silently ignore
     }
