@@ -33,6 +33,7 @@
   flex-direction: column;
   border-radius: 6px;
   overflow: hidden;
+  min-height: 250px;
   background: var(--card-bg);
   box-shadow: none;
   text-decoration: none;
