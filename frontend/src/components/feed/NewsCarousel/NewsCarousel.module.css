@@ -8,6 +8,7 @@
   border: .5px solid var(--border-mid);
   border-radius: 4px;
   overflow: hidden;
+  margin-top: .8rem;
 }
 
 .tickerBadge {
