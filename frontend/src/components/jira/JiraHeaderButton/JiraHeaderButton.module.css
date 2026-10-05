@@ -182,3 +182,33 @@
   height: 15px;
   flex-shrink: 0;
 }
+
+@media (max-width: 768px) {
+  .connectBtn {
+    padding: 6px;
+    gap: 0;
+    border-radius: 8px;
+    width: 34px;
+    height: 34px;
+    justify-content: center;
+  }
+  .connectBtn .infoBtn,
+  .connectBtnText,
+  .connectingText {
+    display: none;
+  }
+  .connected .site,
+  .connected .check {
+    display: none;
+  }
+  .connected {
+    padding: 6px;
+    width: 34px;
+    height: 34px;
+    justify-content: center;
+  }
+  .icon {
+    width: 18px;
+    height: 18px;
+  }
+}

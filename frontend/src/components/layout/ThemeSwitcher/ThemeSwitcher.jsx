@@ -16,7 +16,8 @@ export default function ThemeSwitcher({ bare = false }) {
         aria-pressed={darkMode}
         style={bare ? { color: 'var(--reader-toolbar-text, #fff)' } : {}}
       >
-        {darkMode ? 'light' : 'dark'}
+        <span className={styles.toggleText}>{darkMode ? 'light' : 'dark'}</span>
+        <span className={styles.toggleIcon}>{darkMode ? '☀️' : '🌙'}</span>
       </button>
       {!bare && (
         <button
@@ -41,6 +42,41 @@ export default function ThemeSwitcher({ bare = false }) {
           />
         ))}
       </div>
+    </div>
+  )
+}
+
+export function MobilePaletteButton() {
+  const { themeKey, setThemeKey } = useTheme()
+  const [open, setOpen] = useState(false)
+  const currentSwatch = THEMES[themeKey]?.swatch ?? '#888'
+
+  return (
+    <div className={styles.mobilePaletteWrap}>
+      <button
+        className={styles.mobilePaletteBtn}
+        onClick={() => setOpen(prev => !prev)}
+        title="Change colour theme"
+        aria-label="Change colour theme"
+        style={{ '--swatch': currentSwatch }}
+      >
+        <span className={styles.mobilePaletteDot} style={{ background: currentSwatch }} />
+      </button>
+      {open && (
+        <div className={styles.mobilePaletteDropdown}>
+          {Object.entries(THEMES).map(([key, theme]) => (
+            <button
+              key={key}
+              className={`${styles.swatch} ${themeKey === key ? styles.active : ''}`}
+              style={{ background: theme.swatch }}
+              onClick={() => { setThemeKey(key); setOpen(false) }}
+              title={theme.label}
+              aria-label={`Switch to ${theme.label} theme`}
+              aria-pressed={themeKey === key}
+            />
+          ))}
+        </div>
+      )}
     </div>
   )
 }

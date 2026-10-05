@@ -5,7 +5,7 @@ import { useTheme, THEMES } from '../../context/ThemeContext'
  * Primary color (#d97757) → var(--color-primary)
  * Dark strokes (#1a1a1a)  → var(--text-strong)
  */
-export default function OneSearchLogo({ width = 350, height = 70 }) {
+export default function OneSearchLogo({ width = 350, height = 70, viewBox = '25 0 655 180' }) {
   const { themeKey } = useTheme()
   const primary = THEMES[themeKey]?.['--color-primary'] || '#d97757'
 
@@ -16,7 +16,7 @@ export default function OneSearchLogo({ width = 350, height = 70 }) {
     <svg
       width={width}
       height={height}
-      viewBox="25 0 655 180"
+      viewBox={viewBox}
       role="img"
       xmlns="http://www.w3.org/2000/svg"
       aria-label="OneSearch logo"

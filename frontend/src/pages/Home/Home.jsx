@@ -6,7 +6,7 @@ import { useToast } from '../../context/ToastContext'
 import Header from '../../components/layout/Header/Header'
 import Footer from '../../components/layout/Footer/Footer'
 import NotificationIcon from '../../components/layout/NotificationIcon/NotificationIcon'
-import ThemeSwitcher from '../../components/layout/ThemeSwitcher/ThemeSwitcher'
+import ThemeSwitcher, { MobilePaletteButton } from '../../components/layout/ThemeSwitcher/ThemeSwitcher'
 import JiraHeaderButton from '../../components/jira/JiraHeaderButton/JiraHeaderButton'
 import Sidebar from '../../components/sidebar/Sidebar/Sidebar'
 import LoginButton from '../../components/ui/LoginButton/LoginButton'
@@ -41,7 +41,7 @@ export default function Home() {
   const [sheetOpen, setSheetOpen] = useState(false)
 
   // Resize / collapse state
-  const [formWidth, setFormWidth] = useState(30) // percent
+  const [formWidth, setFormWidth] = useState(33) // percent
   const [formCollapsed, setFormCollapsed] = useState(false)
   const [mobileFormCollapsed, setMobileFormCollapsed] = useState(true)
   const layoutRef = useRef(null)
@@ -215,6 +215,8 @@ export default function Home() {
                 <JiraHeaderButton />
                 <LoginButton />
                 <ThemeSwitcher />
+                <MobilePaletteButton />
+                <NotificationIcon open={sidebarOpen} hasDot={hasDot} onClick={handleSidebarToggle} btnRef={toggleRef} />
               </div>
             </div>
 

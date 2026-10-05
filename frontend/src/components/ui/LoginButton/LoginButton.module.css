@@ -23,6 +23,18 @@
   color: var(--color-primary);
 }
 
+@media (max-width: 768px) {
+  .btn span {
+    display: none;
+  }
+  .btn {
+    padding: 6px;
+    width: 34px;
+    height: 34px;
+    justify-content: center;
+  }
+}
+
 .avatar {
   display: flex;
   align-items: center;

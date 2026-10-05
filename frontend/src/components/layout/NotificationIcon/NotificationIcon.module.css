@@ -42,3 +42,15 @@
   border-radius: 50%;
   border: 2px solid var(--color-primary-hover);
 }
+
+@media (max-width: 768px) {
+  .wrapper {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    justify-content: center;
+    border-radius: 8px;
+    border: 1px solid var(--border-mid);
+    border-top: 2px solid var(--color-primary);
+  }
+}

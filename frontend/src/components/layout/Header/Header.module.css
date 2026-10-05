@@ -17,9 +17,31 @@
   margin-left: -38px;
 }
 
+.logoWrapMobile {
+  display: none;
+}
+
 @media (max-width: 768px) {
   .header {
-    margin-top: -14px;
+    margin-top: 0;
+    flex: 1 1 0;
+    min-width: 0;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .logoWrap {
+    margin-left: -10px;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .logoWrap svg {
+    width: 350px;
+    height: 70px;
+    display: block;
+    flex-shrink: 0;
+    margin-left: -1.5rem;
   }
 }
 

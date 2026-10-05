@@ -40,10 +40,10 @@ function ConnectButton() {
         onClick={handleClick}
       >
         {pending
-          ? <><span className={styles.spinner} /> Connecting…</>
+          ? <><span className={styles.spinner} /><span className={styles.connectingText}> Connecting…</span></>
           : <>
               <img src="https://cdn.simpleicons.org/jira/ffffff" alt="" className={styles.icon} />
-              Connect Jira
+              <span className={styles.connectBtnText}>Connect Jira</span>
               <button
                 type="button"
                 className={styles.infoBtn}
