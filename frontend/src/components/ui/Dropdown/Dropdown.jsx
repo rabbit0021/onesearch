@@ -11,17 +11,24 @@ export default function Dropdown({ items, onSelect, visible, anchorRef }) {
     function updatePos() {
       const r = anchorRef.current?.getBoundingClientRect()
       if (!r) return
-      // Available space below the input (accounting for virtual keyboard via visualViewport)
-      const viewportHeight = window.visualViewport?.height ?? window.innerHeight
-      const spaceBelow = viewportHeight - r.bottom
-      const spaceAbove = r.top
+      const vv = window.visualViewport
+      const viewportHeight = vv?.height ?? window.innerHeight
+      // visualViewport.offsetTop is how far the visual viewport has scrolled
+      // inside the layout viewport (i.e. how much the keyboard pushed things up)
+      const offsetTop = vv?.offsetTop ?? 0
+      // r.top/bottom are relative to the layout viewport top,
+      // so subtract offsetTop to get position within the visible area
+      const inputTop = r.top - offsetTop
+      const inputBottom = r.bottom - offsetTop
+      const spaceBelow = viewportHeight - inputBottom
+      const spaceAbove = inputTop
       const maxH = Math.min(180, Math.max(spaceBelow, spaceAbove) - 8)
       const showAbove = spaceBelow < 120 && spaceAbove > spaceBelow
       setPos({
         left: r.left,
         width: r.width,
-        top: showAbove ? undefined : r.bottom + 2,
-        bottom: showAbove ? (viewportHeight - r.top + 2) : undefined,
+        top: showAbove ? undefined : inputBottom + offsetTop + 2,
+        bottom: showAbove ? (window.innerHeight - (inputTop + offsetTop) + 2) : undefined,
         maxHeight: maxH,
       })
     }
