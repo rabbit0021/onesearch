@@ -297,8 +297,12 @@
   .mobileFormBox {
     display: flex;
     flex-direction: column;
-    background-color: color-mix(in srgb, var(--bg-page) 98%, var(--color-primary) 2%);
-
+    background: linear-gradient(
+      to bottom,
+      var(--bg-page) 0%,
+      color-mix(in srgb, var(--bg-page) 98%, var(--color-primary) 2%) 50%,
+      color-mix(in srgb, var(--bg-page) 98%, var(--color-primary) 2%) 100%
+    );
     border-radius: 6px;
     margin-top: 1.5rem;
     overflow: hidden;
