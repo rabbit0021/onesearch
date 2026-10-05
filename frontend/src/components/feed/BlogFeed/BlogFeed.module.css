@@ -8,7 +8,15 @@
   width: 100%;
 }
 
+.desktopCarousel {
+  display: block;
+}
+
 @media (max-width: 768px) {
+  .desktopCarousel {
+    display: none;
+  }
+
   .wrapper {
     width: 100%;
     max-width: 100%;

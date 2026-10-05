@@ -22,6 +22,7 @@ import SubscriptionStatus from '../../components/subscription/SubscriptionStatus
 import MobileSubscribeSheet from '../../components/subscription/MobileSubscribeSheet/MobileSubscribeSheet'
 import JiraIssuesSummary from '../../components/jira/JiraIssuesSummary/JiraIssuesSummary'
 import BlogFeed from '../../components/feed/BlogFeed/BlogFeed'
+import NewsCarousel from '../../components/feed/NewsCarousel/NewsCarousel'
 import styles from './Home.module.css'
 
 export default function Home() {
@@ -282,6 +283,10 @@ export default function Home() {
           <ResizeHandle onResizeStart={onResizeStart} collapsed={formCollapsed} onCollapse={toggleCollapse} />
 
           <div className={styles.wavySep} aria-hidden="true" />
+
+          <div className={styles.mobileCarousel}>
+            <NewsCarousel />
+          </div>
 
           <div className={styles.feedWrapper}>
             <BlogFeed />

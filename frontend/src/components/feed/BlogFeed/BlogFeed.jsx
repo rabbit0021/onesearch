@@ -237,7 +237,7 @@ export default function BlogFeed() {
   return (
     <div className={styles.wrapper}>
 
-      <NewsCarousel />
+      <div className={styles.desktopCarousel}><NewsCarousel /></div>
 
       <div className={styles.filterBar}>
 

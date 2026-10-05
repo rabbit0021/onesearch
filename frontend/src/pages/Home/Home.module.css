@@ -185,6 +185,10 @@
   display: none;
 }
 
+.mobileCarousel {
+  display: none;
+}
+
 .mobileTextHeader {
   display: none;
 }
@@ -349,6 +353,10 @@
     background-color: var(--bg-feed);
   }
 
+  .mobileCarousel {
+    display: block;
+    width: 100%;
+  }
 
 }
 
