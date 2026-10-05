@@ -445,8 +445,6 @@ export default function BlogCard({ post, readProgress, likedPostIds = new Set(),
           </div>
           <p className={styles.title}>{post.title}</p>
 
-
-          <span className={styles.topicLabel}><span className={styles.topicDot}>●</span>{post.topic}</span>
           {tags.length > 0 && (
             <div className={styles.tags} ref={tagsContainerRef}>
               {(tagsSlice !== null ? tags.slice(0, tagsSlice) : tags).map(tag => (
@@ -457,6 +455,7 @@ export default function BlogCard({ post, readProgress, likedPostIds = new Set(),
               )}
             </div>
           )}
+          <span className={styles.topicLabel}><span className={styles.topicDot}>●</span>{post.topic}</span>
           {match && (
             <div className={styles.matchTip}>
               <span className={styles.matchPrompt}>▸</span>

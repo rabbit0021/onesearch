@@ -9,6 +9,19 @@
   transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.cardOuter::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 38px;
+  background: linear-gradient(to top, color-mix(in srgb, var(--card-accent, #A0A0A0) 10%, transparent), transparent);
+  pointer-events: none;
+  border-radius: 0 0 6px 6px;
+  z-index: 2;
+}
+
 .cardFlipped {
   transform: rotateY(180deg);
   height: 400px;
@@ -34,6 +47,7 @@
 .cardFront {
   position: relative;
 }
+
 
 .cardFront:hover {
   transform: translateY(-2px);
@@ -308,6 +322,7 @@
   overflow: visible;
 }
 
+
 .meta {
   display: flex;
   flex-direction: row;
@@ -458,7 +473,7 @@
   cursor: pointer;
   opacity: 0;
   pointer-events: none;
-  z-index: 2;
+  z-index: 3;
   transition: opacity 0.2s ease;
 }
 
