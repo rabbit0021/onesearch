@@ -161,3 +161,9 @@ textarea,
 select {
   font-family: inherit;
 }
+
+@media (max-width: 768px) {
+  body {
+    font-family: 'DM Sans', sans-serif;
+  }
+}

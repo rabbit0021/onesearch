@@ -294,7 +294,7 @@
   .mobileFormBox {
     display: flex;
     flex-direction: column;
-    background-color: color-mix(in srgb, var(--bg-page) 85%, var(--color-primary) 15%);
+    background-color: color-mix(in srgb, var(--bg-page) 95%, var(--color-primary) 5%);
     border-radius: 6px;
     margin-top: 1.5rem;
     overflow: hidden;
