@@ -61,6 +61,38 @@ const ThemeContext = createContext(null)
 
 const LIGHT_ONLY_VARS = new Set(['--bg-feed'])
 
+// Parse "#rrggbb" or "#rgb" → [r, g, b]
+function hexToRgb(hex) {
+  const h = hex.replace('#', '')
+  if (h.length === 3) {
+    return [
+      parseInt(h[0] + h[0], 16),
+      parseInt(h[1] + h[1], 16),
+      parseInt(h[2] + h[2], 16),
+    ]
+  }
+  return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]
+}
+
+function darkTint(hex) {
+  const [r, g, b] = hexToRgb(hex)
+  return `rgba(${r}, ${g}, ${b}, 0.15)`
+}
+
+function darkPrimaryText(hex) {
+  const [r, g, b] = hexToRgb(hex)
+  // lighten toward white for readability on dark bg
+  const lighten = (c) => Math.round(c + (255 - c) * 0.55)
+  return `rgb(${lighten(r)}, ${lighten(g)}, ${lighten(b)})`
+}
+
+// Darken + desaturate primary for dark mode: pull toward a dark neutral
+function darkPrimary(hex, hoverShift = 0) {
+  const [r, g, b] = hexToRgb(hex)
+  const darken = (c) => Math.round(c * 0.40 + hoverShift)
+  return `rgb(${darken(r)}, ${darken(g)}, ${darken(b)})`
+}
+
 function applyTheme(theme, darkMode = false) {
   const root = document.documentElement
   Object.entries(theme).forEach(([key, val]) => {
@@ -68,6 +100,14 @@ function applyTheme(theme, darkMode = false) {
     if (LIGHT_ONLY_VARS.has(key)) {
       if (!darkMode) root.style.setProperty(key, val)
       else root.style.removeProperty(key)
+    } else if (darkMode && key === '--color-primary') {
+      root.style.setProperty(key, darkPrimary(val))
+    } else if (darkMode && key === '--color-primary-hover') {
+      root.style.setProperty(key, darkPrimary(theme['--color-primary'], -8))
+    } else if (darkMode && key === '--color-primary-tint') {
+      root.style.setProperty(key, darkTint(theme['--color-primary']))
+    } else if (darkMode && key === '--color-primary-text') {
+      root.style.setProperty(key, darkPrimaryText(theme['--color-primary']))
     } else {
       root.style.setProperty(key, val)
     }
