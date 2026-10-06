@@ -259,6 +259,35 @@ class SQLiteDatabase:
         """)
 
         c.execute("""
+            CREATE TABLE IF NOT EXISTS comments (
+                id         INTEGER PRIMARY KEY AUTOINCREMENT,
+                post_id    INTEGER NOT NULL,
+                device_id  TEXT NOT NULL,
+                email      TEXT DEFAULT NULL,
+                author     TEXT NOT NULL DEFAULT 'Anonymous',
+                body       TEXT NOT NULL,
+                parent_id  INTEGER DEFAULT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (post_id) REFERENCES posts(id),
+                FOREIGN KEY (parent_id) REFERENCES comments(id)
+            )
+        """)
+        try:
+            c.execute("ALTER TABLE comments ADD COLUMN email TEXT DEFAULT NULL")
+        except Exception:
+            pass
+
+        c.execute("""
+            CREATE TABLE IF NOT EXISTS comment_likes (
+                comment_id  INTEGER NOT NULL,
+                device_id   TEXT NOT NULL,
+                created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (comment_id, device_id),
+                FOREIGN KEY (comment_id) REFERENCES comments(id)
+            )
+        """)
+
+        c.execute("""
             CREATE TABLE IF NOT EXISTS news_banners (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 publisher TEXT NOT NULL,

@@ -30,6 +30,9 @@ export default defineConfig({
       '/api/chat': FLASK,
       '/api/news-banners': FLASK,
       '/api/admin/news-banners': FLASK,
+      '/api/posts': FLASK,
+      '/api/admin/comments': FLASK,
+      '/api/comments': FLASK,  // covers DELETE and POST /like
       '/api/news-search': FLASK,
       '/feedback': FLASK,
       '/verify-email': FLASK,

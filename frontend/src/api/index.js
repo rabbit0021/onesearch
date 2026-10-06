@@ -422,6 +422,54 @@ export async function adminDeleteNewsBanner(secretKey, id) {
   return res.json()
 }
 
+export async function getAdminComments(secretKey) {
+  const res = await fetch('/api/admin/comments', {
+    headers: { 'X-SECRET-KEY': secretKey },
+  })
+  if (!res.ok) throw new Error('Failed to fetch comments')
+  return res.json()
+}
+
+export async function getComments(postId, deviceId) {
+  const params = deviceId ? `?device_id=${encodeURIComponent(deviceId)}` : ''
+  const res = await fetch(`/api/posts/${postId}/comments${params}`)
+  if (!res.ok) throw new Error('Failed to fetch comments')
+  return res.json()
+}
+
+export async function likeComment(commentId, deviceId) {
+  const res = await fetch(`/api/comments/${commentId}/like`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ device_id: deviceId }),
+  })
+  if (!res.ok) throw new Error('Failed to like comment')
+  return res.json()
+}
+
+export async function postComment(postId, { body, author, parentId, deviceId, email }) {
+  const res = await fetch(`/api/posts/${postId}/comments`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ body, author, parent_id: parentId ?? null, device_id: deviceId, email: email ?? null }),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.error || 'Failed to post comment')
+  }
+  return res.json()
+}
+
+export async function deleteComment(commentId, deviceId, email) {
+  const params = new URLSearchParams({ device_id: deviceId })
+  if (email) params.set('email', email)
+  const res = await fetch(`/api/comments/${commentId}?${params}`, {
+    method: 'DELETE',
+  })
+  if (!res.ok) throw new Error('Failed to delete comment')
+  return res.json()
+}
+
 export async function updatePost(id, topic, tags, secretKey, fireCount) {
   const res = await fetch(`/posts/${id}`, {
     method: 'PATCH',

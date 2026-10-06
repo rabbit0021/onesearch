@@ -14,6 +14,7 @@ import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
 import styles from './ReaderPage.module.css'
 import { useArticleReader } from './useArticleReader'
 import { useVoiceCommands, voiceCommandsSupported } from './useVoiceCommands'
+import Comments from '../../components/comments/Comments'
 
 // Override hljs background so our CSS variable shows through
 const HLJS_BG_OVERRIDE = '\n.hljs { background: transparent !important; }\n'
@@ -888,6 +889,8 @@ export default function ReaderPage() {
               dangerouslySetInnerHTML={{ __html: content }}
             />
           )}
+
+          <Comments postId={Number(id)} />
         </div>
       </div>
 

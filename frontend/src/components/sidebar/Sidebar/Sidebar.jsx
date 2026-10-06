@@ -65,7 +65,6 @@ export default function Sidebar({ open, onClose, toggleRef }) {
         <FeatureCard title="Upcoming Features 🔧">
           <ul className={styles.list}>
             <li>More individual blogger subscriptions</li>
-            <li>Commenting 🤩</li>
           </ul>
         </FeatureCard>
 

@@ -1925,6 +1925,183 @@ def news_search():
         conn.close()
 
 
+@app.route('/api/admin/comments', methods=['GET'])
+def admin_get_comments():
+    secret_key = request.headers.get('X-SECRET-KEY', '')
+    if not compare_digest(secret_key, os.getenv('POSTS_SECRET_KEY', '')):
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    db = app.db
+    conn = db.get_connection()
+    try:
+        comments = conn.execute("""
+            SELECT c.id, c.post_id, c.device_id, c.email, c.author, c.body, c.parent_id, c.created_at,
+                   p.title AS post_title,
+                   (SELECT COUNT(*) FROM comment_likes cl WHERE cl.comment_id = c.id) AS like_count
+            FROM comments c
+            LEFT JOIN posts p ON p.id = c.post_id
+            ORDER BY c.created_at DESC
+        """).fetchall()
+
+        unique_authors = conn.execute(
+            "SELECT COUNT(DISTINCT COALESCE(email, device_id)) FROM comments"
+        ).fetchone()[0]
+
+        total = conn.execute("SELECT COUNT(*) FROM comments").fetchone()[0]
+        total_likes = conn.execute("SELECT COUNT(*) FROM comment_likes").fetchone()[0]
+
+        return jsonify({
+            'comments': [dict(r) for r in comments],
+            'summary': {
+                'total': total,
+                'unique_authors': unique_authors,
+                'total_likes': total_likes,
+            }
+        })
+    finally:
+        conn.close()
+
+
+@app.route('/api/comments/<int:comment_id>/like', methods=['POST'])
+def like_comment(comment_id):
+    if not _check_rate_limit("comment-like", max_calls=30, window_secs=60):
+        return jsonify({'error': 'Too many requests'}), 429
+    data = request.get_json(silent=True) or {}
+    device_id = (data.get('device_id') or '').strip()
+    if not device_id:
+        return jsonify({'error': 'device_id required'}), 400
+
+    db = app.db
+    conn = db.get_connection()
+    try:
+        row = conn.execute("SELECT id FROM comments WHERE id = ?", (comment_id,)).fetchone()
+        if not row:
+            return jsonify({'error': 'not found'}), 404
+        existing = conn.execute(
+            "SELECT 1 FROM comment_likes WHERE comment_id = ? AND device_id = ?", (comment_id, device_id)
+        ).fetchone()
+        if existing:
+            conn.execute("DELETE FROM comment_likes WHERE comment_id = ? AND device_id = ?", (comment_id, device_id))
+            liked = False
+        else:
+            conn.execute("INSERT INTO comment_likes (comment_id, device_id) VALUES (?, ?)", (comment_id, device_id))
+            liked = True
+        conn.commit()
+        count = conn.execute("SELECT COUNT(*) FROM comment_likes WHERE comment_id = ?", (comment_id,)).fetchone()[0]
+        return jsonify({'liked': liked, 'like_count': count})
+    finally:
+        conn.close()
+
+
+@app.route('/api/posts/<int:post_id>/comments', methods=['GET'])
+def get_comments(post_id):
+    device_id = request.args.get('device_id', '')
+    db = app.db
+    conn = db.get_connection()
+    try:
+        rows = conn.execute(
+            "SELECT id, post_id, device_id, email, author, body, parent_id, created_at FROM comments WHERE post_id = ? ORDER BY created_at ASC",
+            (post_id,)
+        ).fetchall()
+        comments = [dict(r) for r in rows]
+        if comments:
+            ids = [c['id'] for c in comments]
+            placeholders = ','.join('?' * len(ids))
+            like_counts = {row[0]: row[1] for row in conn.execute(
+                f"SELECT comment_id, COUNT(*) FROM comment_likes WHERE comment_id IN ({placeholders}) GROUP BY comment_id",
+                ids
+            ).fetchall()}
+            liked_set = set()
+            if device_id:
+                liked_set = {row[0] for row in conn.execute(
+                    f"SELECT comment_id FROM comment_likes WHERE comment_id IN ({placeholders}) AND device_id = ?",
+                    ids + [device_id]
+                ).fetchall()}
+            for c in comments:
+                c['like_count'] = like_counts.get(c['id'], 0)
+                c['liked'] = c['id'] in liked_set
+        return jsonify(comments)
+    finally:
+        conn.close()
+
+
+@app.route('/api/posts/<int:post_id>/comments', methods=['POST'])
+def post_comment(post_id):
+    if not _check_rate_limit("comment", max_calls=10, window_secs=60):
+        return jsonify({'error': 'Too many comments. Please slow down.'}), 429
+    data = request.get_json(silent=True) or {}
+    body = (data.get('body') or '').strip()
+    device_id = (data.get('device_id') or '').strip()
+    email = (data.get('email') or '').strip() or None
+    author = (data.get('author') or 'Anonymous').strip()[:50]
+    parent_id = data.get('parent_id')
+
+    if not body:
+        return jsonify({'error': 'body is required'}), 400
+    if not device_id:
+        return jsonify({'error': 'device_id is required'}), 400
+    if len(body) > 2000:
+        return jsonify({'error': 'comment too long'}), 400
+
+    db = app.db
+    conn = db.get_connection()
+    try:
+        # Verify post exists
+        post = conn.execute("SELECT id FROM posts WHERE id = ?", (post_id,)).fetchone()
+        if not post:
+            return jsonify({'error': 'post not found'}), 404
+
+        # Validate parent_id belongs to same post
+        if parent_id is not None:
+            parent = conn.execute(
+                "SELECT id FROM comments WHERE id = ? AND post_id = ?", (parent_id, post_id)
+            ).fetchone()
+            if not parent:
+                return jsonify({'error': 'invalid parent_id'}), 400
+
+        cur = conn.execute(
+            "INSERT INTO comments (post_id, device_id, email, author, body, parent_id) VALUES (?, ?, ?, ?, ?, ?)",
+            (post_id, device_id, email, author, body, parent_id)
+        )
+        conn.commit()
+        new_id = cur.lastrowid
+        row = conn.execute(
+            "SELECT id, post_id, device_id, email, author, body, parent_id, created_at FROM comments WHERE id = ?",
+            (new_id,)
+        ).fetchone()
+        return jsonify(dict(row)), 201
+    finally:
+        conn.close()
+
+
+@app.route('/api/comments/<int:comment_id>', methods=['DELETE'])
+def delete_comment(comment_id):
+    if not _check_rate_limit("comment-delete", max_calls=10, window_secs=60):
+        return jsonify({'error': 'Too many requests'}), 429
+    device_id = (request.args.get('device_id') or '').strip()
+    email = (request.args.get('email') or '').strip() or None
+
+    if not device_id:
+        return jsonify({'error': 'device_id required'}), 400
+
+    db = app.db
+    conn = db.get_connection()
+    try:
+        row = conn.execute("SELECT device_id, email FROM comments WHERE id = ?", (comment_id,)).fetchone()
+        if not row:
+            return jsonify({'error': 'not found'}), 404
+        # Allow delete if email matches (logged-in user) or device_id matches (anonymous)
+        email_match = email and row['email'] and email == row['email']
+        device_match = row['device_id'] == device_id
+        if not email_match and not device_match:
+            return jsonify({'error': 'forbidden'}), 403
+        conn.execute("DELETE FROM comments WHERE id = ?", (comment_id,))
+        conn.commit()
+        return jsonify({'deleted': True})
+    finally:
+        conn.close()
+
+
 if __name__ == "__main__":
     if os.getenv("FLASK_ENV") == "Production":
         app.run()
