@@ -805,7 +805,6 @@
 
 /* Inline code */
 .articleContent code {
-  background: var(--bg-surface);
   color: var(--text-dim);
   border: 1px solid var(--border-mid);
   border-radius: 3px;
@@ -815,13 +814,13 @@
   word-break: break-word;
   background-color: var(--bg-wizard);
   font-family: 'JetBrains Mono', 'Courier Prime', 'Space Mono', monospace;
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--bg-wizard) 50%, var(--bg-input)), var(--bg-input));
 }
 
 /* Block code */
 .articleContent pre {
   position: relative;
   border: 1px solid color-mix(in srgb, #A0A0A0 25%, transparent);
-  border-left: 3px solid var(--color-primary);
   border-radius: 6px;
   padding: 0.6rem 1.25rem 1.1rem;
   overflow-x: auto;
@@ -830,7 +829,7 @@
   line-height: 1.7;
   font-family: 'Fira Code', 'Cascadia Code', 'JetBrains Mono', 'IBM Plex Mono', monospace;
   font-size: calc(1em * 0.88);
-  background: linear-gradient(to bottom, color-mix(in srgb, #A0A0A0 10%, var(--card-bg)), var(--card-bg));
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--bg-wizard) 50%, var(--bg-input)), var(--bg-input));
 }
 
 .articleContent pre code {
@@ -1463,8 +1462,8 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: var(--bg-page);
-  border-left: 1px solid var(--border-mid);
+  background: transparent;
+  border-left: .1px solid var(--border-mid);
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .chatPanelOpen {
@@ -1477,7 +1476,6 @@
   justify-content: space-between;
   padding: 16px 18px 14px;
   flex-shrink: 0;
-  border-bottom: 1px solid var(--border-mid);
 }
 .chatPanelTitle {
   font-size: var(--fs-base);
@@ -1586,17 +1584,14 @@
   gap: 8px;
   padding: 10px 14px 14px;
   flex-shrink: 0;
-  background: var(--bg-page);
-  border-top: 1px solid var(--border-mid);
 }
 
 .chatInputWrap {
   flex: 1;
   display: flex;
   align-items: center;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-mid);
-  border-radius: 14px;
+  background: var(--bg-wizard);
+  border-radius: 8px;
   padding: 8px 10px 8px 14px;
   gap: 8px;
   transition: border-color 0.2s;

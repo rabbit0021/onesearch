@@ -894,7 +894,7 @@ export default function ReaderPage() {
       {/* Article chat panel — inside readerContent on desktop */}
       <div className={`${styles.chatPanel} ${chatOpen ? styles.chatPanelOpen : ''}`} style={kbOffset > 0 ? { bottom: kbOffset } : undefined}>
         <div className={styles.chatPanelHeader}>
-          <span className={styles.chatPanelTitle}>Ask about this article</span>
+          <span className={styles.chatPanelTitle}></span>
           <button className={styles.chatPanelClose} onClick={() => { if (isMobile) window.history.back(); else setChatOpen(false) }} aria-label="Close">×</button>
         </div>
 
