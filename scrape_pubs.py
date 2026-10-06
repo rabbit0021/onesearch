@@ -68,8 +68,12 @@ def scrape_pubs(db, conn, target_publishers=None, cancel_event=None):
 
             logger.info(f"🔍 Scraping {publisher['publisher_name']} for new blog posts after {last_scraped_at}...")    
 
-            blog_posts = scraper.search_blog_posts("", last_scraped_at)
-            
+            try:
+                blog_posts = scraper.search_blog_posts("", last_scraped_at)
+            except Exception:
+                logger.exception(f"Failed to scrape {publisher['publisher_name']}, skipping")
+                continue
+
             if not blog_posts:
                 logger.info(f"No new blog posts found for {publisher['publisher_name']}")
             

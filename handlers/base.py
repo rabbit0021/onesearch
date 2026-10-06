@@ -76,10 +76,14 @@ class BaseScraper:
 
                 if published is None:
                    published = self.get_date_from_url(entry)
-                                                          
+
                 if last_scan_time.tzinfo is None:
                     last_scan_time = last_scan_time.replace(tzinfo=timezone.utc)
-                
+
+                if published is None:
+                    logger.warning(f"Skipping {entry.title}: could not determine published date")
+                    continue
+
                 # breaking the loop when first article appears having stale
                 if published <= last_scan_time:
                     logger.debug(f"Skipping {entry.title}: article published on {published} before last scan time: {last_scan_time}")

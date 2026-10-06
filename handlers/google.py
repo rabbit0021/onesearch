@@ -51,7 +51,7 @@ class GoogleScraper(BaseScraper):
         try:
             url = entry.link
             title = entry.title
-            resp = requests.get(url, timeout=5)
+            resp = requests.get(url, timeout=15)
             if resp.status_code != 200:
                 logger.warning(f"Non-200 response for {title}: {resp.status_code}")
                 return None    

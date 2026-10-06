@@ -799,8 +799,8 @@
 /* Code */
 .articleContent pre,
 .articleContent code {
-  font-family: 'Fira Code', 'Cascadia Code', 'Courier New', monospace;
-  font-size: var(--fs-md);
+  font-family: 'JetBrains Mono', 'Courier Prime', 'Space Mono', monospace;
+  font-size: var(--fs-std);
 }
 
 /* Inline code */
@@ -810,11 +810,11 @@
   border: 1px solid var(--border-mid);
   border-radius: 3px;
   padding: 2px 6px;
-  font-size: var(--fs-md);
+  font-size: var(--fs-std);
   white-space: pre-wrap;
   word-break: break-word;
   background-color: var(--bg-wizard);
-  font-family: 'Courier Prime', 'Courier', 'IBM Plex Mono', 'JetBrains Mono', 'Space Mono', 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', 'Courier Prime', 'Space Mono', monospace;
 }
 
 /* Block code */

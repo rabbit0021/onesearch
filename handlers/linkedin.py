@@ -9,7 +9,9 @@ from dateutil import parser
 from datetime import timezone
 
 BASE_URL = 'https://engineering.linkedin.com/blog'
-HEADERS = {'User-Agent': 'Mozilla/5.0'}
+HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+}
 
 logger = get_logger("linkedin-heandler")
 class LinkedinScraper(BaseScraper):
@@ -18,7 +20,7 @@ class LinkedinScraper(BaseScraper):
     
     def get_posts_from_group_url(self, url, last_scan_time):
         logger.debug(f"Getting posts from group url: {url}")
-        resp = requests.get(url, timeout=5)
+        resp = requests.get(url, timeout=15, headers=HEADERS)
         if resp.status_code != 200:
             logger.warning(f"Non-200 response for {url}: {resp.status_code}")
             return None    
@@ -156,7 +158,7 @@ class LinkedinScraper(BaseScraper):
         return '<div>' + '\n'.join(parts) + '</div>'
 
     def search_blog_posts(self, category, last_scan_time):
-        res = requests.get(BASE_URL)
+        res = requests.get(BASE_URL, timeout=15, headers=HEADERS)
         soup = BeautifulSoup(res.text, "html.parser")
     
         posts = []
