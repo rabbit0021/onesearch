@@ -59,7 +59,8 @@ def _md_to_html(md):
         if re.match(r'^\d+\.\s+', line):
             items = []
             while i < len(lines) and re.match(r'^\d+\.\s+', lines[i]):
-                items.append(f'<li>{_inline(re.sub(r"^\d+\.\s+", "", lines[i]))}</li>')
+                stripped = re.sub(r'^\d+\.\s+', '', lines[i])
+                items.append(f'<li>{_inline(stripped)}</li>')
                 i += 1
             html_parts.append('<ol>' + ''.join(items) + '</ol>')
             continue
