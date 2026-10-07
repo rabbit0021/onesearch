@@ -10,6 +10,7 @@ import logging
 import random
 import re
 import smtplib
+import httpx
 from functools import lru_cache
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -2109,7 +2110,6 @@ def game_health():
     if not jev_api_key:
         return jsonify({'available': False, 'reason': 'no_key'})
     try:
-        import httpx
         resp = httpx.post(
             'https://api.typesafe.ai/v1/systemone',
             headers={'Authorization': f'Bearer {jev_api_key}', 'Content-Type': 'application/json'},
@@ -2139,11 +2139,6 @@ def game_nextchar():
     client_vocab = data.get('vocab', None)  # optional user-edited vocab from frontend
 
     jev_api_key = os.getenv('JEV_API_KEY', '')
-
-    # Use word-level tokens — far fewer choices, Jev handles it better
-    # We ask Jev to pick the next WORD not char, then append it
-    import httpx
-    import random as _random
 
     if not jev_api_key:
         import string
@@ -2175,15 +2170,7 @@ def game_nextchar():
             env_words.extend(label.lower().split())
         all_words = list(dict.fromkeys(base_vocab + env_words))
         candidates = all_words[:254] + ['STOP']  # hard cap at 255 total (Jev's limit)
-        _random.shuffle(candidates)
-
-        # Hypothesis presentation: show resulting text for each candidate
-        hypotheses = {}
-        for w in candidates:
-            if w == 'STOP':
-                hypotheses[w] = f'[joke ends here]: "{last_words}"'
-            else:
-                hypotheses[w] = f'"{last_words} {w}"' if last_words else f'"{w}"'
+        random.shuffle(candidates)
 
         state = (
             f"You are writing a joke word by word. Theme: {env_str}.\n"
@@ -2223,8 +2210,7 @@ def game_nextchar():
         chosen = result.get('answers', {}).get('next_word', {}).get('choice', '').strip()
         logger.info("Jev chose word: %r", chosen)
 
-        # answer is the criteria key — the word itself
-        if not chosen or chosen == 'STOP' or chosen not in hypotheses:
+        if not chosen or chosen == 'STOP' or chosen not in candidates:
             return jsonify({'char': '<EOT>'})
 
         token = (' ' + chosen) if joke_so_far and not joke_so_far.endswith(' ') else chosen
@@ -2251,7 +2237,6 @@ def game_funnyscore():
 
     if jev_api_key:
         try:
-            import httpx
             headers = {'Authorization': f'Bearer {jev_api_key}', 'Content-Type': 'application/json'}
             env_str = ', '.join(env_labels) if env_labels else 'general'
             payload = {
@@ -2323,183 +2308,6 @@ def admin_jev_games():
         return jsonify({'error': 'unauthorized'}), 401
     return jsonify(app.db.get_jev_games())
 
-
-@app.route('/api/game/score', methods=['POST'])
-def game_score():
-    """Score a life confession using Jev API."""
-    data = request.get_json(silent=True) or {}
-    prompt = data.get('prompt', '')
-    confession = data.get('confession', '')
-    prior_confessions = data.get('prior_confessions', [])  # [{prompt, confession, score}]
-
-    jev_api_key = os.getenv('JEV_API_KEY', '')
-
-    FALLBACK_VERDICTS = [
-        "Jev has seen worse. Not many, but some.",
-        "This is exactly what Jev expected. That's the problem.",
-        "Jev is not angry. Just profoundly unsurprised.",
-        "Somewhere, a life coach is crying and they don't know why.",
-        "Jev logged this. For science.",
-    ]
-
-    if jev_api_key:
-        try:
-            import httpx
-            headers = {'Authorization': f'Bearer {jev_api_key}', 'Content-Type': 'application/json'}
-
-            history_text = ""
-            if prior_confessions:
-                lines = [f"- Asked: {c['prompt']} → Confessed: {c['confession']} (scored {c['score']}/10)" for c in prior_confessions]
-                history_text = "Prior confessions this session:\n" + "\n".join(lines) + "\n\n"
-
-            state = (
-                f"{history_text}"
-                f"Jev asked: {prompt}\n"
-                f"They confessed: {confession}"
-            )
-
-            payload = {
-                'model': 'jev-latest',
-                'state': state,
-                'questions': {
-                    'adult_score': {
-                        'type': 'score',
-                        'instructions': (
-                            'You are Jev, a deadpan AI judge of human life decisions. '
-                            'Score how well this person is functioning as an adult, based on their confession. '
-                            'Be consistent. A person eating cereal at 11pm is low. Someone who planned ahead is high. '
-                            'Consider the pattern of prior confessions if available.'
-                        ),
-                        'criteria': [
-                            'Completely given up',
-                            'Barely surviving',
-                            'Struggling significantly',
-                            'Below average adult functioning',
-                            'Mediocre — getting by',
-                            'Acceptable — mostly functional',
-                            'Decent — some self-awareness',
-                            'Good — making reasonable choices',
-                            'Very good — actually has it together',
-                            'Peak adult — Jev is impressed',
-                        ]
-                    },
-                    'verdict': {
-                        'type': 'freeform',
-                        'instructions': (
-                            'You are Jev. Write ONE dry, deadpan sentence (max 20 words) judging this confession. '
-                            'You are not mean — you are deeply, clinically unimpressed. '
-                            'If there are prior confessions, reference the emerging pattern with resigned disappointment. '
-                            'Examples of tone: "Noted. Jev has updated your file." '
-                            '"This is consistent with your previous behaviour, which is the concerning part." '
-                            '"Jev expected this. That is somehow worse." '
-                            'Be specific to what they actually said. Never generic.'
-                        ),
-                    }
-                }
-            }
-            resp = httpx.post('https://api.typesafe.ai/v1/systemone', json=payload, headers=headers, timeout=10, verify=False)
-            resp.raise_for_status()
-            result = resp.json()
-            answers = result.get('answers', {})
-            score = int(answers.get('adult_score', {}).get('score', 5))
-            verdict = answers.get('verdict', {}).get('answer', random.choice(FALLBACK_VERDICTS))
-            return jsonify({'score': score, 'verdict': verdict})
-        except Exception as e:
-            logger.warning("Jev API call failed, using fallback: %s", e)
-
-    score = random.randint(3, 7)
-    verdict = random.choice(FALLBACK_VERDICTS)
-    return jsonify({'score': score, 'verdict': verdict})
-
-
-@app.route('/api/game/final-report', methods=['POST'])
-def game_final_report():
-    """Generate a Jev life report card from all confessions."""
-    data = request.get_json(silent=True) or {}
-    confessions = data.get('confessions', [])  # [{prompt, confession, score, verdict}]
-    meters = data.get('meters', {})
-
-    jev_api_key = os.getenv('JEV_API_KEY', '')
-    dignity = meters.get('dignity', 75)
-    chaos = meters.get('chaos', 25)
-
-    def deterministic_report():
-        combined = dignity - chaos
-        if combined >= 60:
-            title = "FUNCTIONING ADULT ✅"
-        elif combined >= 20:
-            title = "MOSTLY HOLDING IT TOGETHER 😐"
-        elif combined >= -10:
-            title = "CONCERNING PATTERNS DETECTED 😬"
-        else:
-            title = "CASE STUDY MATERIAL 💀"
-        return {
-            'outcome_title': title,
-            'archetype': 'The Algorithm',
-            'story': "Jev has reviewed your confessions. Jev has questions. Jev will not be asking them.",
-        }
-
-    if not jev_api_key or not confessions:
-        return jsonify(deterministic_report())
-
-    try:
-        import httpx
-        headers = {'Authorization': f'Bearer {jev_api_key}', 'Content-Type': 'application/json'}
-
-        history_lines = [f"{i+1}. Jev asked: {c['prompt']}\n   They said: {c['confession']}\n   Score: {c['score']}/10" for i, c in enumerate(confessions)]
-        history_text = "\n\n".join(history_lines)
-
-        state = (
-            f"Full confession session:\n\n{history_text}\n\n"
-            f"Final metrics — Dignity: {round(dignity)}/100, Chaos: {round(chaos)}/100"
-        )
-
-        payload = {
-            'model': 'jev-latest',
-            'state': state,
-            'questions': {
-                'outcome_title': {
-                    'type': 'freeform',
-                    'instructions': (
-                        'Write a short clinical verdict title (4-7 words, ALL CAPS, 1 emoji) summarising this person\'s life functioning based on their confessions. '
-                        'Tone: deadpan, like a doctor reading a chart. '
-                        'Examples: "BORDERLINE FUNCTIONAL, FURTHER MONITORING REQUIRED 📋", '
-                        '"CONCERNING BUT SELF-AWARE 🔍", "THRIVING BY ACCIDENT ✅", "CASE STUDY SUBMITTED TO ETHICS BOARD 💀"'
-                    ),
-                },
-                'archetype': {
-                    'type': 'freeform',
-                    'instructions': (
-                        'Give this person a 2-4 word life archetype based on their actual confessions. '
-                        'Be specific and dry. '
-                        'Examples: "Functional Disaster", "Late Night Optimist", "Strategic Avoider", "Accidentally Coping"'
-                    ),
-                },
-                'story': {
-                    'type': 'freeform',
-                    'instructions': (
-                        'You are Jev. Write 2-3 sentences as a clinical case summary of this person, referencing at least 2 of their actual confessions. '
-                        'Tone: a therapist who has given up but remains professional. '
-                        'End with one dry observation about their overall trajectory. '
-                        'Be specific. Never say "overall" or "in conclusion".'
-                    ),
-                },
-            }
-        }
-
-        resp = httpx.post('https://api.typesafe.ai/v1/systemone', json=payload, headers=headers, timeout=15, verify=False)
-        resp.raise_for_status()
-        result = resp.json()
-        answers = result.get('answers', {})
-
-        return jsonify({
-            'outcome_title': answers.get('outcome_title', {}).get('answer', 'FUNCTIONING ADULT 😤'),
-            'archetype': answers.get('archetype', {}).get('answer', 'The Algorithm'),
-            'story': answers.get('story', {}).get('answer', 'Jev has reviewed your file. Jev has concerns.'),
-        })
-    except Exception as e:
-        logger.warning("Jev final report failed: %s", e)
-        return jsonify(deterministic_report())
 
 
 if __name__ == "__main__":

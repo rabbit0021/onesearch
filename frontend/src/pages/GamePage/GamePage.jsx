@@ -6,25 +6,6 @@ import { EMOJI_OPTIONS } from './crises'
 import SpinWheel from './SpinWheel'
 import { submitWinnerEmail } from './gameApi'
 
-function useBlockDevtools() {
-  useEffect(() => {
-    const block = e => e.preventDefault()
-    const blockKey = e => {
-      if (
-        e.key === 'F12' ||
-        (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key.toUpperCase())) ||
-        (e.ctrlKey && e.key.toUpperCase() === 'U') ||
-        (e.metaKey && e.altKey && e.key.toUpperCase() === 'I')
-      ) e.preventDefault()
-    }
-    document.addEventListener('contextmenu', block)
-    document.addEventListener('keydown', blockKey)
-    return () => {
-      document.removeEventListener('contextmenu', block)
-      document.removeEventListener('keydown', blockKey)
-    }
-  }, [])
-}
 
 function scoreLabel(score) {
   if (score >= 8) return { text: 'Actually funny', color: '#00ff88' }
@@ -35,8 +16,6 @@ function scoreLabel(score) {
 }
 
 export default function GamePage() {
-  useBlockDevtools()
-
   const {
     jevStatus, phase,
     picked, toggleItem,
