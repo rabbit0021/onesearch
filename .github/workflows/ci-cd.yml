@@ -60,6 +60,7 @@ jobs:
             FRONTEND_URL=$FRONTEND_URL
             GOOGLE_APPLICATION_CREDENTIALS=data/onesearch-google-tts.json
             GEMINI_API_KEY=$GEMINI_API_KEY
+            JEV_API_KEY=$JEV_API_KEY
             EOF
 
             # Write Google TTS credentials JSON (stored as a GitHub secret)
