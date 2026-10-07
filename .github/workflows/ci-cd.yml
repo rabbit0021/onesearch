@@ -82,3 +82,4 @@ jobs:
           FRONTEND_URL: ${{ vars.FRONTEND_URL }}
           GOOGLE_TTS_CREDENTIALS_JSON: ${{ secrets.GOOGLE_TTS_CREDENTIALS_JSON }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          JEV_API_KEY: ${{ secrets.JEV_API_KEY }}

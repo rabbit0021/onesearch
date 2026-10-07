@@ -1,0 +1,42 @@
+.meters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.meter {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: #a0a0c0;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.value {
+  margin-left: auto;
+  color: #e0e0ff;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.track {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 0 6px currentColor;
+}

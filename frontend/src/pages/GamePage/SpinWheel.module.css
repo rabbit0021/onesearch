@@ -1,0 +1,48 @@
+.wheel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 0;
+}
+
+.pointer {
+  font-size: 1.5rem;
+  color: #00ff88;
+  text-shadow: 0 0 10px rgba(0,255,136,0.6);
+  margin-bottom: -0.5rem;
+  z-index: 1;
+}
+
+.canvas {
+  border-radius: 50%;
+  box-shadow: 0 0 30px rgba(0,255,136,0.15), 0 0 60px rgba(0,0,0,0.5);
+  display: block;
+}
+
+.spinHint {
+  font-size: 0.78rem;
+  color: #404060;
+  font-family: system-ui, sans-serif;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.continueBtn {
+  padding: 0.7rem 1.8rem;
+  background: #00ff88;
+  color: #0a0a0f;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  box-shadow: 0 0 20px rgba(0,255,136,0.4);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.continueBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 30px rgba(0,255,136,0.6);
+}

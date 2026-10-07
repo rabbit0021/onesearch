@@ -32,7 +32,9 @@ export default defineConfig({
       '/api/admin/news-banners': FLASK,
       '/api/posts': FLASK,
       '/api/admin/comments': FLASK,
+      '/api/admin/jev-games': FLASK,
       '/api/comments': FLASK,  // covers DELETE and POST /like
+      '/api/game': FLASK,
       '/api/news-search': FLASK,
       '/feedback': FLASK,
       '/verify-email': FLASK,

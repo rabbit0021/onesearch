@@ -99,6 +99,74 @@
   border-radius: 2px;
 }
 
+.jevBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 10px 8px 6px;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(to bottom, color-mix(in srgb, #A0A0A0 15%, var(--card-bg)), var(--card-bg));
+  border: 1px solid var(--border-mid, #e0e0e0);
+  border-radius: 8px;
+  text-decoration: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.jevBannerLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.jevBannerBadge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-primary, #2563eb);
+  border: 1px solid var(--color-primary, #2563eb);
+  border-radius: 20px;
+  padding: 0.2rem 0.55rem;
+  white-space: nowrap;
+  font-family: 'JetBrains Mono', monospace;
+  flex-shrink: 0;
+}
+
+.jevBannerTitle {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-base, #111);
+  margin: 0 0 0.1rem;
+}
+
+.jevBannerSub {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #666);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.jevBannerCta {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-primary, #2563eb);
+  white-space: nowrap;
+  padding: 0.35rem 0.8rem;
+  border: 1px solid var(--color-primary, #2563eb);
+  border-radius: 6px;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.jevBanner:hover .jevBannerCta {
+  background: var(--color-primary, #2563eb);
+  color: #fff;
+}
+
 .feedWrapper {
   flex: 1;
   min-width: 0;

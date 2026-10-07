@@ -23,6 +23,7 @@ import MobileSubscribeSheet from '../../components/subscription/MobileSubscribeS
 import JiraIssuesSummary from '../../components/jira/JiraIssuesSummary/JiraIssuesSummary'
 import BlogFeed from '../../components/feed/BlogFeed/BlogFeed'
 import NewsCarousel from '../../components/feed/NewsCarousel/NewsCarousel'
+import { Link } from 'react-router-dom'
 import styles from './Home.module.css'
 
 export default function Home() {
@@ -291,6 +292,17 @@ export default function Home() {
           </div>
 
           <div className={styles.feedWrapper}>
+            {/* Jev game banner */}
+            <Link to="/game" className={styles.jevBanner}>
+              <div className={styles.jevBannerLeft}>
+                <div>
+                  <p className={styles.jevBannerTitle}>Help Jev write a joke</p>
+                  <p className={styles.jevBannerSub}>If Jev writes a joke · win a phone 📱</p>
+                </div>
+              </div>
+              <span className={styles.jevBannerCta}>Play →</span>
+            </Link>
+
             <BlogFeed />
 
             {/* <JiraIssuesSummary /> */}

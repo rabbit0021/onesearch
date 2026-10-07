@@ -303,6 +303,18 @@ class SQLiteDatabase:
             )
         """)
 
+        c.execute("""
+            CREATE TABLE IF NOT EXISTS jev_games (
+                id         INTEGER PRIMARY KEY AUTOINCREMENT,
+                device_id  TEXT NOT NULL,
+                joke       TEXT NOT NULL,
+                score      INTEGER NOT NULL,
+                env_labels TEXT,
+                email      TEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
         logger.info(f"SQLite database initialized Successfully")
         conn.commit()
         conn.close()
@@ -341,6 +353,41 @@ class SQLiteDatabase:
         logger.info("New SQLite connection created")
         return conn
     
+    def add_jev_game(self, device_id, joke, score, env_labels, email=None):
+        conn = self.get_connection()
+        try:
+            c = conn.cursor()
+            c.execute("""
+                INSERT INTO jev_games (device_id, joke, score, env_labels, email)
+                VALUES (?, ?, ?, ?, ?)
+            """, (device_id, joke, score, json.dumps(env_labels), email))
+            conn.commit()
+            return c.lastrowid
+        finally:
+            conn.close()
+
+    def update_jev_game_email(self, device_id, email):
+        """Update the most recent game for a device with a winner email."""
+        conn = self.get_connection()
+        try:
+            c = conn.cursor()
+            c.execute("""
+                UPDATE jev_games SET email = ?
+                WHERE id = (SELECT id FROM jev_games WHERE device_id = ? ORDER BY created_at DESC LIMIT 1)
+            """, (email, device_id))
+            conn.commit()
+        finally:
+            conn.close()
+
+    def get_jev_games(self):
+        conn = self.get_connection()
+        try:
+            c = conn.cursor()
+            c.execute("SELECT * FROM jev_games ORDER BY created_at DESC")
+            return [dict(row) for row in c.fetchall()]
+        finally:
+            conn.close()
+
     def save_job_run(self, conn, job_id, job_name, status, logs, started_at, finished_at):
         import json
         c = conn.cursor()

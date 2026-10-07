@@ -1,0 +1,45 @@
+.wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wrapper.urgent {
+  animation: pulse 0.8s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { filter: drop-shadow(0 0 4px #ff3333); }
+  50%       { filter: drop-shadow(0 0 16px #ff3333); }
+}
+
+.track {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 4;
+}
+
+.ring {
+  fill: none;
+  stroke: #00ff88;
+  stroke-width: 4;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.9s linear, stroke 0.3s;
+}
+
+.ring.ringUrgent {
+  stroke: #ff3333;
+}
+
+.count {
+  position: absolute;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #e0e0ff;
+  font-variant-numeric: tabular-nums;
+}
+
+.count.countUrgent {
+  color: #ff3333;
+}

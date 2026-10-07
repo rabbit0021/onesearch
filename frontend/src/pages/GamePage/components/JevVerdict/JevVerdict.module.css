@@ -1,0 +1,58 @@
+.card {
+  background: #12121f;
+  border: 1px solid rgba(0, 255, 136, 0.4);
+  border-radius: 16px;
+  padding: 1.75rem 2rem;
+  animation: slideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 0 40px rgba(0, 255, 136, 0.15);
+}
+
+@keyframes slideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.logo {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #00ff88;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.scoreEmoji {
+  font-size: 1.5rem;
+}
+
+.verdict {
+  color: #e0e0ff;
+  font-size: 1.05rem;
+  line-height: 1.55;
+  margin: 0 0 1rem;
+  font-style: italic;
+  font-family: system-ui, sans-serif;
+}
+
+.score {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: #6060a0;
+}
+
+.score strong {
+  color: #00ff88;
+}
+
+.next {
+  font-size: 0.72rem;
+  color: #303050;
+}

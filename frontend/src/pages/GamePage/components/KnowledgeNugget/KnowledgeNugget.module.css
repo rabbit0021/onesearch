@@ -1,0 +1,151 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: #0a0a0f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  cursor: pointer;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.card {
+  max-width: 480px;
+  width: 90%;
+  text-align: center;
+  animation: zoomIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes zoomIn {
+  from { transform: scale(0.85); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+
+.tag {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #00ff88;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid rgba(0, 255, 136, 0.4);
+  border-radius: 20px;
+  padding: 0.3rem 0.8rem;
+  margin-bottom: 1.5rem;
+}
+
+.fact {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.3;
+  margin-bottom: 0.75rem;
+}
+
+.sub {
+  font-size: 1rem;
+  color: #6060a0;
+  margin-bottom: 2.5rem;
+}
+
+.cta {
+  display: inline-block;
+  margin-bottom: 2rem;
+  padding: 0.6rem 1.4rem;
+  background: rgba(0, 255, 136, 0.1);
+  border: 1px solid rgba(0, 255, 136, 0.4);
+  border-radius: 20px;
+  color: #00ff88;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.cta:hover {
+  background: rgba(0, 255, 136, 0.2);
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: #404060;
+}
+
+.rounds {
+  color: #404060;
+}
+
+.hint {
+  color: rgba(0, 255, 136, 0.4);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 2rem;
+}
+
+.emailInput {
+  width: 100%;
+  max-width: 320px;
+  padding: 0.6rem 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(0, 255, 136, 0.3);
+  border-radius: 20px;
+  color: #fff;
+  font-size: 0.9rem;
+  outline: none;
+  text-align: center;
+}
+
+.emailInput::placeholder {
+  color: #404060;
+}
+
+.emailInput:focus {
+  border-color: rgba(0, 255, 136, 0.7);
+}
+
+.submitBtn {
+  padding: 0.6rem 1.4rem;
+  background: rgba(0, 255, 136, 0.1);
+  border: 1px solid rgba(0, 255, 136, 0.4);
+  border-radius: 20px;
+  color: #00ff88;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: rgba(0, 255, 136, 0.2);
+}
+
+.submitBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.successMsg {
+  color: #00ff88;
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+}
+
+.errorMsg {
+  color: #ff4466;
+  font-size: 0.8rem;
+}
