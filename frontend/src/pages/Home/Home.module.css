@@ -287,6 +287,10 @@
     display: none !important;
   }
 
+  .jevBanner {
+    margin: 0;
+  }
+
   /* Hide form box and form on mobile — bottom sheet handles subscribe */
   .mobileFormBox {
     display: none;

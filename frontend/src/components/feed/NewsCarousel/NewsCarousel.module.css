@@ -8,7 +8,8 @@
   border: .5px solid var(--border-mid);
   border-radius: 4px;
   overflow: hidden;
-  margin-top: .8rem;
+  margin-top: .4rem;
+  margin-bottom: 1.5rem;
 }
 
 .tickerBadge {
@@ -340,8 +341,10 @@
 }
 
 @media (max-width: 768px) {
-  .ticker,
   .wrapper {
     margin-bottom: 0.5rem;
+  }
+  .ticker {
+    margin-bottom: 1rem;
   }
 }

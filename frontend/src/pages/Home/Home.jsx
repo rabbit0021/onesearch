@@ -287,10 +287,6 @@ export default function Home() {
 
           <div className={styles.wavySep} aria-hidden="true" />
 
-          <div className={styles.mobileCarousel}>
-            <NewsCarousel />
-          </div>
-
           <div className={styles.feedWrapper}>
             {/* Jev game banner */}
             <Link to="/game" className={styles.jevBanner}>
@@ -302,6 +298,10 @@ export default function Home() {
               </div>
               <span className={styles.jevBannerCta}>Play →</span>
             </Link>
+
+            <div className={styles.mobileCarousel}>
+              <NewsCarousel />
+            </div>
 
             <BlogFeed />
 
