@@ -1,4 +1,4 @@
-from handlers import aws, github, linkedin, netflix, airbnb, dropbox, facebook, slack, spotify, cloudfare, nvidea, salesforce, google, databricks, addy_osmani, julia_evans, antirez, gergely_orosz, simon_willison, eli_bendersky, marc_brooker, stripe, pinterest, shopify, notion
+from handlers import aws, github, linkedin, netflix, airbnb, dropbox, facebook, slack, spotify, cloudfare, nvidea, salesforce, google, databricks, addy_osmani, julia_evans, antirez, gergely_orosz, simon_willison, eli_bendersky, marc_brooker, stripe, pinterest, shopify, notion, huggingface, aphyr
 from logger_config import get_logger;
 
 logger = get_logger("HANDLERS")
@@ -55,6 +55,10 @@ class ScraperFactory:
             return shopify.ShopifyScraper()
         elif comapny.lower() == "notion":
             return notion.NotionScraper()
+        elif comapny.lower() == "aphyr":
+            return aphyr.AphyrScraper()
+        elif comapny.lower() == "hugging face":
+            return huggingface.HuggingFaceScraper()
         else:
             logger.error(f"No handler found for {comapny}")
             return None

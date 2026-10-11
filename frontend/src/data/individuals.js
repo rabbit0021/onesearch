@@ -43,4 +43,10 @@ export const INDIVIDUALS_META = {
     website: 'https://blog.pragmaticengineer.com',
     bio: 'Author of The Pragmatic Engineer newsletter. Writes about software engineering, engineering management, and the tech industry.',
   },
+  
+  'aphyr': {
+    image: '/individuals/aphyr.jpg',
+    website: 'https://aphyr.com',
+    bio: 'Writes about distributed systems, databases, and the theory behind them.',
+  },
 }
