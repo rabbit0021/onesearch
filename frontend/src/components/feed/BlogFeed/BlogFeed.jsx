@@ -404,7 +404,8 @@ export default function BlogFeed() {
 
           {loading
             ? <SkeletonSection />
-            : <div className={styles.section}>
+            : filteredMostLiked.length > 0 && (
+              <div className={styles.section}>
                 <p className={styles.heading}>Trending Blog Posts</p>
                 <div className={styles.scrollRow}>
                   {filteredMostLiked.map(post => (
@@ -414,11 +415,13 @@ export default function BlogFeed() {
                   ))}
                 </div>
               </div>
+            )
           }
 
           {loading
             ? <SkeletonSection />
-            : <div className={styles.section}>
+            : filteredIndividualsPosts.length > 0 && (
+              <div className={styles.section}>
                 <p className={styles.heading}>Recently from Individuals</p>
                 <div className={styles.scrollRow}>
                   {filteredIndividualsPosts.map(post => (
@@ -428,11 +431,13 @@ export default function BlogFeed() {
                   ))}
                 </div>
               </div>
+            )
           }
 
           {loading
             ? <SkeletonSection />
-            : <div className={styles.section}>
+            : recommended.length > 0 && (
+              <div className={styles.section}>
                 <p className={styles.heading}>Recommended by OneSearch</p>
                 <div className={styles.scrollRow}>
                   {recommended.map(post => (
@@ -442,11 +447,13 @@ export default function BlogFeed() {
                   ))}
                 </div>
               </div>
+            )
           }
 
           {SHOW_ALL_TIME_FAVOURITES && (loading
             ? <SkeletonSection />
-            : <div className={styles.section}>
+            : filteredMostLikedAllTime.length > 0 && (
+              <div className={styles.section}>
                 <p className={styles.heading}>All Time Favourites</p>
                 <div className={styles.scrollRow}>
                   {filteredMostLikedAllTime.map(post => (
@@ -456,6 +463,7 @@ export default function BlogFeed() {
                   ))}
                 </div>
               </div>
+            )
           )}
         </>
       )}
