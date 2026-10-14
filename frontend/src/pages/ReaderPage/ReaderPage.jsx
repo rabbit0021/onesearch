@@ -12,6 +12,7 @@ import lightThemeCss from 'highlight.js/styles/github.min.css?inline'
 import darkThemeCss from 'highlight.js/styles/github-dark-dimmed.min.css?inline'
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
 import styles from './ReaderPage.module.css'
+import ResizeHandle from '../../components/layout/ResizeHandle/ResizeHandle'
 import { useArticleReader } from './useArticleReader'
 import { useVoiceCommands, voiceCommandsSupported } from './useVoiceCommands'
 import Comments from '../../components/comments/Comments'
@@ -327,6 +328,9 @@ export default function ReaderPage() {
   const [lightboxSrc, setLightboxSrc] = useState(null)
   const [resumeOverlay, setResumeOverlay] = useState(false) // true=visible, 'fading'=fading out
   const [chatOpen, setChatOpen]   = useState(() => window.innerWidth > 768)
+  const [chatWidth, setChatWidth] = useState(380)
+  const [chatResizing, setChatResizing] = useState(false)
+  const chatDrag = useRef({ startX: 0, startWidth: 0, maxWidth: 0 })
   const [chatMsgs, setChatMsgs]   = useState([])
   const [chatInput, setChatInput] = useState('')
   const [chatLoading, setChatLoading] = useState(false)
@@ -386,6 +390,32 @@ export default function ReaderPage() {
       window.removeEventListener('beforeunload', flush)
     }
   }, [post?.id])
+
+  // Drag the handle between article and chat panel; chat is on the right, so dragging left widens it
+  function onChatResizeStart(e) {
+    chatDrag.current = { startX: e.clientX, startWidth: chatWidth, maxWidth: window.innerWidth * 0.6 }
+    setChatResizing(true)
+    document.body.style.cursor = 'col-resize'
+    document.body.style.userSelect = 'none'
+  }
+  useEffect(() => {
+    if (!chatResizing) return
+    const onMove = e => {
+      const { startX, startWidth, maxWidth } = chatDrag.current
+      setChatWidth(Math.round(Math.min(maxWidth, Math.max(280, startWidth - (e.clientX - startX)))))
+    }
+    const onUp = () => {
+      setChatResizing(false)
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+    }
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup', onUp)
+    return () => {
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mouseup', onUp)
+    }
+  }, [chatResizing])
 
   useEffect(() => { localStorage.setItem('reader-font-level', fontLevel) }, [fontLevel])
   useEffect(() => { localStorage.setItem('reader-font-family', fontFamily) }, [fontFamily])
@@ -894,8 +924,17 @@ export default function ReaderPage() {
         </div>
       </div>
 
+      {chatOpen && <ResizeHandle onResizeStart={onChatResizeStart} />}
+
       {/* Article chat panel — inside readerContent on desktop */}
-      <div className={`${styles.chatPanel} ${chatOpen ? styles.chatPanelOpen : ''}`} style={kbOffset > 0 ? { bottom: kbOffset } : undefined}>
+      <div
+        className={`${styles.chatPanel} ${chatOpen ? styles.chatPanelOpen : ''}`}
+        style={{
+          ...(kbOffset > 0 ? { bottom: kbOffset } : {}),
+          ...(chatOpen && !isMobile ? { width: chatWidth } : {}),
+          ...(chatResizing ? { transition: 'none' } : {}),
+        }}
+      >
         <div className={styles.chatPanelHeader}>
           <span className={styles.chatPanelTitle}></span>
           <button className={styles.chatPanelClose} onClick={() => { if (isMobile) window.history.back(); else setChatOpen(false) }} aria-label="Close">×</button>
