@@ -924,7 +924,7 @@ export default function ReaderPage() {
         </div>
       </div>
 
-      {chatOpen && <ResizeHandle onResizeStart={onChatResizeStart} />}
+      {chatOpen && <ResizeHandle onResizeStart={onChatResizeStart} style={{ height: '100%', position: 'relative' }} />}
 
       {/* Article chat panel — inside readerContent on desktop */}
       <div

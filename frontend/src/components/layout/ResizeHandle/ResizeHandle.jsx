@@ -1,8 +1,8 @@
 import styles from './ResizeHandle.module.css'
 
-export default function ResizeHandle({ onResizeStart, collapsed, onCollapse }) {
+export default function ResizeHandle({ onResizeStart, collapsed, onCollapse, style }) {
   return (
-    <div className={styles.handle} onMouseDown={onResizeStart}>
+    <div className={styles.handle} onMouseDown={onResizeStart} style={style}>
       <div className={styles.track} />
       {onCollapse && (
         <button
